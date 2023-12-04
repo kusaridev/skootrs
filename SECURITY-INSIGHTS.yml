@@ -1,0 +1,20 @@
+header:
+  schema-version: 1.0.0
+  expiration-date: '2024-12-04T10:10:09.000Z'
+  last-updated: '2023-12-04'
+  last-reviewed: '2023-12-04'
+  project-url: https://github.com/kusaridev/kusari
+  license: https://github.com/kusaridev/kusari/blob/main/LICENSE
+project-lifecycle:
+  status: active
+  bug-fixes-only: false
+  core-maintainers:
+  - github:mlieberman85
+contribution-policy:
+  accepts-pull-requests: true
+  accepts-automated-pull-requests: true
+  automated-tools-list:
+security-contacts:
+- type: email
+  value: mike@kusari.dev
+  primary: true
