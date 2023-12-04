@@ -46,22 +46,47 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
             .collect(),
     )
     .prompt()?;
+
+    create_repository(&instance, &name, &description, &organization).await?;
+    create_readme(&instance, &name, &description, &organization).await?;
+    clone_repository(&organization, &name).await?;
+    initialize_go_module(&organization, &name).await?;
+    create_security_insights_yaml(&organization, &name).await?;
+    commit_and_push_changes(&name).await?;
+
+    Ok(println!("Created a new skootrs project"))
+}
+
+async fn create_repository(
+    instance: &octocrab::Octocrab,
+    name: &str,
+    description: &str,
+    organization: &str,
+) -> std::result::Result<(), Box<dyn Error>> {
     instance
         .repos("kusaridev", "skoot-go")
-        .generate(name.as_str())
+        .generate(name)
         .owner(organization)
-        .description(&description)
+        .description(description)
         .send()
         .await?;
     println!(
         "Created {} repository from template: kusaridev/skoot-go",
-        &name
+        name
     );
-
+    // TODO: figure out what the best way to wait for the repository to be created and template generated
     thread::sleep(Duration::from_millis(4000));
+    Ok(())
+}
 
+async fn create_readme(
+    instance: &octocrab::Octocrab,
+    name: &str,
+    description: &str,
+    organization: &str,
+) -> std::result::Result<(), Box<dyn Error>> {
     instance
-        .repos(organization, name.as_str())
+        .repos(organization, name)
         .create_file(
             "README.md",
             "Create README",
@@ -69,62 +94,83 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
                 r#"# {}
 {}
 "#,
-                &name, description
+                name, description
             ),
         )
         .send()
         .await?;
-    println!("Created README.md for {}", &name);
+    println!("Created README.md for {}", name);
+    Ok(())
+}
 
-    let url = format!("https://github.com/{}/{}", organization, &name);
+async fn clone_repository(
+    organization: &str,
+    name: &str,
+) -> std::result::Result<(), Box<dyn Error>> {
+    let url = format!("https://github.com/{}/{}", organization, name);
     let _output = Command::new("git")
         .arg("clone")
         .arg(&url)
-        .arg(format!("/tmp/{}", &name))
+        .arg(format!("/tmp/{}", name))
         .output()
         .expect("Failed to execute git clone command");
-    println!("Cloned {} to /tmp/{}", &url, &name);
+    println!("Cloned {} to /tmp/{}", url, name);
+    Ok(())
+}
 
+async fn initialize_go_module(
+    organization: &str,
+    name: &str,
+) -> std::result::Result<(), Box<dyn Error>> {
     let _output = Command::new("go")
         .arg("mod")
         .arg("init")
-        .arg(format!("github.com/{}/{}", organization, &name))
-        .current_dir(format!("/tmp/{}", &name))
+        .arg(format!("github.com/{}/{}", organization, name))
+        .current_dir(format!("/tmp/{}", name))
         .output()
         .expect("Failed to execute go mod init command");
-    println!("Initialized go module for {}", &name);
+    println!("Initialized go module for {}", name);
+    Ok(())
+}
 
+async fn create_security_insights_yaml(
+    organization: &str,
+    name: &str,
+) -> std::result::Result<(), Box<dyn Error>> {
+    let url = format!("https://github.com/{}/{}", organization, name);
     fs::write(
-        format!("/tmp/{}/SECURITY_INSIGHTS.yaml", &name),
+        format!("/tmp/{}/SECURITY_INSIGHTS.yaml", name),
         create_security_insights(url)?,
     )?;
-    println!("Created SECURITY_INSIGHTS.yaml for {}", &name);
+    println!("Created SECURITY_INSIGHTS.yaml for {}", name);
+    Ok(())
+}
 
+async fn commit_and_push_changes(name: &str) -> std::result::Result<(), Box<dyn Error>> {
     let _output = Command::new("git")
         .arg("add")
         .arg(".")
-        .current_dir(format!("/tmp/{}", &name))
+        .current_dir(format!("/tmp/{}", name))
         .output()
         .expect("Failed to execute git add command");
 
-    let commit_message = format!("Initialize go module for {}", &name);
+    let commit_message = format!("Initialize go module for {}", name);
     let _output = Command::new("git")
         .arg("commit")
         .arg("-m")
         .arg(&commit_message)
-        .current_dir(format!("/tmp/{}", &name))
+        .current_dir(format!("/tmp/{}", name))
         .output()
         .expect("Failed to execute git commit command");
-    println!("Committed changes to {}", &name);
+    println!("Committed changes to {}", name);
 
     let _output = Command::new("git")
         .arg("push")
-        .current_dir(format!("/tmp/{}", &name))
+        .current_dir(format!("/tmp/{}", name))
         .output()
         .expect("Failed to execute git push command");
-    println!("Pushed changes to {}", &name);
-
-    Ok(println!("Created a new skootrs project"))
+    println!("Pushed changes to {}", name);
+    Ok(())
 }
 
 pub fn create_security_insights(url: String) -> std::result::Result<String, Box<dyn Error>> {
