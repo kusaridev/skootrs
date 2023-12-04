@@ -13,7 +13,6 @@ project-lifecycle:
 contribution-policy:
   accepts-pull-requests: true
   accepts-automated-pull-requests: true
-  automated-tools-list:
 security-contacts:
 - type: email
   value: mike@kusari.dev
