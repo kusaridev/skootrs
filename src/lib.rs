@@ -21,26 +21,47 @@ use models::security_insights::insights10::{
     SecurityInsightsVersion100YamlSchemaHeader,
     SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
     SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-    SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
+    SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
+    SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
 };
-use std::{error::Error, process::Command, thread, time::Duration, fs};
+use octocrab::Page;
+use std::{error::Error, fs, process::Command, thread, time::Duration};
 
 pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     let instance = octocrab::instance();
     let name = Text::new("The name of the repository").prompt()?;
     let description = Text::new("The description of the repository").prompt()?;
+    let user = instance.current().user().await?.login;
+    let Page { items, .. } = instance
+        .current()
+        .list_org_memberships_for_authenticated_user()
+        .send()
+        .await?;
+    let organization = inquire::Select::new(
+        "Select an organization",
+        items
+            .iter()
+            .map(|i| i.organization.login.as_str())
+            .chain(vec![user.as_str()])
+            .collect(),
+    )
+    .prompt()?;
     instance
         .repos("kusaridev", "skoot-go")
         .generate(name.as_str())
+        .owner(organization)
         .description(&description)
         .send()
         .await?;
-    println!("Created {} repository from template: kusaridev/skoot-go", &name);
+    println!(
+        "Created {} repository from template: kusaridev/skoot-go",
+        &name
+    );
 
     thread::sleep(Duration::from_millis(4000));
 
     instance
-        .repos("mlieberman85", name.as_str())
+        .repos(organization, name.as_str())
         .create_file(
             "README.md",
             "Create README",
@@ -55,7 +76,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
         .await?;
     println!("Created README.md for {}", &name);
 
-    let url = format!("https://github.com/{}/{}", "mlieberman85", &name);
+    let url = format!("https://github.com/{}/{}", organization, &name);
     let _output = Command::new("git")
         .arg("clone")
         .arg(&url)
@@ -67,7 +88,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     let _output = Command::new("go")
         .arg("mod")
         .arg("init")
-        .arg(format!("github.com/mlieberman85/{}", &name))
+        .arg(format!("github.com/{}/{}", organization, &name))
         .current_dir(format!("/tmp/{}", &name))
         .output()
         .expect("Failed to execute go mod init command");
