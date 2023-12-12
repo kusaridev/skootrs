@@ -18,8 +18,10 @@ pub struct GoConfig {
     pub module: String,
 }
 
-// TODO: Make this real
-pub struct MavenConfig {}
+pub struct MavenConfig {
+    pub group_id: String,
+    pub artifact_id: String,
+}
 
 pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = ["Go", "Maven"];
 
@@ -59,8 +61,12 @@ impl<'a> GithubBundle<'a> {
     }
 
     async fn create_repository(&self) -> std::result::Result<(), Box<dyn Error>> {
+        let (organization, repo) = match self.ecosystem_init_config {
+            EcosystemInitConfig::Go(_) => ("kusaridev", "skoot-go"),
+            EcosystemInitConfig::Maven(_) => ("kusaridev", "skoot-maven"),
+        };
         self.client
-            .repos("kusaridev", "skoot-go")
+            .repos(organization, repo)
             .generate(self.name)
             .owner(self.organization)
             .description(self.description)
@@ -109,10 +115,25 @@ impl<'a> GithubBundle<'a> {
     async fn initialize_project(&self) -> std::result::Result<(), Box<dyn Error>> {
         match &self.ecosystem_init_config {
             EcosystemInitConfig::Go(go_config) => self.initialize_go_module(go_config).await,
-            EcosystemInitConfig::Maven(_maven_config) => {
-                todo!("Maven not yet implemented");
-            }
+            EcosystemInitConfig::Maven(maven_config) => self.initialize_mvn_project(maven_config).await,
         }
+    }
+
+    async fn initialize_mvn_project(
+        &self,
+        maven_config: &MavenConfig,
+    ) -> std::result::Result<(), Box<dyn Error>> {
+        let _output = Command::new("mvn")
+            .arg("archetype:generate")
+            .arg(format!("-DgroupId={}", maven_config.group_id))
+            .arg(format!("-DartifactId={}", maven_config.artifact_id))
+            .arg("-DarchetypeArtifactId=maven-archetype-quickstart")
+            .arg("-DinteractiveMode=false")
+            .current_dir(format!("/tmp/{}", self.name))
+            .output()
+            .expect("Failed to execute mvn archetype:generate command");
+        println!("Initialized maven project for {}", self.name);
+        Ok(())
     }
 
     async fn initialize_go_module(
