@@ -55,7 +55,11 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
             EcosystemInitConfig::Go(go_config)
         }
         "Maven" => {
-            let maven_config = bundle::bundle::MavenConfig {};
+            // TODO: Make this configurable
+            let maven_config = bundle::bundle::MavenConfig {
+                group_id: format!("com.{}.{}", organization, name),
+                artifact_id: name.clone(),
+            };
             EcosystemInitConfig::Maven(maven_config)
         }
         _ => {
