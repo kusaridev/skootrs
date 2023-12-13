@@ -1,13 +1,12 @@
-use std::{error::Error, fs, process::Command, thread, time::Duration};
+use std::{error::Error, fs, process::Command};
 
 use crate::models::security_insights::insights10::{
-    SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy,
-    SecurityInsightsVersion100YamlSchemaHeader,
-    SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
-    SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-    SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
-    SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
-};
+        SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy,
+        SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
+        SecurityInsightsVersion100YamlSchemaProjectLifecycle,
+        SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
+        SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
+    };
 
 pub enum EcosystemInitConfig {
     Go(GoConfig),
@@ -33,6 +32,22 @@ pub struct GithubBundle<'a> {
     ecosystem_init_config: EcosystemInitConfig,
 }
 
+pub trait Bundle<'a> {
+    fn create(&self) -> impl std::future::Future<Output = std::result::Result<(), Box<dyn Error>>> + Send;
+}
+
+impl<'a> Bundle<'a> for GithubBundle<'a> {
+    async fn create(&self) -> std::result::Result<(), Box<dyn Error>> {
+        self.create_repository().await?;
+        self.clone_repository().await?;
+        self.initialize_project().await?;
+        self.create_security_insights_yaml().await?;
+        self.commit_and_push_changes().await?;
+        self.create_readme().await?;
+        Ok(())
+    }
+}
+
 impl<'a> GithubBundle<'a> {
     pub fn new(
         client: &'a octocrab::Octocrab,
@@ -50,21 +65,8 @@ impl<'a> GithubBundle<'a> {
         }
     }
 
-    pub async fn create(&self) -> std::result::Result<(), Box<dyn Error>> {
-        self.create_repository().await?;
-        self.create_readme().await?;
-        self.clone_repository().await?;
-        self.initialize_project().await?;
-        self.create_security_insights_yaml().await?;
-        self.commit_and_push_changes().await?;
-        Ok(())
-    }
-
     async fn create_repository(&self) -> std::result::Result<(), Box<dyn Error>> {
-        let (organization, repo) = match self.ecosystem_init_config {
-            EcosystemInitConfig::Go(_) => ("kusaridev", "skoot-go"),
-            EcosystemInitConfig::Maven(_) => ("kusaridev", "skoot-maven"),
-        };
+        let (organization, repo) = self.get_repository_info();
         self.client
             .repos(organization, repo)
             .generate(self.name)
@@ -72,12 +74,7 @@ impl<'a> GithubBundle<'a> {
             .description(self.description)
             .send()
             .await?;
-        println!(
-            "Created {} repository from template: kusaridev/skoot-go",
-            self.name
-        );
-        // TODO: figure out what the best way to wait for the repository to be created and template generated
-        thread::sleep(Duration::from_millis(4000));
+        println!("Created {} repository from template: {}/{}", self.name, organization, repo);
         Ok(())
     }
 
@@ -87,12 +84,7 @@ impl<'a> GithubBundle<'a> {
             .create_file(
                 "README.md",
                 "Create README",
-                format!(
-                    r#"# {}
-{}
-"#,
-                    self.name, self.description
-                ),
+                self.generate_readme_content(),
             )
             .send()
             .await?;
@@ -101,7 +93,7 @@ impl<'a> GithubBundle<'a> {
     }
 
     async fn clone_repository(&self) -> std::result::Result<(), Box<dyn Error>> {
-        let url = format!("https://github.com/{}/{}", self.organization, self.name);
+        let url = self.get_repository_url();
         let _output = Command::new("git")
             .arg("clone")
             .arg(&url)
@@ -130,8 +122,7 @@ impl<'a> GithubBundle<'a> {
             .arg("-DarchetypeArtifactId=maven-archetype-quickstart")
             .arg("-DinteractiveMode=false")
             .current_dir(format!("/tmp/{}", self.name))
-            .output()
-            .expect("Failed to execute mvn archetype:generate command");
+            .output()?;
         println!("Initialized maven project for {}", self.name);
         Ok(())
     }
@@ -145,17 +136,16 @@ impl<'a> GithubBundle<'a> {
             .arg("init")
             .arg(go_config.module.as_str())
             .current_dir(format!("/tmp/{}", self.name))
-            .output()
-            .expect("Failed to execute go mod init command");
+            .output()?;
         println!("Initialized go module for {}", self.name);
         Ok(())
     }
 
     async fn create_security_insights_yaml(&self) -> std::result::Result<(), Box<dyn Error>> {
-        let url = format!("https://github.com/{}/{}", self.organization, self.name);
+        let url = self.get_repository_url();
         fs::write(
             format!("/tmp/{}/SECURITY_INSIGHTS.yaml", self.name),
-            create_security_insights(url)?,
+            self.create_security_insights(url)?,
         )?;
         println!("Created SECURITY_INSIGHTS.yaml for {}", self.name);
         Ok(())
@@ -166,8 +156,7 @@ impl<'a> GithubBundle<'a> {
             .arg("add")
             .arg(".")
             .current_dir(format!("/tmp/{}", self.name))
-            .output()
-            .expect("Failed to execute git add command");
+            .output()?;
 
         let commit_message = format!("Initialize go module for {}", self.name);
         let _output = Command::new("git")
@@ -175,69 +164,85 @@ impl<'a> GithubBundle<'a> {
             .arg("-m")
             .arg(&commit_message)
             .current_dir(format!("/tmp/{}", self.name))
-            .output()
-            .expect("Failed to execute git commit command");
+            .output()?;
         println!("Committed changes to {}", self.name);
 
         let _output = Command::new("git")
             .arg("push")
             .current_dir(format!("/tmp/{}", self.name))
-            .output()
-            .expect("Failed to execute git push command");
+            .output()?;
         println!("Pushed changes to {}", self.name);
         Ok(())
     }
-}
 
-// TODO: Make this do more. This just creates a very simple config
-pub fn create_security_insights(url: String) -> std::result::Result<String, Box<dyn Error>> {
-    let insights = SecurityInsightsVersion100YamlSchema {
-        contribution_policy: SecurityInsightsVersion100YamlSchemaContributionPolicy {
-            accepts_automated_pull_requests: true,
-            accepts_pull_requests: true,
-            automated_tools_list: None,
-            code_of_conduct: None,
-            contributing_policy: None,
-        },
-        dependencies: None,
-        distribution_points: Vec::new(),
-        documentation: None,
-        header: SecurityInsightsVersion100YamlSchemaHeader {
-            changelog: None,
-            commit_hash: None,
-            expiration_date: chrono::Utc::now() + chrono::Duration::days(365),
-            last_reviewed: None,
-            last_updated: None,
-            license: Some(format!("{}/blob/main/LICENSE", &url)),
-            project_release: None,
-            project_url: url,
-            schema_version: SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion::_100,
-        },
-        project_lifecycle: SecurityInsightsVersion100YamlSchemaProjectLifecycle {
-            bug_fixes_only: false,
-            core_maintainers: None,
-            release_cycle: None,
-            release_process: None,
-            roadmap: None,
-            status: SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus::Active,
-        },
-        security_artifacts: None,
-        security_assessments: None,
-        security_contacts: Vec::new(),
-        security_testing: Vec::new(),
-        vulnerability_reporting: SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
-            accepts_vulnerability_reports: false,
-            bug_bounty_available: None,
-            bug_bounty_url: None,
-            comment: None,
-            email_contact: None,
-            in_scope: None,
-            out_scope: None,
-            pgp_key: None,
-            security_policy: None,
-        },
-    };
+    fn get_repository_info(&self) -> (&str, &str) {
+        match self.ecosystem_init_config {
+            EcosystemInitConfig::Go(_) => ("kusaridev", "skoot-go"),
+            EcosystemInitConfig::Maven(_) => ("kusaridev", "skoot-maven"),
+        }
+    }
 
-    let yaml = serde_yaml::to_string(&insights)?;
-    Ok(yaml)
+    fn get_repository_url(&self) -> String {
+        let (organization, repo) = self.get_repository_info();
+        format!("https://github.com/{}/{}", organization, repo)
+    }
+
+    fn generate_readme_content(&self) -> String {
+        format!(
+            "# {}\n{}",
+            self.name, self.description
+        )
+    }
+
+    fn create_security_insights(&self, url: String) -> std::result::Result<String, Box<dyn Error>> {
+        let insights = SecurityInsightsVersion100YamlSchema {
+            contribution_policy: SecurityInsightsVersion100YamlSchemaContributionPolicy {
+                accepts_automated_pull_requests: true,
+                accepts_pull_requests: true,
+                automated_tools_list: None,
+                code_of_conduct: None,
+                contributing_policy: None,
+            },
+            dependencies: None,
+            distribution_points: Vec::new(),
+            documentation: None,
+            header: SecurityInsightsVersion100YamlSchemaHeader {
+                changelog: None,
+                commit_hash: None,
+                expiration_date: chrono::Utc::now() + chrono::Duration::days(365),
+                last_reviewed: None,
+                last_updated: None,
+                license: Some(format!("{}/blob/main/LICENSE", &url)),
+                project_release: None,
+                project_url: url,
+                schema_version: SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion::_100,
+            },
+            project_lifecycle: SecurityInsightsVersion100YamlSchemaProjectLifecycle {
+                bug_fixes_only: false,
+                core_maintainers: None,
+                release_cycle: None,
+                release_process: None,
+                roadmap: None,
+                status: SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus::Active,
+            },
+            security_artifacts: None,
+            security_assessments: None,
+            security_contacts: Vec::new(),
+            security_testing: Vec::new(),
+            vulnerability_reporting: SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
+                accepts_vulnerability_reports: false,
+                bug_bounty_available: None,
+                bug_bounty_url: None,
+                comment: None,
+                email_contact: None,
+                in_scope: None,
+                out_scope: None,
+                pgp_key: None,
+                security_policy: None,
+            },
+        };
+
+        let yaml = serde_yaml::to_string(&insights)?;
+        Ok(yaml)
+    }
 }

@@ -20,6 +20,7 @@ use bundle::bundle::{EcosystemInitConfig, GithubBundle};
 use inquire::Text;
 use octocrab::Page;
 use std::error::Error;
+use crate::bundle::bundle::Bundle;
 
 pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     let instance = octocrab::instance();
