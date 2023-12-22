@@ -13,4 +13,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod bundle;
+use std::error::Error;
+
+/// Trait representing a packaging/language ecosystem.
+/// e.g. Go, Maven
+pub trait Ecosystem: Clone {
+    /// Returns `Ok(())` if the initialization of a project for a
+    /// package/language ecosystem is successful, otherwise returns an error.
+    /// 
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - A string representing the path to initialize the ecosystem.
+    fn initialize(&self, path: String) -> Result<(), Box<dyn Error>>;
+}

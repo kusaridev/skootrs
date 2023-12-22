@@ -16,8 +16,9 @@
 use std::error::Error;
 
 use clap::Parser;
-use skootrs::create;
-use octocrab;
+use skootrs::{create, new_create};
+
+
 
 #[derive(Parser)]
 #[command(name = "skootrs")]
@@ -25,19 +26,26 @@ use octocrab;
 enum SkootrsCli{
     #[command(name = "create")]
     Create,
+    #[command(name = "create2")]
+    Create2,
 }
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn Error>> {
+    tracing_subscriber::fmt::init();
     let cli = SkootrsCli::parse();
     let o: octocrab::Octocrab = octocrab::Octocrab::builder()
     .personal_token(std::env::var("GITHUB_TOKEN")?)
     .build()?
     ;
     octocrab::initialise(o);
-    Ok(match cli {
+    match cli {
         SkootrsCli::Create => {
             create().await?;
         }
-    })
+        SkootrsCli::Create2 => {
+            new_create().await?;
+        }
+    };
+    Ok(())
 }
