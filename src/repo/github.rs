@@ -13,13 +13,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{sync::Arc, process::Command, error::Error};
+use std::{sync::Arc, process::Command, error::Error, str::FromStr};
 
 use tracing::info;
 
-use crate::source::source::Source;
+use crate::{source::source::Source, model::cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventSubject, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
 use super::repo::{UninitializedRepo, InitializedRepo};
+use chrono::prelude::*;
 
 pub struct UninitializedGithubRepo {
     pub client: Arc<octocrab::Octocrab>,
@@ -71,6 +72,29 @@ impl UninitializedRepo for UninitializedGithubRepo {
         };
 
         info!("Github Repo Created: {}", self.name);
+        let rce = RepositoryCreatedEvent {
+             context: RepositoryCreatedEventContext {
+                id: RepositoryCreatedEventContextId::from_str(format!("{}/{}", self.organization.get_name(), self.name.clone()).as_str())?,
+                source: "skootrs.github.creator".into(),
+                timestamp: Utc::now(),
+                type_: crate::model::cd_events::repo_created::RepositoryCreatedEventContextType::DevCdeventsRepositoryCreated011,
+                version: RepositoryCreatedEventContextVersion::from_str("0.3.0")?,
+            }, 
+             custom_data: None,
+             custom_data_content_type: None,
+             subject: RepositoryCreatedEventSubject {
+                content: RepositoryCreatedEventSubjectContent{
+                    name: RepositoryCreatedEventSubjectContentName::from_str(self.name.as_str())?,
+                    owner: Some(self.organization.get_name()),
+                    url: RepositoryCreatedEventSubjectContentUrl::from_str(self.full_url().as_str())?,
+                    view_url: Some(self.full_url()),
+                },
+                id: RepositoryCreatedEventSubjectId::from_str(format!("{}/{}", self.organization.get_name(), self.name.clone()).as_str())?,
+                source: Some("skootrs.github.creator".into()),
+                type_: crate::model::cd_events::repo_created::RepositoryCreatedEventSubjectType::Repository,
+            } 
+        };
+        info!("{}", serde_json::to_string(&rce)?);
 
         Ok(InitializedGithubRepo {
             _client: self.client.clone(),
