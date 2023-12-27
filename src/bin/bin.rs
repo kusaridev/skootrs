@@ -28,6 +28,8 @@ enum SkootrsCli{
     Create,
     #[command(name = "create2")]
     Create2,
+    #[command(name = "daemon")]
+    Daemon
 }
 
 #[tokio::main]
@@ -45,6 +47,9 @@ async fn main() -> std::result::Result<(), Box<dyn Error>> {
         }
         SkootrsCli::Create2 => {
             new_create().await?;
+        }
+        SkootrsCli::Daemon => {
+            skootrs::server::rest::run_server(None).await?;
         }
     };
     Ok(())

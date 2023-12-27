@@ -20,6 +20,7 @@ pub mod repo;
 pub mod ecosystem;
 pub mod source;
 pub mod config;
+pub mod server;
 
 use bundle::bundle::{EcosystemInitConfig, GithubBundle};
 use config::config::DefaultConfigBundle;
@@ -77,7 +78,7 @@ pub async fn new_create() -> std::result::Result<(), Box<dyn Error>> {
             // TODO: support more than just github
             let go_config = Go { name: name.clone(), host: format!("github.com/{}", organization) };
             let project_config = UninitializedProject { 
-                repo: UninitializedGithubRepo { client: instance, name: name.clone(), description, organization: gh_org }, 
+                repo: UninitializedGithubRepo { name: name.clone(), description, organization: gh_org }, 
                 ecosystem: go_config, 
                 name: name.clone(),
                 config_bundle: Box::new(DefaultConfigBundle{})
@@ -93,7 +94,7 @@ pub async fn new_create() -> std::result::Result<(), Box<dyn Error>> {
             };
 
             let project_config = UninitializedProject {
-                repo: UninitializedGithubRepo { client: instance, name: name.clone(), description, organization: gh_org },
+                repo: UninitializedGithubRepo { name: name.clone(), description, organization: gh_org },
                 ecosystem: maven_config,
                 name: name.clone(),
                 config_bundle: Box::new(DefaultConfigBundle{})
