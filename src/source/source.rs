@@ -15,9 +15,12 @@
 
 use std::{process::Command, error::Error, path::Path, fs};
 
+use serde::{Serialize, Deserialize};
 use tracing::{info, debug};
+use utoipa::ToSchema;
 
 /// Struct representing a working copy of source code.
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
 pub struct Source {
     pub path: String
 }

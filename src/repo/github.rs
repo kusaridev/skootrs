@@ -13,17 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{sync::Arc, process::Command, error::Error, str::FromStr};
+use std::{process::Command, error::Error, str::FromStr};
 
+use serde::{Serialize, Deserialize};
 use tracing::info;
+use utoipa::ToSchema;
 
 use crate::{source::source::Source, model::cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventSubject, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
 use super::repo::{UninitializedRepo, InitializedRepo};
 use chrono::prelude::*;
 
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct UninitializedGithubRepo {
-    pub client: Arc<octocrab::Octocrab>,
+    //pub client: Arc<octocrab::Octocrab>,
     pub name: String,
     pub description: String,
     pub organization: GithubUser,
@@ -32,7 +35,7 @@ pub struct UninitializedGithubRepo {
 /// Enum representing whether or not a particular permissioned path in Github, e.g. github.com/kusaridev references
 /// a user or an organization. This is useful since the way you create and manage repos within Github is different
 /// depending on whether it's owned by a User or an Organization.
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum GithubUser {
     User(String),
     Organization(String),
@@ -63,9 +66,9 @@ impl UninitializedRepo for UninitializedGithubRepo {
         };
 
         let _response: serde_json::Value = match self.organization.clone() {
-            GithubUser::User(_) => self.client.post("/user/repos", Some(&new_repo)).await?,
+            GithubUser::User(_) => octocrab::instance().post("/user/repos", Some(&new_repo)).await?,
             GithubUser::Organization(name) => {
-                self.client
+                octocrab::instance()
                     .post(format!("/orgs/{}/repos", name), Some(&new_repo))
                     .await?
             }
@@ -97,7 +100,6 @@ impl UninitializedRepo for UninitializedGithubRepo {
         info!("{}", serde_json::to_string(&rce)?);
 
         Ok(InitializedGithubRepo {
-            _client: self.client.clone(),
             name: self.name.clone(),
             organization: self.organization.clone(),
         })
@@ -135,8 +137,8 @@ struct NewGithubRepoParams {
     has_wiki: bool,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct InitializedGithubRepo {
-    _client: Arc<octocrab::Octocrab>,
     pub name: String,
     pub organization: GithubUser,
 }

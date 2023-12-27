@@ -15,12 +15,14 @@
 
 use std::{process::Command, error::Error};
 
+use serde::{Serialize, Deserialize};
 use tracing::info;
+use utoipa::ToSchema;
 
 use super::ecosystem::Ecosystem;
 
 /// Represents the Maven ecosystem.
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct Maven {
     /// The group ID of the Maven project.
     pub group_id: String,

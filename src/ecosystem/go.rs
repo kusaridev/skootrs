@@ -15,12 +15,14 @@
 
 use std::{process::Command, error::Error};
 
+use serde::{Serialize, Deserialize};
 use tracing::info;
+use utoipa::ToSchema;
 
 use super::ecosystem::Ecosystem;
 
 /// Represents the Go ecosystem.
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct Go {
     /// The name of the Go module.
     pub name: String,
