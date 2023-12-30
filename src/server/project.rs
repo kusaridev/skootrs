@@ -118,7 +118,8 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
     }
 }
 
-/// TODO: Clean this up
+/// Create a new project
+/// 
 /// Example: 
 /// {
 /// "ecosystem_params": {
@@ -143,6 +144,7 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
     )
 )]
 pub(super) async fn create_project(project: Json<APISupportedCreateProjectParams>, project_store: Data<ProjectStore>) -> impl Responder {
+    // TODO: Clean this up
     let mut projects = project_store.projects.lock().unwrap();
 
     let initialized_project = project.create().await.unwrap();
@@ -151,6 +153,7 @@ pub(super) async fn create_project(project: Json<APISupportedCreateProjectParams
     HttpResponse::Ok().json(initialized_project)
 }
 
+/// Get all projects
 #[utoipa::path(
     get,
     path = "/project",

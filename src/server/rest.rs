@@ -7,7 +7,7 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::Maven, go::Go}};
+use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::Maven, go::Go}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::source::Source};
 
 pub struct SkootrsWebConfig {
 
@@ -21,7 +21,8 @@ pub async fn run_server(config: Option<SkootrsWebConfig>) -> std::io::Result<()>
             crate::server::project::create_project
         ),
         components(
-            schemas(APISupportedInitializedProject,
+            schemas(
+                APISupportedInitializedProject,
                 APISupportedCreateProjectParams,
                 ErrorResponse, 
                 APISupportedRepo,
@@ -29,7 +30,11 @@ pub async fn run_server(config: Option<SkootrsWebConfig>) -> std::io::Result<()>
                 APISupportedRepoParams,
                 APISupportedEcosystemParams,
                 Maven,
-                Go
+                Go,
+                UninitializedGithubRepo,
+                GithubUser,
+                InitializedGithubRepo,
+                Source,
             )
         ),
         tags(

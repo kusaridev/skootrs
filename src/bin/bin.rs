@@ -37,7 +37,10 @@ async fn main() -> std::result::Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt::init();
     let cli = SkootrsCli::parse();
     let o: octocrab::Octocrab = octocrab::Octocrab::builder()
-    .personal_token(std::env::var("GITHUB_TOKEN")?)
+    .personal_token(
+        std::env::var("GITHUB_TOKEN")
+        .expect("GITHUB_TOKEN env var must be populated")
+    )
     .build()?
     ;
     octocrab::initialise(o);
