@@ -19,9 +19,9 @@ use serde::{Serialize, Deserialize};
 use tracing::info;
 use utoipa::ToSchema;
 
-use crate::{source::source::Source, model::cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventSubject, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
+use crate::{source::Source, model::cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventSubject, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
-use super::repo::{UninitializedRepo, InitializedRepo};
+use super::{UninitializedRepo, InitializedRepo};
 use chrono::prelude::*;
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]

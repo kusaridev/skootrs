@@ -22,16 +22,16 @@ pub mod source;
 pub mod config;
 pub mod server;
 
-use bundle::bundle::{EcosystemInitConfig, GithubBundle};
-use config::config::DefaultConfigBundle;
+use bundle::{EcosystemInitConfig, GithubBundle};
+use config::DefaultConfigBundle;
 use ecosystem::{maven::Maven, go::Go};
 use inquire::Text;
 use octocrab::Page;
-use project::project::{UninitializedProject, InitializeOptions};
+use project::{UninitializedProject, InitializeOptions};
 use repo::github::{UninitializedGithubRepo, GithubUser};
 use tracing::info;
 use std::error::Error;
-use crate::bundle::bundle::Bundle;
+use crate::bundle::Bundle;
 
 /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.
 /// 
@@ -61,7 +61,7 @@ pub async fn new_create() -> std::result::Result<(), Box<dyn Error>> {
 
     let language = inquire::Select::new(
         "Select a language",
-        bundle::bundle::SUPPORTED_ECOSYSTEMS.to_vec(),
+        bundle::SUPPORTED_ECOSYSTEMS.to_vec(),
     );
 
     let options = InitializeOptions {
@@ -140,12 +140,12 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
 
     let language = inquire::Select::new(
         "Select a language",
-        bundle::bundle::SUPPORTED_ECOSYSTEMS.to_vec(),
+        bundle::SUPPORTED_ECOSYSTEMS.to_vec(),
     );
 
     let ecosystem_init_config: EcosystemInitConfig = match language.prompt()? {
         "Go" => {
-            let go_config = bundle::bundle::GoConfig {
+            let go_config = bundle::GoConfig {
                 // TODO: Support more than Github
                 module: format!("github.com/{}/{}", organization, name),
             };
@@ -153,7 +153,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
         }
         "Maven" => {
             // TODO: Make this configurable
-            let maven_config = bundle::bundle::MavenConfig {
+            let maven_config = bundle::MavenConfig {
                 group_id: format!("com.{}.{}", organization, name),
                 artifact_id: name.clone(),
             };

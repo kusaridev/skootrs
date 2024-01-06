@@ -13,4 +13,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod source;
+use std::{process::Command, error::Error, path::Path, fs};
+
+use serde::{Serialize, Deserialize};
+use tracing::{info, debug};
+use utoipa::ToSchema;
+
+/// Struct representing a working copy of source code.
+#[derive(Serialize, Deserialize, Debug, Clone, ToSchema)]
+pub struct Source {
+    pub path: String
+}
+
+impl Source {
+    /// Returns `Ok(())` if changes are committed and pushed back to the remote  if successful,
+    /// otherwise returns an error.
+    pub fn commit_and_push_changes(&self, message: String) -> Result<(), Box<dyn Error>> {
+        let _output = Command::new("git")
+        .arg("add")
+        .arg(".")
+        .current_dir(&self.path)
+        .output()?;
+
+    let _output = Command::new("git")
+        .arg("commit")
+        .arg("-m")
+        .arg(message)
+        .current_dir(&self.path)
+        .output()?;
+    info!("Committed changes for {}", self.path);
+
+    let _output = Command::new("git")
+        .arg("push")
+        .current_dir(&self.path)
+        .output()?;
+    info!("Pushed changes for {}", self.path);
+    Ok(())
+    }
+
+    /// Returns `Ok(())` if a file is successfully written to some path within the source directory. Otherwise,
+    /// it returns an error.
+    pub fn write_file<P: AsRef<Path>, C: AsRef<[u8]>>(&self, path: P, name: String, contents: C) -> Result<(), Box<dyn Error>> {
+        let full_path = Path::new(&self.path).join(&path);
+        // Ensure path exists
+        fs::create_dir_all(&full_path)?;
+        let complete_path = full_path.join(name);
+        fs::write(complete_path, contents)?;
+        debug!("{:?} file written", &full_path);
+        Ok(())
+    }
+}

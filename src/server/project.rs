@@ -1,10 +1,11 @@
-use std::{sync::Mutex, error::Error};
+use std::error::Error;
 use actix_web::{Responder, web::{ServiceConfig, Data, Json, self}, HttpResponse};
 use serde::{Serialize, Deserialize};
+use tokio::sync::Mutex;
 use tracing::info;
 use utoipa::ToSchema;
 
-use crate::{repo::{repo::{InitializedRepo, UninitializedRepo}, github::{InitializedGithubRepo, UninitializedGithubRepo}}, ecosystem::{ecosystem::Ecosystem, go::Go, maven::Maven}, source::source::Source, config::config::{ConfigBundle, DefaultConfigBundle, ConfigInput, DefaultReadmeInput, DefaultSecurityInsightsInput}};
+use crate::{repo::{{InitializedRepo, UninitializedRepo}, github::{InitializedGithubRepo, UninitializedGithubRepo}}, ecosystem::{Ecosystem, go::Go, maven::Maven}, source::Source, config::{ConfigBundle, DefaultConfigBundle, ConfigInput, DefaultReadmeInput, DefaultSecurityInsightsInput}};
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct APISupportedInitializedProject {
@@ -55,7 +56,7 @@ impl APISupportedCreateProjectParams {
         let readme_bundle = config_bundle.readme_bundle(
             ConfigInput::DefaultReadmeStruct(DefaultReadmeInput{ name: self.name.clone() }))?;
         match readme_bundle {
-            crate::config::config::Config::SourceFileConfig(sfc) => {
+            crate::config::Config::SourceFileConfig(sfc) => {
                 source.write_file(sfc.path, sfc.name, sfc.content)?;
             },
         }
@@ -63,7 +64,7 @@ impl APISupportedCreateProjectParams {
         let security_insights_bundle = config_bundle.security_insights_bundle(
             ConfigInput::DefaultSecurityInsightsStruct(DefaultSecurityInsightsInput{ url }))?;
         match security_insights_bundle {
-            crate::config::config::Config::SourceFileConfig(sfc) => {
+            crate::config::Config::SourceFileConfig(sfc) => {
                 source.write_file(sfc.path, sfc.name, sfc.content)?;
             },
         }
@@ -145,7 +146,7 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
 )]
 pub(super) async fn create_project(project: Json<APISupportedCreateProjectParams>, project_store: Data<ProjectStore>) -> impl Responder {
     // TODO: Clean this up
-    let mut projects = project_store.projects.lock().unwrap();
+    let mut projects = project_store.projects.lock().await;
 
     let initialized_project = project.create().await.unwrap();
     projects.push(initialized_project.clone());
@@ -162,7 +163,7 @@ pub(super) async fn create_project(project: Json<APISupportedCreateProjectParams
     )
 )]
 pub(super) async fn get_projects(project_store: Data<ProjectStore>) -> impl Responder {
-    let projects = project_store.projects.lock().unwrap();
+    let projects = project_store.projects.lock().await;
 
     HttpResponse::Ok().json(projects.clone())
 }
