@@ -1,20 +1,19 @@
 use std::net::Ipv4Addr;
 
-use actix_web::{App, http, web::{self, Data}, HttpServer};
+use actix_web::{App, HttpServer, web::Data};
 use tracing_actix_web::TracingLogger;
 use utoipa::{OpenApi, Modify, openapi::security::{SecurityScheme, ApiKey, ApiKeyValue}};
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::Maven, go::Go}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::source::Source};
+use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::Maven, go::Go}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::Source};
 
 pub struct SkootrsWebConfig {
 
 }
 
-//#[actix_web::main]
-pub async fn run_server(config: Option<SkootrsWebConfig>) -> std::io::Result<()> {
+pub async fn run_server(_config: Option<SkootrsWebConfig>) -> std::io::Result<()> {
     #[derive(OpenApi)]
     #[openapi(
         paths(
@@ -72,6 +71,4 @@ pub async fn run_server(config: Option<SkootrsWebConfig>) -> std::io::Result<()>
     .bind((Ipv4Addr::UNSPECIFIED, 8080))?
     .run()
     .await
-
-    //http_server.run().await
 }

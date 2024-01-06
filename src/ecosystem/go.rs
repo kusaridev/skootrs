@@ -19,7 +19,7 @@ use serde::{Serialize, Deserialize};
 use tracing::info;
 use utoipa::ToSchema;
 
-use super::ecosystem::Ecosystem;
+use super::Ecosystem;
 
 /// Represents the Go ecosystem.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
