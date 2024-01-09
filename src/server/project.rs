@@ -5,13 +5,15 @@ use tokio::sync::Mutex;
 use tracing::info;
 use utoipa::ToSchema;
 
-use crate::{repo::{{InitializedRepo, UninitializedRepo}, github::{InitializedGithubRepo, UninitializedGithubRepo}}, ecosystem::{Ecosystem, go::Go, maven::Maven}, source::Source, config::{ConfigBundle, DefaultConfigBundle, ConfigInput, DefaultReadmeInput, DefaultSecurityInsightsInput}};
+use crate::{config::{DefaultConfigBundle, DefaultReadmeInput, ConfigInput, DefaultSecurityInsightsInput}, model::skootrs::{SourceParams, MavenParams, GoParams, InitializedGithubRepo}};
+
+//use crate::repo::{{InitializedRepo, UninitializedRepo}, ecosystem::{Ecosystem, go::GoParams, maven::MavenParams}, source::Source, config::{ConfigBundle, DefaultConfigBundle, ConfigInput, DefaultReadmeInput, DefaultSecurityInsightsInput}};
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct APISupportedInitializedProject {
     repo: APISupportedRepo,
     ecosystem: APISupportedEcosystem,
-    source: Source
+    source: SourceParams
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
@@ -51,7 +53,7 @@ impl APISupportedCreateProjectParams {
     }
 
     // TODO: Fix this
-    fn configure(&self, source: &Source, url: String) -> Result<(), Box<dyn Error>> {
+    fn configure(&self, source: &SourceParams, url: String) -> Result<(), Box<dyn Error>> {
         let config_bundle = DefaultConfigBundle{};
         let readme_bundle = config_bundle.readme_bundle(
             ConfigInput::DefaultReadmeStruct(DefaultReadmeInput{ name: self.name.clone() }))?;
@@ -80,8 +82,8 @@ pub enum APISupportedRepo {
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum APISupportedEcosystem {
-    Go(Go),
-    Maven(Maven)
+    Go(GoParams),
+    Maven(MavenParams)
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
@@ -91,8 +93,8 @@ pub enum APISupportedRepoParams {
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum APISupportedEcosystemParams {
-    Go(Go),
-    Maven(Maven)
+    Go(GoParams),
+    Maven(MavenParams)
 }
 
 #[derive(Default)]

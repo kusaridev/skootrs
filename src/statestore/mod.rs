@@ -1,5 +1,5 @@
 //
-// Copyright 2023 The Skootrs Authors.
+// Copyright 2024 The Skootrs Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,11 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{process::Command, error::Error};
+/*use crate::project::InitializedProject;
 
-use serde::{Serialize, Deserialize};
-use tracing::info;
-use utoipa::ToSchema;
-
-use super::Ecosystem;
-
+pub trait StateStore {
+    fn set_project(&self, id: String, project: InitializedProject<>)
+}*/
