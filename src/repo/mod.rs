@@ -17,12 +17,14 @@ pub mod github;
 
 use std::error::Error;
 
+use serde::de::DeserializeOwned;
+
 use crate::source::Source;
 
 /// UnitializedRepo represents a source repo that hasn't been created in its host yet.
 /// e.g. a Github repo that you plan to create.
 pub trait UninitializedRepo {
-    type Repo: InitializedRepo;
+    type Repo: InitializedRepo + DeserializeOwned;
 
     /// Returns an `InitializedRepo` representing a created and initialized repo if it is
     /// successfully created, otherwise it returns an error.

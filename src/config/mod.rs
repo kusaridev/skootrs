@@ -15,6 +15,7 @@
 
 use std::{collections::HashMap, error::Error};
 
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::model::security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting};
@@ -58,9 +59,10 @@ pub struct DefaultSBOMInput {}
 pub struct DefaultSLSAInput {}
 
 /// An empty struct that can be used to implement the ConfigBundle trait.
+#[derive(Serialize, Deserialize)]
 pub struct DefaultConfigBundle {}
 
-pub trait ConfigBundle {
+pub trait ConfigBundle where Self: DeserializeOwned {
     fn readme_bundle(&self, config_input: ConfigInput) -> Result<Config, Box<dyn Error>>;
     fn security_insights_bundle(
         &self,
