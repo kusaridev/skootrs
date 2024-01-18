@@ -49,9 +49,9 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
 #[utoipa::path(
     post,
     path = "/project",
-    request_body = APISupportedCreateProjectParams,
+    request_body = ProjectParams,
     responses( 
-        (status = 201, description = "Project created successfully", body = APISupportedInitializedProject),
+        (status = 201, description = "Project created successfully", body = InitializedProject),
         (status = 409, description = "Project unable to be created", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to create repo".into())))
     )
 )]

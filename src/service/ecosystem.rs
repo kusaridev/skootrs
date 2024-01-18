@@ -2,7 +2,7 @@ use std::{error::Error, process::Command};
 
 use tracing::info;
 
-use crate::model::skootrs::{EcosystemParams, InitializedEcosystem, MavenParams, GoParams, InitializedSource};
+use crate::model::skootrs::{EcosystemParams, InitializedEcosystem, MavenParams, GoParams, InitializedSource, InitializedMaven, InitializedGo};
 
 pub trait EcosystemService {
     fn initialize(&self, params: EcosystemParams, source: InitializedSource) -> Result<InitializedEcosystem, Box<dyn Error>>;
@@ -18,12 +18,18 @@ impl EcosystemService for LocalEcosystemService {
             EcosystemParams::Maven(m) => {
                 let handler = LocalMavenEcosystemHandler {};
                 handler.initialize(source.path, m.clone())?;
-                Ok(InitializedEcosystem::Maven(m))
+                Ok(InitializedEcosystem::Maven(InitializedMaven {
+                    group_id: m.group_id,
+                    artifact_id: m.artifact_id,
+                }))
             }
             EcosystemParams::Go(g) => {
                 let handler = LocalGoEcosystemHandler {};
                 handler.initialize(source.path, g.clone())?;
-                Ok(InitializedEcosystem::Go(g))
+                Ok(InitializedEcosystem::Go(InitializedGo {
+                    name: g.name,
+                    host: g.host,
+                }))
             }
         }
     }

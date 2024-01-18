@@ -18,6 +18,8 @@ pub mod facet;
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
 
+use self::facet::Facet;
+
 /// The general structure of the models here is the struct names take the form:
 /// <Thing>Params reflecting the parameters for something to be created or initilized, like the parameters
 /// to create a repo or project.
@@ -36,15 +38,13 @@ pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = [
 ];
 
 // TODO: These should be their own structs, but they're currently not any different from the params structs.
-pub type InitializedGo = GoParams;
-pub type InitializedMaven = MavenParams;
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct InitializedProject {
     pub repo: InitializedRepo,
     pub ecosystem: InitializedEcosystem,
     pub source: InitializedSource,
-    pub facets: Vec<facet::Facet>,
+    pub facets: Vec<Facet>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
@@ -182,6 +182,29 @@ pub struct GoParams {
     pub name: String,
     /// The host of the Go module.
     pub host: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct InitializedGo {
+    /// The name of the Go module.
+    pub name: String,
+    /// The host of the Go module.
+    pub host: String,
+}
+
+impl InitializedGo {
+    /// Returns the module name in the format "{host}/{name}".
+    pub fn module(&self) -> String {
+        format!("{}/{}", self.host, self.name)
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct InitializedMaven {
+    /// The group ID of the Maven project.
+    pub group_id: String,
+    /// The artifact ID of the Maven project.
+    pub artifact_id: String,
 }
 
 impl GoParams {
