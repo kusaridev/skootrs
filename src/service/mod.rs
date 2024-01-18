@@ -18,3 +18,4 @@ pub mod project;
 pub mod repo;
 pub mod source;
 pub mod ecosystem;
+pub mod facet;
