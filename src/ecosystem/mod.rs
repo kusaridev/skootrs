@@ -1,6 +1,5 @@
-
 //
-// Copyright 2024 The Skootrs Authors.
+// Copyright 2023 The Skootrs Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod project;
-pub mod repo;
-pub mod source;
-pub mod ecosystem;
+pub mod go;
+pub mod maven;
+
+use std::error::Error;
+
+/// Trait representing a packaging/language ecosystem.
+/// e.g. Go, Maven
+pub trait Ecosystem: Clone {
+    /// Returns `Ok(())` if the initialization of a project for a
+    /// package/language ecosystem is successful, otherwise returns an error.
+    /// 
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - A string representing the path to initialize the ecosystem.
+    fn initialize(&self, path: String) -> Result<(), Box<dyn Error>>;
+}

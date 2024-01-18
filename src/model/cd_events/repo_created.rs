@@ -22,9 +22,8 @@
 #![allow(clippy::clone_on_copy)]
 
 use serde::{Deserialize, Serialize};
-use utoipa::ToSchema;
 
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RepositoryCreatedEvent {
     pub context: RepositoryCreatedEventContext,
@@ -52,7 +51,7 @@ impl RepositoryCreatedEvent {
         builder::RepositoryCreatedEvent::default()
     }
 }
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RepositoryCreatedEventContext {
     pub id: RepositoryCreatedEventContextId,
@@ -72,7 +71,7 @@ impl RepositoryCreatedEventContext {
         builder::RepositoryCreatedEventContext::default()
     }
 }
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct RepositoryCreatedEventContextId(String);
 impl std::ops::Deref for RepositoryCreatedEventContextId {
     type Target = String;
@@ -178,7 +177,7 @@ impl Default for RepositoryCreatedEventContextType {
         RepositoryCreatedEventContextType::DevCdeventsRepositoryCreated011
     }
 }
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct RepositoryCreatedEventContextVersion(String);
 impl std::ops::Deref for RepositoryCreatedEventContextVersion {
     type Target = String;
@@ -233,7 +232,7 @@ impl<'de> serde::Deserialize<'de> for RepositoryCreatedEventContextVersion {
             .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum RepositoryCreatedEventCustomData {
     Variant0(std::collections::HashMap<String, serde_json::Value>),
@@ -251,7 +250,7 @@ impl From<std::collections::HashMap<String, serde_json::Value>>
         Self::Variant0(value)
     }
 }
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RepositoryCreatedEventSubject {
     pub content: RepositoryCreatedEventSubjectContent,
@@ -271,7 +270,7 @@ impl RepositoryCreatedEventSubject {
         builder::RepositoryCreatedEventSubject::default()
     }
 }
-#[derive(Clone, Debug, Deserialize, Serialize, ToSchema)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct RepositoryCreatedEventSubjectContent {
     pub name: RepositoryCreatedEventSubjectContentName,
@@ -291,7 +290,7 @@ impl RepositoryCreatedEventSubjectContent {
         builder::RepositoryCreatedEventSubjectContent::default()
     }
 }
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct RepositoryCreatedEventSubjectContentName(String);
 impl std::ops::Deref for RepositoryCreatedEventSubjectContentName {
     type Target = String;
@@ -346,7 +345,7 @@ impl<'de> serde::Deserialize<'de> for RepositoryCreatedEventSubjectContentName {
             .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct RepositoryCreatedEventSubjectContentUrl(String);
 impl std::ops::Deref for RepositoryCreatedEventSubjectContentUrl {
     type Target = String;
@@ -401,7 +400,7 @@ impl<'de> serde::Deserialize<'de> for RepositoryCreatedEventSubjectContentUrl {
             .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct RepositoryCreatedEventSubjectId(String);
 impl std::ops::Deref for RepositoryCreatedEventSubjectId {
     type Target = String;

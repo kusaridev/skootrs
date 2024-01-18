@@ -2,28 +2,28 @@ use std::{error::Error, process::Command};
 
 use tracing::info;
 
-use crate::model::skootrs::{EcosystemParams, InitializedEcosystem, MavenParams, GoParams, InitializedSource};
+use crate::model::skootrs::{EcosystemParams, InitializedEcosystem, MavenParams};
 
 pub trait EcosystemService {
-    fn initialize(&self, params: EcosystemParams, source: InitializedSource) -> Result<InitializedEcosystem, Box<dyn Error>>;
+    fn initialize(&self, params: EcosystemParams) -> Result<InitializedEcosystem, Box<dyn Error>>;
 }
 
-#[derive(Debug)]
 pub struct LocalEcosystemService {
+    path: String,
 }
 
 impl EcosystemService for LocalEcosystemService {
-    fn initialize(&self, params: EcosystemParams, source: InitializedSource) -> Result<InitializedEcosystem, Box<dyn Error>> {
+    fn initialize(&self, params: EcosystemParams) -> Result<InitializedEcosystem, Box<dyn Error>> {
         match params {
             EcosystemParams::Maven(m) => {
                 let handler = LocalMavenEcosystemHandler {};
-                handler.initialize(source.path, m.clone())?;
-                Ok(InitializedEcosystem::Maven(m))
+                handler.initialize(self.path, m)?;
+                Ok(InitializedEcosystem::Maven)
             }
             EcosystemParams::Go(g) => {
                 let handler = LocalGoEcosystemHandler {};
-                handler.initialize(source.path, g.clone())?;
-                Ok(InitializedEcosystem::Go(g))
+                handler.initialize(self.path)?;
+                Ok(InitializedEcosystem::Go)
             }
         }
     }
@@ -45,7 +45,7 @@ impl LocalMavenEcosystemHandler {
             .arg(format!("-DartifactId={}", params.artifact_id))
             .arg("-DarchetypeArtifactId=maven-archetype-quickstart")
             .arg("-DinteractiveMode=false")
-            .current_dir(format!("{}", path))
+            .current_dir(format!("{}/{}", path, self.artifact_id))
             .output()?;
         if !output.status.success() {
             Err(Box::new(std::io::Error::new(
@@ -53,7 +53,7 @@ impl LocalMavenEcosystemHandler {
                 "Failed to run mvn generate",
             )))
         } else {
-            info!("Initialized maven project for {}", params.artifact_id);
+            info!("Initialized maven project for {}", self.artifact_id);
             Ok(())
         }
     }
@@ -68,12 +68,12 @@ impl LocalGoEcosystemHandler {
     /// # Arguments
     ///
     /// * `path` - The path where the Go module should be initialized.
-    fn initialize(&self, path: String, params: GoParams) -> Result<(), Box<dyn Error>> {
+    fn initialize(&self, path: String) -> Result<(), Box<dyn Error>> {
         let output = Command::new("go")
             .arg("mod")
             .arg("init")
-            .arg(params.module())
-            .current_dir(format!("{}", path))
+            .arg(self.module())
+            .current_dir(format!("{}/{}", path, self.name))
             .output()?;
         if !output.status.success() {
             Err(Box::new(std::io::Error::new(
@@ -84,7 +84,7 @@ impl LocalGoEcosystemHandler {
                 ),
             )))
         } else {
-            info!("Initialized go module for {}", params.name);
+            info!("Initialized go module for {}", self.name);
             Ok(())
         }
     }

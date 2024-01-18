@@ -7,7 +7,7 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{server::project::{ProjectStore, ErrorResponse}, model::{skootrs::{InitializedProject, ProjectParams, InitializedRepo, InitializedGithubRepo, InitializedEcosystem, RepoParams, EcosystemParams, GithubUser, GithubRepoParams, SourceParams, InitializedSource, MavenParams, GoParams}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderCommitHash, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess, SecurityInsightsVersion100YamlSchemaSecurityArtifacts, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment, SecurityInsightsVersion100YamlSchemaSecurityContactsItem, SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, SecurityInsightsVersion100YamlSchemaSecurityTestingItem, SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment, SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey}}};
+use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::MavenParams, go::GoParams}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::Source};
 
 pub struct SkootrsWebConfig {
 
@@ -21,66 +21,19 @@ pub async fn run_server(_config: Option<SkootrsWebConfig>) -> std::io::Result<()
         ),
         components(
             schemas(
-                // Server only schemas
+                APISupportedInitializedProject,
+                APISupportedCreateProjectParams,
                 ErrorResponse, 
-
-                // Skootrs Model schemas
-                InitializedProject,
-                ProjectParams,
-                InitializedRepo,
-                InitializedGithubRepo,
-                InitializedEcosystem,
-                RepoParams,
-                EcosystemParams,
-                GithubUser,
-                GithubRepoParams,
-                SourceParams,
-                InitializedSource,
+                APISupportedRepo,
+                APISupportedEcosystem,
+                APISupportedRepoParams,
+                APISupportedEcosystemParams,
                 MavenParams,
                 GoParams,
-
-                // CD Events Schemas
-                RepositoryCreatedEvent,
-                RepositoryCreatedEventContext,
-                RepositoryCreatedEventContextId,
-                RepositoryCreatedEventContextVersion,
-                RepositoryCreatedEventSubject,
-                RepositoryCreatedEventSubjectContent,
-                RepositoryCreatedEventContext,
-                RepositoryCreatedEventSubjectContentUrl,
-                RepositoryCreatedEventSubjectId,
-
-                // Security Insights Schemas
-                SecurityInsightsVersion100YamlSchema,
-                SecurityInsightsVersion100YamlSchemaContributionPolicy,
-                SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
-                SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment,
-                SecurityInsightsVersion100YamlSchemaDependencies,
-                SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
-                SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment,
-                SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
-                SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment,
-                SecurityInsightsVersion100YamlSchemaDependenciesSbomItem,
-                SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
-                SecurityInsightsVersion100YamlSchemaHeader,
-                SecurityInsightsVersion100YamlSchemaHeaderCommitHash,
-                SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-                SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess,
-                SecurityInsightsVersion100YamlSchemaSecurityArtifacts,
-                SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
-                SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment,
-                SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
-                SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment,
-                SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem,
-                SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment,
-                SecurityInsightsVersion100YamlSchemaSecurityContactsItem,
-                SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue,
-                SecurityInsightsVersion100YamlSchemaSecurityTestingItem,
-                SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment,
-                SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration,
-                SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
-                SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment,
-                SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey,
+                UninitializedGithubRepo,
+                GithubUser,
+                InitializedGithubRepo,
+                Source,
             )
         ),
         tags(
