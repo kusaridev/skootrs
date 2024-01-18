@@ -14,28 +14,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{error::Error, process::Command, str::FromStr};
+use std::{error::Error, process::Command, str::FromStr, sync::Arc};
 
 use chrono::Utc;
-use tracing::info;
+use tracing::{info, debug};
+
 
 use crate::model::{skootrs::{RepoParams, InitializedRepo, GithubUser, InitializedGithubRepo, InitializedSource, GithubRepoParams}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
 pub trait RepoService {
-    fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, Box<dyn Error>>;
+    fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, Box<dyn Error>>> + Send;
     fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error>>;
 }
 
+#[derive(Debug)]
 pub struct LocalRepoService {}
 
 impl RepoService for LocalRepoService {
-    fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, Box<dyn Error>> {
+    async fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, Box<dyn Error>> {
         match params {
             RepoParams::Github(g) => {
                 let github_repo_handler = GithubRepoHandler {
                     client: octocrab::instance(),
                 };
-                github_repo_handler.create(g)
+                Ok(InitializedRepo::Github(github_repo_handler.create(g).await?))
             },
         }
     }
@@ -52,8 +54,9 @@ impl RepoService for LocalRepoService {
     }
 }
 
+#[derive(Debug)]
 struct GithubRepoHandler {
-    client: octocrab::Octocrab,
+    client: Arc<octocrab::Octocrab>,
 }
 
 impl GithubRepoHandler {
@@ -70,7 +73,7 @@ impl GithubRepoHandler {
         let _response: serde_json::Value = match github_params.organization.clone() {
             GithubUser::User(_) => octocrab::instance().post("/user/repos", Some(&new_repo)).await?,
             GithubUser::Organization(name) => {
-                octocrab::instance()
+                self.client
                     .post(format!("/orgs/{}/repos", name), Some(&new_repo))
                     .await?
             }
@@ -99,6 +102,8 @@ impl GithubRepoHandler {
                 type_: crate::model::cd_events::repo_created::RepositoryCreatedEventSubjectType::Repository,
             } 
         };
+
+        // TODO: Turn this into an event
         info!("{}", serde_json::to_string(&rce)?);
 
         Ok(InitializedGithubRepo {
@@ -108,15 +113,16 @@ impl GithubRepoHandler {
     }
 
     fn clone_local(&self, initialized_github_repo: InitializedGithubRepo, path: String) -> Result<InitializedSource, Box<dyn Error>> {
+        debug!("Cloning {}", initialized_github_repo.full_url());
         let clone_url = initialized_github_repo.full_url();
         let _output = Command::new("git")
             .arg("clone")
             .arg(clone_url)
-            .arg(path)
+            .current_dir(&path)
             .output()?;
 
         Ok(InitializedSource{
-            path,
+            path: format!("{}/{}", path, initialized_github_repo.name.clone()),
         })
     }
 }

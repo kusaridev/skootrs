@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod facet;
+
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
 
@@ -25,6 +27,14 @@ use utoipa::ToSchema;
 /// it easy for (de)serialization, the structs and impls only contain the logic for the data, and not for the operations,
 /// which falls under service.
 
+// TODO: These categories of structs should be moved to their own modules.
+
+/// Consts for the supported ecosystems, repos, etc. for convenient use by things like the CLI.
+pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = [
+    "Go",
+    "Maven"
+];
+
 // TODO: These should be their own structs, but they're currently not any different from the params structs.
 pub type InitializedGo = GoParams;
 pub type InitializedMaven = MavenParams;
@@ -33,7 +43,8 @@ pub type InitializedMaven = MavenParams;
 pub struct InitializedProject {
     pub repo: InitializedRepo,
     pub ecosystem: InitializedEcosystem,
-    pub source: InitializedSource
+    pub source: InitializedSource,
+    pub facets: Vec<facet::Facet>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
@@ -41,6 +52,7 @@ pub struct ProjectParams {
     pub name: String,
     pub repo_params: RepoParams,
     pub ecosystem_params: EcosystemParams,
+    pub source_params: SourceParams,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
@@ -48,10 +60,39 @@ pub enum InitializedRepo {
     Github(InitializedGithubRepo)
 }
 
+impl InitializedRepo {
+    pub fn host_url(&self) -> String {
+        match self {
+            InitializedRepo::Github(x) => x.host_url(),
+        }
+    }
+
+    pub fn full_url(&self) -> String {
+        match self {
+            InitializedRepo::Github(x) => x.full_url(),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct InitializedGithubRepo {
     pub name: String,
     pub organization: GithubUser,
+}
+
+impl InitializedGithubRepo {
+    pub fn host_url(&self) -> String {
+        "https://github.com".into()
+    }
+
+    pub fn full_url(&self) -> String {
+        format!(
+            "{}/{}/{}",
+            self.host_url(),
+            self.organization.get_name(),
+            self.name
+        )
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
@@ -110,8 +151,13 @@ impl GithubRepoParams {
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct SourceParams {
-    pub path: String,
-    pub repo: InitializedRepo
+    pub parent_path: String,
+}
+
+impl SourceParams {
+    pub fn path(&self, name: String) -> String {
+        format!("{}/{}", self.parent_path, name)
+    }
 }
 
 /// Struct representing a working copy of source code.

@@ -16,8 +16,8 @@
 use std::error::Error;
 
 use clap::Parser;
-use skootrs::{create, new_create};
-
+use skootrs::create;
+use tracing::error;
 
 
 #[derive(Parser)]
@@ -26,15 +26,19 @@ use skootrs::{create, new_create};
 enum SkootrsCli{
     #[command(name = "create")]
     Create,
-    #[command(name = "create2")]
-    Create2,
     #[command(name = "daemon")]
     Daemon
 }
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn Error>> {
-    tracing_subscriber::fmt::init();
+    //tracing_subscriber::fmt::init();
+    let subscriber = tracing_subscriber::fmt()
+    .with_file(true)
+    .with_line_number(true)
+    .finish();
+
+    tracing::subscriber::set_global_default(subscriber)?;
     let cli = SkootrsCli::parse();
     let o: octocrab::Octocrab = octocrab::Octocrab::builder()
     .personal_token(
@@ -46,10 +50,9 @@ async fn main() -> std::result::Result<(), Box<dyn Error>> {
     octocrab::initialise(o);
     match cli {
         SkootrsCli::Create => {
-            create().await?;
-        }
-        SkootrsCli::Create2 => {
-            new_create().await?;
+            if let Err(ref error) = create().await {
+                error!(error = error.as_ref(), "Failed to create project");
+            }
         }
         SkootrsCli::Daemon => {
             skootrs::server::rest::run_server(None).await?;
