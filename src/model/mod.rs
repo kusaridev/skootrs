@@ -15,4 +15,3 @@
 
 pub mod security_insights;
 pub mod cd_events;
-pub mod skootrs;

@@ -15,7 +15,6 @@
 
 use std::{error::Error, result::Result};
 
-use serde::de::DeserializeOwned;
 use tracing::info;
 
 use crate::{
@@ -28,8 +27,7 @@ pub struct InitializeOptions {
     pub local_path: String,
 }
 
-#[derive(Debug)]
-pub struct UninitializedProject<T: UninitializedRepo + DeserializeOwned, E: Ecosystem + DeserializeOwned> {
+pub struct UninitializedProject<T: UninitializedRepo, E: Ecosystem> {
     // TODO: This should take in InitializeOptions
     pub repo: T,
     pub ecosystem: E,
@@ -37,7 +35,7 @@ pub struct UninitializedProject<T: UninitializedRepo + DeserializeOwned, E: Ecos
     pub config_bundle: Box<dyn ConfigBundle>
 }
 
-pub struct InitializedProject<T: InitializedRepo + DeserializeOwned, E: Ecosystem + DeserializeOwned> {
+pub struct InitializedProject<T: InitializedRepo, E: Ecosystem> {
     pub repo: T,
     pub ecosystem: E,
     pub source: Source,
@@ -53,7 +51,7 @@ pub struct InitializedProject<T: InitializedRepo + DeserializeOwned, E: Ecosyste
 /// # Arguments
 ///
 /// * `options` - The options for initializing the project.
-impl<T: UninitializedRepo + DeserializeOwned, E: Ecosystem + DeserializeOwned > UninitializedProject<T, E> {
+impl<T: UninitializedRepo, E: Ecosystem> UninitializedProject<T, E> {
     pub async fn initialize(
         &self,
         options: InitializeOptions,

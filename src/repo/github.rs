@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*use std::{process::Command, error::Error, str::FromStr};
+use std::{process::Command, error::Error, str::FromStr};
 
 use serde::{Serialize, Deserialize};
 use tracing::info;
@@ -42,7 +42,7 @@ pub enum GithubUser {
 }
 
 impl GithubUser {
-    pub fn get_name(&self) -> String {
+    fn get_name(&self) -> String {
         match self {
             GithubUser::User(x) => x.to_string(),
             GithubUser::Organization(x) => x.to_string(),
@@ -174,4 +174,4 @@ impl InitializedRepo for InitializedGithubRepo {
             self.name
         )
     }
-}*/
+}

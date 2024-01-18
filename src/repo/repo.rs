@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub mod github;
-
 use std::error::Error;
 
-use crate::source::Source;
+use crate::source::source::Source;
 
 /// UnitializedRepo represents a source repo that hasn't been created in its host yet.
 /// e.g. a Github repo that you plan to create.

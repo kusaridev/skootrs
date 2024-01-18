@@ -13,31 +13,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*use std::{process::Command, error::Error};
+use std::{process::Command, error::Error};
 
 use serde::{Serialize, Deserialize};
 use tracing::info;
 use utoipa::ToSchema;
 
-use super::{Ecosystem, maven::MavenParams};
+use super::Ecosystem;
 
 /// Represents the Go ecosystem.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
-pub struct GoParams {
+pub struct Go {
     /// The name of the Go module.
     pub name: String,
     /// The host of the Go module.
     pub host: String,
 }
 
-impl GoParams {
+impl Go {
     /// Returns the module name in the format "{host}/{name}".
     pub fn module(&self) -> String {
         format!("{}/{}", self.host, self.name)
     }
 }
 
-impl Ecosystem for GoParams {
+impl Ecosystem for Go {
     /// Returns an error if the initialization of a Go module at the specified
     /// path fails.
     ///
@@ -61,4 +61,4 @@ impl Ecosystem for GoParams {
             Ok(())
         }
     }
-}*/
+}

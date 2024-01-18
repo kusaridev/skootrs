@@ -21,3 +21,39 @@ use utoipa::ToSchema;
 
 use super::Ecosystem;
 
+/// Represents the Maven ecosystem.
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct Maven {
+    /// The group ID of the Maven project.
+    pub group_id: String,
+    /// The artifact ID of the Maven project.
+    pub artifact_id: String,
+}
+
+impl Ecosystem for Maven {
+    /// Returns `Ok(())` if the Maven project initialization is successful, 
+    /// otherwise returns an error.
+    ///
+    /// # Arguments
+    ///
+    /// * `path` - The path where the Maven project should be initialized.
+    fn initialize(&self, path: String) -> Result<(), Box<dyn Error>> {
+        let output = Command::new("mvn")
+            .arg("archetype:generate")
+            .arg(format!("-DgroupId={}", self.group_id))
+            .arg(format!("-DartifactId={}", self.artifact_id))
+            .arg("-DarchetypeArtifactId=maven-archetype-quickstart")
+            .arg("-DinteractiveMode=false")
+            .current_dir(format!("{}/{}", path, self.artifact_id))
+            .output()?;
+        if !output.status.success() {
+            Err(Box::new(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Failed to run mvn generate",
+            )))
+        } else {
+            info!("Initialized maven project for {}", self.artifact_id);
+            Ok(())
+        }
+    }
+}

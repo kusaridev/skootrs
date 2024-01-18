@@ -21,15 +21,14 @@ pub mod ecosystem;
 pub mod source;
 pub mod config;
 pub mod server;
-pub mod statestore;
-pub mod service;
 
 use bundle::{EcosystemInitConfig, GithubBundle};
 use config::DefaultConfigBundle;
+use ecosystem::{maven::Maven, go::Go};
 use inquire::Text;
-use model::skootrs::{MavenParams, GoParams, GithubRepoParams, ProjectParams, GithubUser, RepoParams, EcosystemParams};
 use octocrab::Page;
 use project::{UninitializedProject, InitializeOptions};
+use repo::github::{UninitializedGithubRepo, GithubUser};
 use tracing::info;
 use std::error::Error;
 use crate::bundle::Bundle;
@@ -77,38 +76,25 @@ pub async fn new_create() -> std::result::Result<(), Box<dyn Error>> {
     match language.prompt()? {
         "Go" => {
             // TODO: support more than just github
-            let go_params = GoParams { name: name.clone(), host: format!("github.com/{}", organization) };
-            /*let project_config = ProjectParams { 
-                repo: GithubRepoParams { name: name.clone(), description, organization: gh_org }, 
+            let go_config = Go { name: name.clone(), host: format!("github.com/{}", organization) };
+            let project_config = UninitializedProject { 
+                repo: UninitializedGithubRepo { name: name.clone(), description, organization: gh_org }, 
                 ecosystem: go_config, 
                 name: name.clone(),
-                //config_bundle: Box::new(DefaultConfigBundle{}),
-                repo_params: todo!(),
-                ecosystem_params: todo!(),
-            };*/
-            let project_params = ProjectParams {
-                name,
-                repo_params: RepoParams::Github(
-                    GithubRepoParams {
-                        name,
-                        description,
-                        organization: gh_org,
-                    }
-                ),
-                ecosystem_params: EcosystemParams::Go(go_params),
+                config_bundle: Box::new(DefaultConfigBundle{})
             };
 
-            let _initialized_project = project_params.initialize(options).await?;
+            let _initialized_project = project_config.initialize(options).await?;
         },
 
         "Maven" => {
-            let maven_config = MavenParams { 
+            let maven_config = Maven { 
                 group_id: format!("com.{}.{}", organization, name),
                 artifact_id: name.clone()
             };
 
             let project_config = UninitializedProject {
-                repo: GithubRepoParams { name: name.clone(), description, organization: gh_org },
+                repo: UninitializedGithubRepo { name: name.clone(), description, organization: gh_org },
                 ecosystem: maven_config,
                 name: name.clone(),
                 config_bundle: Box::new(DefaultConfigBundle{})

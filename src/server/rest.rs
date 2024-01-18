@@ -7,7 +7,7 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::MavenParams, go::GoParams}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::Source};
+use crate::{server::project::{ProjectStore, APISupportedInitializedProject, APISupportedCreateProjectParams, ErrorResponse, APISupportedRepo, APISupportedEcosystem, APISupportedRepoParams, APISupportedEcosystemParams}, ecosystem::{maven::Maven, go::Go}, repo::github::{UninitializedGithubRepo, GithubUser, InitializedGithubRepo}, source::Source};
 
 pub struct SkootrsWebConfig {
 
@@ -28,8 +28,8 @@ pub async fn run_server(_config: Option<SkootrsWebConfig>) -> std::io::Result<()
                 APISupportedEcosystem,
                 APISupportedRepoParams,
                 APISupportedEcosystemParams,
-                MavenParams,
-                GoParams,
+                Maven,
+                Go,
                 UninitializedGithubRepo,
                 GithubUser,
                 InitializedGithubRepo,
