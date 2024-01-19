@@ -16,7 +16,7 @@
 use std::error::Error;
 
 use clap::Parser;
-use skootrs::create;
+use skootrs::{create, dump, get_facet};
 use tracing::error;
 
 
@@ -27,7 +27,11 @@ enum SkootrsCli{
     #[command(name = "create")]
     Create,
     #[command(name = "daemon")]
-    Daemon
+    Daemon,
+    #[command(name = "dump")]
+    Dump,
+    #[command(name = "get-facet")]
+    GetFacet,
 }
 
 #[tokio::main]
@@ -53,10 +57,20 @@ async fn main() -> std::result::Result<(), Box<dyn Error>> {
             if let Err(ref error) = create().await {
                 error!(error = error.as_ref(), "Failed to create project");
             }
-        }
+        },
         SkootrsCli::Daemon => {
             skootrs::server::rest::run_server(None).await?;
-        }
+        },
+        SkootrsCli::Dump => {
+            if let Err(ref error) = dump().await {
+                error!(error = error.as_ref(), "Failed to get info");
+            }
+        },
+        SkootrsCli::GetFacet => {
+            if let Err(ref error) = get_facet().await {
+                error!(error = error.as_ref(), "Failed to get facet");
+            }
+        },
     };
     Ok(())
 }

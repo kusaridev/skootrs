@@ -13,8 +13,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*use crate::project::InitializedProject;
+use std::error::Error;
 
-pub trait StateStore {
-    fn set_project(&self, id: String, project: InitializedProject<>)
-}*/
+use surrealdb::{engine::local::{Db, RocksDb}, Surreal};
+
+use crate::model::skootrs::InitializedProject;
+
+#[derive(Debug)]
+pub struct SurrealProjectStateStore {
+    pub db: Surreal<Db>
+}
+
+impl SurrealProjectStateStore {
+    pub async fn new() -> Result<Self, Box<dyn Error>> {
+        let db = Surreal::new::<RocksDb>("state.db").await?;
+        db.use_ns("kusaridev").use_db("skootrs").await?;
+        Ok(SurrealProjectStateStore {
+            db
+        })
+    }
+
+    pub async fn create(&self, project: InitializedProject) -> Result<Option<InitializedProject>, Box<dyn Error>> {
+        let created = self.db
+            .create(("project", project.repo.full_url()))
+            .content(project)
+            .await?;
+        Ok(created)
+    }
+
+    pub async fn select(&self, repo_url: String) -> Result<Option<InitializedProject>, Box<dyn Error>> {
+        let record = self.db
+            .select(("project", repo_url))
+            .await?;
+        Ok(record)
+    }
+
+    pub async fn select_all(&self) -> Result<Vec<InitializedProject>, Box<dyn Error>> {
+        let records = self.db
+            .select("project")
+            .await?;
+        Ok(records)
+    }
+}

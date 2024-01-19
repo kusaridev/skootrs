@@ -28,9 +28,7 @@ use tracing::debug;
 static DEFAULT_SOURCE_FACETS: [SupportedFacetType; 2] = [
     SupportedFacetType::Readme,
     SupportedFacetType::SecurityInsights,
-];
-
-pub trait ProjectService {
+];pub trait ProjectService {
     fn initialize(&self, params: ProjectParams) -> impl std::future::Future<Output = Result<InitializedProject, Box<dyn Error>>> + Send;
 }
 
