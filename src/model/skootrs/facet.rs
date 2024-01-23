@@ -13,19 +13,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::fmt;
+
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
 
 use super::{InitializedSource, InitializedRepo, InitializedEcosystem};
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
-pub enum Facet {
+pub enum InitializedFacet {
     SourceFile(SourceFileFacet),
+    SourceBundle(SourceBundleFacet),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum FacetParams {
     SourceFile(SourceFileFacetParams),
+    SourceBundle(SourceBundleFacetParams),
+}
+
+/// This is required to create an ordering of what facets get applied
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct FacetSetParams {
+    pub facets_params: Vec<FacetParams>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
@@ -40,21 +50,62 @@ pub struct CommonFacetParams {
 pub struct SourceFileFacet {
     pub name: String,
     pub path: String,
+    pub facet_type: SupportedFacetType,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct SourceFileFacetParams {
-    pub name: String,
-    pub path: String,
+    //pub name: String,
+    //pub path: String,
 
     pub common: CommonFacetParams,
     pub facet_type: SupportedFacetType,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct SourceFileContent {
+    pub name: String,
+    pub path: String,
+    pub content: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct SourceBundleFacet {
+    pub source_files: Vec<SourceFileContent>,
+    pub facet_type: SupportedFacetType,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct SourceBundleFacetParams {
+    pub common: CommonFacetParams,
+    pub facet_type: SupportedFacetType,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema, PartialEq, Eq)]
 pub enum SupportedFacetType {
     Readme,
     SecurityInsights,
     SLSABuild,
     SBOMGenerator,
+    License,
+    StaticCodeAnalysis,
+    Gitignore,
+    BranchProtection,
+    CodeReview,
+    DependencyUpdateTool,
+    Fuzzing,
+    PublishPackages,
+    PinnedDependencies,
+    SAST,
+    SecurityPolicy,
+    VulnerabilityScanner,
+    GUACForwardingConfig,
+    Allstar,
+    Scorecard,
+}
+
+impl fmt::Display for SupportedFacetType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
+    }
 }

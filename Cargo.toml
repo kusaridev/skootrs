@@ -34,3 +34,16 @@ path = "src/lib.rs"
 [[bin]]
 name = "skootrs"
 path = "src/bin/bin.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+enum_glob_use = "deny"
+pedantic = "deny"
+nursery = "deny"
+unwrap_used = "deny"
+
+#[profile.dev]
+#debug = 0
+#incremental = true
