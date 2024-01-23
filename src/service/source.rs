@@ -35,6 +35,7 @@ pub trait SourceService {
         name: String,
         contents: C,
     ) -> Result<(), Box<dyn Error>>;
+    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, Box<dyn Error>>;
 }
 
 #[derive(Debug)]
@@ -86,10 +87,17 @@ impl SourceService for LocalSourceService {
     ) -> Result<(), Box<dyn Error>> {
         let full_path = Path::new(&source.path).join(&path);
         // Ensure path exists
+        info!("Creating path {:?}", &full_path);
         fs::create_dir_all(&full_path)?;
         let complete_path = full_path.join(name);
         fs::write(complete_path, contents)?;
         debug!("{:?} file written", &full_path);
         Ok(())
+    }
+
+    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, Box<dyn Error>> {
+        let full_path = Path::new(&source.path).join(&path).join(&name);
+        let contents = fs::read_to_string(full_path)?;
+        Ok(contents)
     }
 }

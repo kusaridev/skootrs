@@ -17,17 +17,28 @@
 
 pub mod model;
 pub mod server;
-pub mod statestore;
 pub mod service;
+pub mod statestore;
 
 use inquire::Text;
-use model::skootrs::{facet::SourceFileFacet, EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectParams, RepoParams, SourceParams, SUPPORTED_ECOSYSTEMS};
+use model::skootrs::{
+    EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams,
+    ProjectParams, RepoParams, SourceParams, SUPPORTED_ECOSYSTEMS,
+};
 use octocrab::Page;
-use service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService};
+use service::{
+    ecosystem::LocalEcosystemService,
+    facet::LocalFacetService,
+    project::{LocalProjectService, ProjectService},
+    repo::LocalRepoService,
+    source::{LocalSourceService, SourceService},
+};
 use std::{collections::HashMap, error::Error};
 
+use crate::model::skootrs::facet::InitializedFacet;
+
 /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.
-/// 
+///
 /// Creates a new skootrs project by prompting the user for repository details and language selection.
 /// The project can be created for either Go or Maven ecosystems right now.
 /// The project is created in Github, cloned down, and then initialized along with any other security supporting
@@ -52,10 +63,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     )
     .prompt()?;
 
-    let language = inquire::Select::new(
-        "Select a language",
-        SUPPORTED_ECOSYSTEMS.to_vec(),
-    );
+    let language = inquire::Select::new("Select a language", SUPPORTED_ECOSYSTEMS.to_vec());
 
     let gh_org = match organization {
         x if x == user => GithubUser::User(x.to_string()),
@@ -65,16 +73,17 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     let initialized_project: InitializedProject = match language.prompt()? {
         "Go" => {
             // TODO: support more than just github
-            let go_params = GoParams { name: name.clone(), host: format!("github.com/{}", organization) };
+            let go_params = GoParams {
+                name: name.clone(),
+                host: format!("github.com/{}", organization),
+            };
             let project_params = ProjectParams {
                 name: name.clone(),
-                repo_params: RepoParams::Github(
-                    GithubRepoParams {
-                        name,
-                        description,
-                        organization: gh_org,
-                    }
-                ),
+                repo_params: RepoParams::Github(GithubRepoParams {
+                    name,
+                    description,
+                    organization: gh_org,
+                }),
                 ecosystem_params: EcosystemParams::Go(go_params),
                 source_params: SourceParams {
                     parent_path: "/tmp".to_string(), // FIXME: This should be configurable
@@ -88,23 +97,21 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
             };
 
             local_project_service.initialize(project_params).await?
-        },
+        }
 
         "Maven" => {
-            let maven_params = MavenParams { 
+            let maven_params = MavenParams {
                 group_id: format!("com.{}.{}", organization, name),
-                artifact_id: name.clone()
+                artifact_id: name.clone(),
             };
 
             let project_params = ProjectParams {
                 name: name.clone(),
-                repo_params: RepoParams::Github(
-                    GithubRepoParams {
-                        name,
-                        description,
-                        organization: gh_org,
-                    }
-                ),
+                repo_params: RepoParams::Github(GithubRepoParams {
+                    name,
+                    description,
+                    organization: gh_org,
+                }),
                 ecosystem_params: EcosystemParams::Maven(maven_params),
                 source_params: SourceParams {
                     parent_path: "/tmp".to_string(), // FIXME: This should be configurable
@@ -133,21 +140,34 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
 
 pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
     let projects = get_all().await?;
-    let repo_to_project: HashMap<String, &InitializedProject> = projects.iter().map(|p| (p.repo.full_url(), p)).collect::<HashMap<_,_>>();
+    let repo_to_project: HashMap<String, &InitializedProject> = projects
+        .iter()
+        .map(|p| (p.repo.full_url(), p))
+        .collect::<HashMap<_, _>>();
     let selected_project = inquire::Select::new(
         "Select a project",
         repo_to_project.keys().collect::<Vec<_>>(),
     )
     .prompt()?;
 
-    // FIXME: Support more than SouceFileFacet
-    let facet_to_project: HashMap<String, &SourceFileFacet> = repo_to_project.get(selected_project)
-        .ok_or_else(|| Box::<dyn Error>::from("Failed to get selected project"))?
-        .facets.iter()
+    let project = repo_to_project
+        .get(selected_project)
+        .ok_or_else(|| Box::<dyn Error>::from("Failed to get selected project"))?;
+
+    let facet_to_project: HashMap<String, InitializedFacet> = project
+        .facets
+        .iter()
         .filter_map(|f| match f {
-            model::skootrs::facet::Facet::SourceFile(f) => Some((f.name.clone(), f)),
+            InitializedFacet::SourceFile(f) => Some((
+                f.facet_type.to_string(),
+                InitializedFacet::SourceFile(f.clone()),
+            )),
+            InitializedFacet::SourceBundle(f) => Some((
+                f.facet_type.to_string(),
+                InitializedFacet::SourceBundle(f.clone()),
+            )),
         })
-        .collect::<HashMap<_,_>>();
+        .collect::<HashMap<_, _>>();
 
     let selected_facet = inquire::Select::new(
         "Select a facet",
@@ -155,20 +175,23 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
     )
     .prompt()?;
 
-    let facet = facet_to_project.get(selected_facet)
+    let facet = facet_to_project
+        .get(selected_facet)
         .ok_or_else(|| Box::<dyn Error>::from("Failed to get selected facet"))?;
 
-    let facet_path = format!("{}/{}", facet.path, facet.name);
+    let facet_content = get_facet_content(facet, project)?;
 
-    let content = std::fs::read_to_string(facet_path)?;
-    println!("{}", content);
+    //let facet_path = format!("{}/{}", facet.path, facet.name);
+
+    //let content = std::fs::read_to_string(facet_path)?;
+    println!("{}", facet_content);
 
     Ok(())
 }
 
 pub async fn dump() -> std::result::Result<(), Box<dyn Error>> {
     let projects = get_all().await?;
-    println!("{}", serde_json::to_string_pretty(&projects).unwrap());
+    println!("{}", serde_json::to_string_pretty(&projects)?);
     Ok(())
 }
 
@@ -176,4 +199,26 @@ async fn get_all() -> std::result::Result<Vec<InitializedProject>, Box<dyn Error
     let state_store = statestore::SurrealProjectStateStore::new().await?;
     let projects = state_store.select_all().await?;
     Ok(projects)
+}
+
+fn get_facet_content(
+    facet: &InitializedFacet,
+    project: &InitializedProject,
+) -> std::result::Result<String, Box<dyn Error>> {
+    match facet {
+        InitializedFacet::SourceFile(f) => {
+            let source_service = LocalSourceService {};
+            let content = source_service.read_file(&project.source, &f.path, f.name.clone())?;
+            Ok(content)
+        }
+        InitializedFacet::SourceBundle(f) => {
+            let source_service = LocalSourceService {};
+            let content = f
+                .source_files
+                .iter()
+                .map(|f| source_service.read_file(&project.source, &f.path, f.name.clone()))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(content.join("\n"))
+        }
+    }
 }

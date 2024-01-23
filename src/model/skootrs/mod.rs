@@ -18,7 +18,7 @@ pub mod facet;
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
 
-use self::facet::Facet;
+use self::facet::InitializedFacet;
 
 /// The general structure of the models here is the struct names take the form:
 /// <Thing>Params reflecting the parameters for something to be created or initilized, like the parameters
@@ -44,7 +44,7 @@ pub struct InitializedProject {
     pub repo: InitializedRepo,
     pub ecosystem: InitializedEcosystem,
     pub source: InitializedSource,
-    pub facets: Vec<Facet>,
+    pub facets: Vec<InitializedFacet>,
 }
 
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]

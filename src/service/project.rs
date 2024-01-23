@@ -19,16 +19,12 @@ use std::error::Error;
 
 
 
-use crate::{model::skootrs::{ProjectParams, InitializedProject, InitializedSource, facet::{SupportedFacetType, FacetParams, SourceFileFacetParams, CommonFacetParams}}, service::facet::RootFaceService};
+use crate::{model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams}, service::facet::{FacetSetParamsGenerator, RootFacetService}};
 
 use super::{repo::{LocalRepoService, RepoService}, ecosystem::{LocalEcosystemService, EcosystemService}, source::{LocalSourceService, SourceService}, facet::LocalFacetService};
 use tracing::debug;
 
-// TODO: Where should this go?
-static DEFAULT_SOURCE_FACETS: [SupportedFacetType; 2] = [
-    SupportedFacetType::Readme,
-    SupportedFacetType::SecurityInsights,
-];pub trait ProjectService {
+pub trait ProjectService {
     fn initialize(&self, params: ProjectParams) -> impl std::future::Future<Output = Result<InitializedProject, Box<dyn Error>>> + Send;
 }
 
@@ -49,27 +45,20 @@ impl ProjectService for LocalProjectService {
         debug!("Starting ecosystem initialization");
         let initialized_ecosystem = self.ecosystem_service.initialize(params.ecosystem_params.clone(), initialized_source.clone())?;
         debug!("Starting facet initialization");
-        let initialized_facets = DEFAULT_SOURCE_FACETS.iter().map(|facet_type| {
-            let params = params.clone();
-            let name = match facet_type {
-                SupportedFacetType::Readme => "README.md".to_string(),
-                SupportedFacetType::SecurityInsights => "SECURITY_INSIGHTS.yml".to_string(),
-                SupportedFacetType::SLSABuild => todo!("Not supported yet"),
-                SupportedFacetType::SBOMGenerator => todo!("Not supported yet"),
-            };
-            let facet_params = FacetParams::SourceFile(SourceFileFacetParams {
-                name: name,
-                path: params.source_params.path(params.name.clone()),
-                common: CommonFacetParams {
-                    project_name: params.name.clone(),
-                    source: initialized_source.clone(),
-                    repo: initialized_repo.clone(),
-                    ecosystem: initialized_ecosystem.clone(),
-                },
-                facet_type: facet_type.clone(),
-            });
-            self.facet_service.initialize(facet_params)
-        }).collect::<Result<Vec<_>, _>>()?;
+        // TODO: This is ugly and this should probably be configured somewhere better, preferably outside of code.
+        let facet_set_params_generator = FacetSetParamsGenerator {};
+        let common_params = CommonFacetParams {
+            project_name: params.name.clone(),
+            source: initialized_source.clone(),
+            repo: initialized_repo.clone(),
+            ecosystem: initialized_ecosystem.clone(),
+        };
+        let facet_set_params = facet_set_params_generator.generate_default(common_params)?;
+        let initialized_facets = self.facet_service.initialize_all(facet_set_params)?;
+        self.source_service.commit_and_push_changes(initialized_source.clone(), "Initialized project".to_string())?;
+
+        debug!("Completed project initialization");
+
         Ok(InitializedProject {
             repo: initialized_repo,
             ecosystem: initialized_ecosystem,
