@@ -26,6 +26,7 @@ utoipa-redoc = { version = "2.0.0", features = ["actix-web"] }
 utoipa-rapidoc = { version = "2.0.0", features = ["actix-web"] }
 utoipa-swagger-ui = { version = "5.0.0", features = ["actix-web"] }
 surrealdb = { version = "1.1.1", features = ["kv-rocksdb"] }
+askama = "0.12.1"
 
 [lib]
 name = "skootrs"
