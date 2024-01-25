@@ -103,7 +103,7 @@ impl SourceBundleFacetService for LocalFacetService {
             SupportedFacetType::StaticCodeAnalysis => todo!(),
             SupportedFacetType::BranchProtection => todo!(),
             SupportedFacetType::CodeReview => todo!(),
-            SupportedFacetType::Fuzzing => todo!(),
+            SupportedFacetType::Fuzzing => language_specific_source_bundle_content_handler.generate_content(&params)?,
             SupportedFacetType::PublishPackages => todo!(),
             SupportedFacetType::PinnedDependencies => todo!(),
             SupportedFacetType::SAST => todo!(),
@@ -238,7 +238,7 @@ impl DefaultSourceBundleContentHandler {
     ) -> Result<SourceBundleContent, Box<dyn Error>> {
         // TODO: Turn this into a real default security policy
         #[derive(Template)]
-        #[template(path = "SECURITY.md", escape = "none")]
+        #[template(path = "SECURITY.prerelease.md", escape = "none")]
         struct SecurityPolicyTemplateParams {}
 
         let security_policy_template_params = SecurityPolicyTemplateParams {};
@@ -355,6 +355,7 @@ impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
             SupportedFacetType::Gitignore => self.generate_gitignore_content(params),
             SupportedFacetType::SLSABuild => self.generate_slsa_build_content(params),
             SupportedFacetType::DependencyUpdateTool => self.generate_dependency_update_tool_content(params),
+            SupportedFacetType::Fuzzing => self.generate_fuzzing_content(params),
             _ => todo!("Not implemented yet"),
         }
     }
@@ -429,6 +430,33 @@ impl GoGithubSourceBundleContentHandler {
             facet_type: SupportedFacetType::DependencyUpdateTool,
         })
     }
+
+    fn generate_fuzzing_content(
+        &self,
+        params: &SourceBundleFacetParams,
+    ) -> Result<SourceBundleContent, Box<dyn Error>> {
+        #[derive(Template)]
+        #[template(path = "cifuzz.yml", escape = "none")]
+        struct FuzzingTemplateParams {
+            project_name: String,
+            language: String
+        }
+
+        let fuzzing_template_params = FuzzingTemplateParams {
+            project_name: params.common.project_name.clone(),
+            language: "go".to_string(),
+        };
+        let content = fuzzing_template_params.render()?;
+
+        Ok(SourceBundleContent {
+            source_files_content: vec![SourceFileContent {
+                name: "cifuzz.yml".to_string(),
+                path: ".github/workflows/".to_string(),
+                content,
+            }],
+            facet_type: SupportedFacetType::Fuzzing,
+        })
+    }
 }
 
 pub struct FacetSetParamsGenerator {}
@@ -450,7 +478,8 @@ impl FacetSetParamsGenerator {
             // SBOMGenerator, // Handled by the SLSABuild facet
             // StaticCodeAnalysis,
             DependencyUpdateTool,
-            //Fuzzing,
+            Fuzzing,
+            Scorecard,
             // PublishPackages,
             // PinnedDependencies,
             // SAST,
@@ -475,8 +504,3 @@ impl FacetSetParamsGenerator {
     }
 }
 
-pub struct SourceFileContentParams {
-    pub name: String,
-    pub path: String,
-    pub content: String,
-}
