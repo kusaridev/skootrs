@@ -27,12 +27,13 @@ on:
 
 permissions:
   actions: read # for detecting the Github Actions environment.
-  contents: write # To upload assets to release.
-  packages: write # To publish container images to GHCR
-  id-token: write # needed for signing the images with GitHub OIDC Token
 
 jobs:
   goreleaser:
+    permissions:
+      contents: write # To upload assets to release.
+      packages: write # To publish container images to GHCR
+      id-token: write # needed for signing the images with GitHub OIDC Token
     runs-on: ubuntu-latest
     outputs:
       hashes: ${{ steps.hash.outputs.hashes }}
