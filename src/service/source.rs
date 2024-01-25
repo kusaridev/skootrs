@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::{error::Error, process::Command, path::Path, fs};
 
 use tracing::{info, debug};
@@ -50,7 +52,7 @@ impl SourceService for LocalSourceService {
         initialized_repo: InitializedRepo,
     ) -> Result<InitializedSource, Box<dyn Error>> {
         let repo_service = LocalRepoService {};
-        Ok(repo_service.clone_local(initialized_repo, params.parent_path)?)
+        repo_service.clone_local(initialized_repo, params.parent_path)
     }
 
     fn commit_and_push_changes(&self, source: InitializedSource, message: String) -> Result<(), Box<dyn Error>> {
@@ -96,7 +98,7 @@ impl SourceService for LocalSourceService {
     }
 
     fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, Box<dyn Error>> {
-        let full_path = Path::new(&source.path).join(&path).join(&name);
+        let full_path = Path::new(&source.path).join(&path).join(name);
         let contents = fs::read_to_string(full_path)?;
         Ok(contents)
     }

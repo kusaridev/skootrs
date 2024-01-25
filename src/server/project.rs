@@ -56,8 +56,6 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
     )
 )]
 pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<ProjectStore>) -> Result<impl Responder, Box<dyn Error>> {
-    let mut projects = project_store.projects.lock().await;
-
     // TODO: This should be initialized elsewhere
     let project_service = LocalProjectService {
         repo_service: LocalRepoService {},
@@ -67,7 +65,7 @@ pub(super) async fn create_project(params: Json<ProjectParams>, project_store: D
     };
 
     let initialized_project = project_service.initialize(params.into_inner()).await?;
-    projects.push(initialized_project.clone());
+    project_store.projects.lock().await.push(initialized_project.clone());
     Ok(HttpResponse::Ok().json(initialized_project))
 }
 

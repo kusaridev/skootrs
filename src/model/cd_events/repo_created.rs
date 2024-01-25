@@ -20,6 +20,8 @@
 #![allow(clippy::needless_lifetimes)]
 #![allow(clippy::match_single_binding)]
 #![allow(clippy::clone_on_copy)]
+#![allow(clippy::return_self_not_must_use)]
+#![allow(clippy::default_trait_access)]
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -42,13 +44,13 @@ pub struct RepositoryCreatedEvent {
     pub custom_data_content_type: Option<String>,
     pub subject: RepositoryCreatedEventSubject,
 }
-impl From<&RepositoryCreatedEvent> for RepositoryCreatedEvent {
-    fn from(value: &RepositoryCreatedEvent) -> Self {
+impl From<&Self> for RepositoryCreatedEvent {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl RepositoryCreatedEvent {
-    pub fn builder() -> builder::RepositoryCreatedEvent {
+    #[must_use] pub fn builder() -> builder::RepositoryCreatedEvent {
         builder::RepositoryCreatedEvent::default()
     }
 }
@@ -62,13 +64,13 @@ pub struct RepositoryCreatedEventContext {
     pub type_: RepositoryCreatedEventContextType,
     pub version: RepositoryCreatedEventContextVersion,
 }
-impl From<&RepositoryCreatedEventContext> for RepositoryCreatedEventContext {
-    fn from(value: &RepositoryCreatedEventContext) -> Self {
+impl From<&Self> for RepositoryCreatedEventContext {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl RepositoryCreatedEventContext {
-    pub fn builder() -> builder::RepositoryCreatedEventContext {
+    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventContext {
         builder::RepositoryCreatedEventContext::default()
     }
 }
@@ -85,15 +87,15 @@ impl From<RepositoryCreatedEventContextId> for String {
         value.0
     }
 }
-impl From<&RepositoryCreatedEventContextId> for RepositoryCreatedEventContextId {
-    fn from(value: &RepositoryCreatedEventContextId) -> Self {
+impl From<&Self> for RepositoryCreatedEventContextId {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr for RepositoryCreatedEventContextId {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if value.len() < 1usize {
+        if value.is_empty() {
             return Err("shorter than 1 characters");
         }
         Ok(Self(value.to_string()))
@@ -132,8 +134,8 @@ pub enum RepositoryCreatedEventContextType {
     #[serde(rename = "dev.cdevents.repository.created.0.1.1")]
     DevCdeventsRepositoryCreated011,
 }
-impl From<&RepositoryCreatedEventContextType> for RepositoryCreatedEventContextType {
-    fn from(value: &RepositoryCreatedEventContextType) -> Self {
+impl From<&Self> for RepositoryCreatedEventContextType {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -175,7 +177,7 @@ impl std::convert::TryFrom<String> for RepositoryCreatedEventContextType {
 }
 impl Default for RepositoryCreatedEventContextType {
     fn default() -> Self {
-        RepositoryCreatedEventContextType::DevCdeventsRepositoryCreated011
+        Self::DevCdeventsRepositoryCreated011
     }
 }
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, ToSchema)]
@@ -191,15 +193,15 @@ impl From<RepositoryCreatedEventContextVersion> for String {
         value.0
     }
 }
-impl From<&RepositoryCreatedEventContextVersion> for RepositoryCreatedEventContextVersion {
-    fn from(value: &RepositoryCreatedEventContextVersion) -> Self {
+impl From<&Self> for RepositoryCreatedEventContextVersion {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr for RepositoryCreatedEventContextVersion {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if value.len() < 1usize {
+        if value.is_empty() {
             return Err("shorter than 1 characters");
         }
         Ok(Self(value.to_string()))
@@ -239,8 +241,8 @@ pub enum RepositoryCreatedEventCustomData {
     Variant0(std::collections::HashMap<String, serde_json::Value>),
     Variant1(String),
 }
-impl From<&RepositoryCreatedEventCustomData> for RepositoryCreatedEventCustomData {
-    fn from(value: &RepositoryCreatedEventCustomData) -> Self {
+impl From<&Self> for RepositoryCreatedEventCustomData {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -261,13 +263,13 @@ pub struct RepositoryCreatedEventSubject {
     #[serde(rename = "type")]
     pub type_: RepositoryCreatedEventSubjectType,
 }
-impl From<&RepositoryCreatedEventSubject> for RepositoryCreatedEventSubject {
-    fn from(value: &RepositoryCreatedEventSubject) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubject {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl RepositoryCreatedEventSubject {
-    pub fn builder() -> builder::RepositoryCreatedEventSubject {
+    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventSubject {
         builder::RepositoryCreatedEventSubject::default()
     }
 }
@@ -281,13 +283,13 @@ pub struct RepositoryCreatedEventSubjectContent {
     #[serde(rename = "viewUrl", default, skip_serializing_if = "Option::is_none")]
     pub view_url: Option<String>,
 }
-impl From<&RepositoryCreatedEventSubjectContent> for RepositoryCreatedEventSubjectContent {
-    fn from(value: &RepositoryCreatedEventSubjectContent) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubjectContent {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl RepositoryCreatedEventSubjectContent {
-    pub fn builder() -> builder::RepositoryCreatedEventSubjectContent {
+    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventSubjectContent {
         builder::RepositoryCreatedEventSubjectContent::default()
     }
 }
@@ -304,15 +306,15 @@ impl From<RepositoryCreatedEventSubjectContentName> for String {
         value.0
     }
 }
-impl From<&RepositoryCreatedEventSubjectContentName> for RepositoryCreatedEventSubjectContentName {
-    fn from(value: &RepositoryCreatedEventSubjectContentName) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubjectContentName {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr for RepositoryCreatedEventSubjectContentName {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if value.len() < 1usize {
+        if value.is_empty() {
             return Err("shorter than 1 characters");
         }
         Ok(Self(value.to_string()))
@@ -359,15 +361,15 @@ impl From<RepositoryCreatedEventSubjectContentUrl> for String {
         value.0
     }
 }
-impl From<&RepositoryCreatedEventSubjectContentUrl> for RepositoryCreatedEventSubjectContentUrl {
-    fn from(value: &RepositoryCreatedEventSubjectContentUrl) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubjectContentUrl {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr for RepositoryCreatedEventSubjectContentUrl {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if value.len() < 1usize {
+        if value.is_empty() {
             return Err("shorter than 1 characters");
         }
         Ok(Self(value.to_string()))
@@ -414,15 +416,15 @@ impl From<RepositoryCreatedEventSubjectId> for String {
         value.0
     }
 }
-impl From<&RepositoryCreatedEventSubjectId> for RepositoryCreatedEventSubjectId {
-    fn from(value: &RepositoryCreatedEventSubjectId) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubjectId {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr for RepositoryCreatedEventSubjectId {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if value.len() < 1usize {
+        if value.is_empty() {
             return Err("shorter than 1 characters");
         }
         Ok(Self(value.to_string()))
@@ -461,8 +463,8 @@ pub enum RepositoryCreatedEventSubjectType {
     #[serde(rename = "repository")]
     Repository,
 }
-impl From<&RepositoryCreatedEventSubjectType> for RepositoryCreatedEventSubjectType {
-    fn from(value: &RepositoryCreatedEventSubjectType) -> Self {
+impl From<&Self> for RepositoryCreatedEventSubjectType {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -502,7 +504,7 @@ impl std::convert::TryFrom<String> for RepositoryCreatedEventSubjectType {
 }
 impl Default for RepositoryCreatedEventSubjectType {
     fn default() -> Self {
-        RepositoryCreatedEventSubjectType::Repository
+        Self::Repository
     }
 }
 pub mod builder {
@@ -531,7 +533,7 @@ pub mod builder {
         {
             self.context = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for context: {}", e));
+                .map_err(|e| format!("error converting supplied value for context: {e}"));
             self
         }
         pub fn custom_data<T>(mut self, value: T) -> Self
@@ -541,7 +543,7 @@ pub mod builder {
         {
             self.custom_data = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for custom_data: {}", e));
+                .map_err(|e| format!("error converting supplied value for custom_data: {e}"));
             self
         }
         pub fn custom_data_content_type<T>(mut self, value: T) -> Self
@@ -551,8 +553,7 @@ pub mod builder {
         {
             self.custom_data_content_type = value.try_into().map_err(|e| {
                 format!(
-                    "error converting supplied value for custom_data_content_type: {}",
-                    e
+                    "error converting supplied value for custom_data_content_type: {e}"
                 )
             });
             self
@@ -564,7 +565,7 @@ pub mod builder {
         {
             self.subject = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for subject: {}", e));
+                .map_err(|e| format!("error converting supplied value for subject: {e}"));
             self
         }
     }
@@ -616,7 +617,7 @@ pub mod builder {
         {
             self.id = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for id: {}", e));
+                .map_err(|e| format!("error converting supplied value for id: {e}"));
             self
         }
         pub fn source<T>(mut self, value: T) -> Self
@@ -626,7 +627,7 @@ pub mod builder {
         {
             self.source = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for source: {}", e));
+                .map_err(|e| format!("error converting supplied value for source: {e}"));
             self
         }
         pub fn timestamp<T>(mut self, value: T) -> Self
@@ -636,7 +637,7 @@ pub mod builder {
         {
             self.timestamp = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for timestamp: {}", e));
+                .map_err(|e| format!("error converting supplied value for timestamp: {e}"));
             self
         }
         pub fn type_<T>(mut self, value: T) -> Self
@@ -646,7 +647,7 @@ pub mod builder {
         {
             self.type_ = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for type_: {}", e));
+                .map_err(|e| format!("error converting supplied value for type_: {e}"));
             self
         }
         pub fn version<T>(mut self, value: T) -> Self
@@ -656,7 +657,7 @@ pub mod builder {
         {
             self.version = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for version: {}", e));
+                .map_err(|e| format!("error converting supplied value for version: {e}"));
             self
         }
     }
@@ -708,7 +709,7 @@ pub mod builder {
         {
             self.content = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for content: {}", e));
+                .map_err(|e| format!("error converting supplied value for content: {e}"));
             self
         }
         pub fn id<T>(mut self, value: T) -> Self
@@ -718,7 +719,7 @@ pub mod builder {
         {
             self.id = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for id: {}", e));
+                .map_err(|e| format!("error converting supplied value for id: {e}"));
             self
         }
         pub fn source<T>(mut self, value: T) -> Self
@@ -728,7 +729,7 @@ pub mod builder {
         {
             self.source = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for source: {}", e));
+                .map_err(|e| format!("error converting supplied value for source: {e}"));
             self
         }
         pub fn type_<T>(mut self, value: T) -> Self
@@ -738,7 +739,7 @@ pub mod builder {
         {
             self.type_ = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for type_: {}", e));
+                .map_err(|e| format!("error converting supplied value for type_: {e}"));
             self
         }
     }
@@ -788,7 +789,7 @@ pub mod builder {
         {
             self.name = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for name: {}", e));
+                .map_err(|e| format!("error converting supplied value for name: {e}"));
             self
         }
         pub fn owner<T>(mut self, value: T) -> Self
@@ -798,7 +799,7 @@ pub mod builder {
         {
             self.owner = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for owner: {}", e));
+                .map_err(|e| format!("error converting supplied value for owner: {e}"));
             self
         }
         pub fn url<T>(mut self, value: T) -> Self
@@ -808,7 +809,7 @@ pub mod builder {
         {
             self.url = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for url: {}", e));
+                .map_err(|e| format!("error converting supplied value for url: {e}"));
             self
         }
         pub fn view_url<T>(mut self, value: T) -> Self
@@ -818,7 +819,7 @@ pub mod builder {
         {
             self.view_url = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for view_url: {}", e));
+                .map_err(|e| format!("error converting supplied value for view_url: {e}"));
             self
         }
     }

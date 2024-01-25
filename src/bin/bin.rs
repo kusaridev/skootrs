@@ -59,7 +59,9 @@ async fn main() -> std::result::Result<(), Box<dyn Error>> {
             }
         },
         SkootrsCli::Daemon => {
-            skootrs::server::rest::run_server(None).await?;
+            tokio::task::spawn_blocking(|| {
+                skootrs::server::rest::run_server().expect("Failed to start REST Server");
+            }).await.expect("REST Server Task Panicked");
         },
         SkootrsCli::Dump => {
             if let Err(ref error) = dump().await {

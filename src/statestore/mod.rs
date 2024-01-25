@@ -28,7 +28,7 @@ impl SurrealProjectStateStore {
     pub async fn new() -> Result<Self, Box<dyn Error>> {
         let db = Surreal::new::<RocksDb>("state.db").await?;
         db.use_ns("kusaridev").use_db("skootrs").await?;
-        Ok(SurrealProjectStateStore {
+        Ok(Self {
             db
         })
     }

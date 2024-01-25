@@ -44,11 +44,10 @@ use crate::model::skootrs::facet::InitializedFacet;
 /// The project is created in Github, cloned down, and then initialized along with any other security supporting
 /// tasks.
 pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
-    let instance = octocrab::instance();
     let name = Text::new("The name of the repository").prompt()?;
     let description = Text::new("The description of the repository").prompt()?;
-    let user = instance.current().user().await?.login;
-    let Page { items, .. } = instance
+    let user = octocrab::instance().current().user().await?.login;
+    let Page { items, .. } = octocrab::instance()
         .current()
         .list_org_memberships_for_authenticated_user()
         .send()
@@ -75,7 +74,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
             // TODO: support more than just github
             let go_params = GoParams {
                 name: name.clone(),
-                host: format!("github.com/{}", organization),
+                host: format!("github.com/{organization}"),
             };
             let project_params = ProjectParams {
                 name: name.clone(),
@@ -101,7 +100,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
 
         "Maven" => {
             let maven_params = MavenParams {
-                group_id: format!("com.{}.{}", organization, name),
+                group_id: format!("com.{organization}.{name}"),
                 artifact_id: name.clone(),
             };
 
@@ -157,15 +156,15 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
     let facet_to_project: HashMap<String, InitializedFacet> = project
         .facets
         .iter()
-        .filter_map(|f| match f {
-            InitializedFacet::SourceFile(f) => Some((
+        .map(|f| match f {
+            InitializedFacet::SourceFile(f) => (
                 f.facet_type.to_string(),
                 InitializedFacet::SourceFile(f.clone()),
-            )),
-            InitializedFacet::SourceBundle(f) => Some((
+            ),
+            InitializedFacet::SourceBundle(f) => (
                 f.facet_type.to_string(),
                 InitializedFacet::SourceBundle(f.clone()),
-            )),
+            ),
         })
         .collect::<HashMap<_, _>>();
 
@@ -184,7 +183,7 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
     //let facet_path = format!("{}/{}", facet.path, facet.name);
 
     //let content = std::fs::read_to_string(facet_path)?;
-    println!("{}", facet_content);
+    println!("{facet_content}");
 
     Ok(())
 }

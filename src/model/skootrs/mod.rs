@@ -28,9 +28,7 @@ use self::facet::InitializedFacet;
 /// This module is purely focused on the data for skootrs, and not for performing any of the operations. In order to make
 /// it easy for (de)serialization, the structs and impls only contain the logic for the data, and not for the operations,
 /// which falls under service.
-
 // TODO: These categories of structs should be moved to their own modules.
-
 /// Consts for the supported ecosystems, repos, etc. for convenient use by things like the CLI.
 pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = [
     "Go",
@@ -61,15 +59,15 @@ pub enum InitializedRepo {
 }
 
 impl InitializedRepo {
-    pub fn host_url(&self) -> String {
+    #[must_use] pub fn host_url(&self) -> String {
         match self {
-            InitializedRepo::Github(x) => x.host_url(),
+            Self::Github(x) => x.host_url(),
         }
     }
 
-    pub fn full_url(&self) -> String {
+    #[must_use] pub fn full_url(&self) -> String {
         match self {
-            InitializedRepo::Github(x) => x.full_url(),
+            Self::Github(x) => x.full_url(),
         }
     }
 }
@@ -81,11 +79,11 @@ pub struct InitializedGithubRepo {
 }
 
 impl InitializedGithubRepo {
-    pub fn host_url(&self) -> String {
+    #[must_use] pub fn host_url(&self) -> String {
         "https://github.com".into()
     }
 
-    pub fn full_url(&self) -> String {
+    #[must_use] pub fn full_url(&self) -> String {
         format!(
             "{}/{}/{}",
             self.host_url(),
@@ -119,10 +117,10 @@ pub enum GithubUser {
 }
 
 impl GithubUser {
-    pub fn get_name(&self) -> String {
+    #[must_use] pub fn get_name(&self) -> String {
         match self {
-            GithubUser::User(x) => x.to_string(),
-            GithubUser::Organization(x) => x.to_string(),
+            Self::User(x) |
+            Self::Organization(x) => x.to_string(),
         }
     }
 }
@@ -135,11 +133,11 @@ pub struct GithubRepoParams {
 }
 
 impl GithubRepoParams {
-    pub fn host_url(&self) -> String {
+    #[must_use] pub fn host_url(&self) -> String {
         "https://github.com".into()
     }
 
-    pub fn full_url(&self) -> String {
+    #[must_use] pub fn full_url(&self) -> String {
         format!(
             "{}/{}/{}",
             self.host_url(),
@@ -155,7 +153,7 @@ pub struct SourceParams {
 }
 
 impl SourceParams {
-    pub fn path(&self, name: String) -> String {
+    #[must_use] pub fn path(&self, name: &str) -> String {
         format!("{}/{}", self.parent_path, name)
     }
 }
@@ -194,7 +192,7 @@ pub struct InitializedGo {
 
 impl InitializedGo {
     /// Returns the module name in the format "{host}/{name}".
-    pub fn module(&self) -> String {
+    #[must_use] pub fn module(&self) -> String {
         format!("{}/{}", self.host, self.name)
     }
 }
@@ -209,7 +207,7 @@ pub struct InitializedMaven {
 
 impl GoParams {
     /// Returns the module name in the format "{host}/{name}".
-    pub fn module(&self) -> String {
+    #[must_use] pub fn module(&self) -> String {
         format!("{}/{}", self.host, self.name)
     }
 }
