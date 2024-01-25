@@ -14,6 +14,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::{error::Error, process::Command, str::FromStr, sync::Arc};
 
 use chrono::Utc;
@@ -45,10 +47,7 @@ impl RepoService for LocalRepoService {
     fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error>> {
         match initialized_repo {
             InitializedRepo::Github(g) => {
-                let github_repo_handler = GithubRepoHandler {
-                    client: octocrab::instance(),
-                };
-                github_repo_handler.clone_local(g, path)
+                GithubRepoHandler::clone_local(&g, &path)
             },
         }
     }
@@ -74,7 +73,7 @@ impl GithubRepoHandler {
             GithubUser::User(_) => octocrab::instance().post("/user/repos", Some(&new_repo)).await?,
             GithubUser::Organization(name) => {
                 self.client
-                    .post(format!("/orgs/{}/repos", name), Some(&new_repo))
+                    .post(format!("/orgs/{name}/repos"), Some(&new_repo))
                     .await?
             }
         };
@@ -112,22 +111,23 @@ impl GithubRepoHandler {
         })
     }
 
-    fn clone_local(&self, initialized_github_repo: InitializedGithubRepo, path: String) -> Result<InitializedSource, Box<dyn Error>> {
+    fn clone_local(initialized_github_repo: &InitializedGithubRepo, path: &str) -> Result<InitializedSource, Box<dyn Error>> {
         debug!("Cloning {}", initialized_github_repo.full_url());
         let clone_url = initialized_github_repo.full_url();
         let _output = Command::new("git")
             .arg("clone")
             .arg(clone_url)
-            .current_dir(&path)
+            .current_dir(path)
             .output()?;
 
         Ok(InitializedSource{
-            path: format!("{}/{}", path, initialized_github_repo.name.clone()),
+            path: format!("{}/{}", path, initialized_github_repo.name),
         })
     }
 }
 
 /// This is needed to easily send over Github new repo parameters to the post.
+#[allow(clippy::struct_excessive_bools)] // Clippy doesn't like the Github API
 #[derive(serde::Serialize)]
 struct NewGithubRepoParams {
     name: String,

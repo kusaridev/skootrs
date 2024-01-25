@@ -14,10 +14,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::error::Error;
-
-
-
 
 use crate::{model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams}, service::facet::{FacetSetParamsGenerator, RootFacetService}};
 
@@ -53,7 +52,7 @@ impl ProjectService for LocalProjectService {
             repo: initialized_repo.clone(),
             ecosystem: initialized_ecosystem.clone(),
         };
-        let facet_set_params = facet_set_params_generator.generate_default(common_params)?;
+        let facet_set_params = facet_set_params_generator.generate_default(&common_params)?;
         let initialized_facets = self.facet_service.initialize_all(facet_set_params)?;
         self.source_service.commit_and_push_changes(initialized_source.clone(), "Initialized project".to_string())?;
 
@@ -63,7 +62,7 @@ impl ProjectService for LocalProjectService {
             repo: initialized_repo,
             ecosystem: initialized_ecosystem,
             source: initialized_source,
-            facets: initialized_facets.into(),
+            facets: initialized_facets,
         })
     }
 }

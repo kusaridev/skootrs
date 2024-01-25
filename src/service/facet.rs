@@ -18,6 +18,9 @@
 
 // TODO: Most of the generators for files need to be parameterized better.
 
+#![allow(clippy::module_name_repetitions)]
+#![allow(clippy::unused_self)]
+
 use std::error::Error;
 
 use askama::Template;
@@ -112,7 +115,7 @@ impl SourceBundleFacetService for LocalFacetService {
             SupportedFacetType::Allstar => todo!(),
         };
 
-        for source_file_content in source_bundle_content.source_files_content.iter() {
+        for source_file_content in &source_bundle_content.source_files_content {
             info!("Writing file {} to {}", source_file_content.name, source_file_content.path);
             source_service.write_file(
                 params.common.source.clone(),
@@ -465,9 +468,9 @@ impl FacetSetParamsGenerator {
     // TODO: Come up with a better solution than hard coding the default facets
     pub fn generate_default(
         &self,
-        common_params: CommonFacetParams,
+        common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, Box<dyn Error>> {
-        use SupportedFacetType::*;
+        use SupportedFacetType::{DependencyUpdateTool, Fuzzing, Gitignore, License, Readme, SLSABuild, Scorecard, SecurityInsights, SecurityPolicy};
         let supported_facets = vec![
             Readme,
             License,
