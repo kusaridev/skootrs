@@ -39,7 +39,9 @@ use crate::model::{
     },
     skootrs::{
         facet::{
-            CommonFacetParams, FacetSetParams, FacetParams, InitializedFacet, SourceBundleFacet, SourceBundleFacetParams, SourceFileContent, SourceFileFacet, SourceFileFacetParams, SupportedFacetType
+            CommonFacetParams, FacetParams, FacetSetParams, InitializedFacet, SourceBundleFacet,
+            SourceBundleFacetParams, SourceFileContent, SourceFileFacet, SourceFileFacetParams,
+            SupportedFacetType,
         },
         InitializedEcosystem,
     },
@@ -96,27 +98,33 @@ impl SourceBundleFacetService for LocalFacetService {
             | SupportedFacetType::Scorecard
             | SupportedFacetType::SecurityInsights => {
                 default_source_bundle_content_handler.generate_content(&params)?
-            },
+            }
             SupportedFacetType::Gitignore
             | SupportedFacetType::SLSABuild
             | SupportedFacetType::DependencyUpdateTool => {
                 language_specific_source_bundle_content_handler.generate_content(&params)?
-            },
+            }
             SupportedFacetType::SBOMGenerator => todo!(),
             SupportedFacetType::StaticCodeAnalysis => todo!(),
             SupportedFacetType::BranchProtection => todo!(),
             SupportedFacetType::CodeReview => todo!(),
-            SupportedFacetType::Fuzzing => language_specific_source_bundle_content_handler.generate_content(&params)?,
+            SupportedFacetType::Fuzzing => {
+                language_specific_source_bundle_content_handler.generate_content(&params)?
+            }
             SupportedFacetType::PublishPackages => todo!(),
             SupportedFacetType::PinnedDependencies => todo!(),
             SupportedFacetType::SAST => todo!(),
             SupportedFacetType::VulnerabilityScanner => todo!(),
             SupportedFacetType::GUACForwardingConfig => todo!(),
             SupportedFacetType::Allstar => todo!(),
+            SupportedFacetType::DefaultSourceCode => language_specific_source_bundle_content_handler.generate_content(&params)?,
         };
 
         for source_file_content in &source_bundle_content.source_files_content {
-            info!("Writing file {} to {}", source_file_content.name, source_file_content.path);
+            info!(
+                "Writing file {} to {}",
+                source_file_content.name, source_file_content.path
+            );
             source_service.write_file(
                 params.common.source.clone(),
                 source_file_content.path.clone(),
@@ -357,8 +365,13 @@ impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
         match params.facet_type {
             SupportedFacetType::Gitignore => self.generate_gitignore_content(params),
             SupportedFacetType::SLSABuild => self.generate_slsa_build_content(params),
-            SupportedFacetType::DependencyUpdateTool => self.generate_dependency_update_tool_content(params),
+            SupportedFacetType::DependencyUpdateTool => {
+                self.generate_dependency_update_tool_content(params)
+            }
             SupportedFacetType::Fuzzing => self.generate_fuzzing_content(params),
+            SupportedFacetType::DefaultSourceCode => {
+                self.generate_default_source_code_content(params)
+            }
             _ => todo!("Not implemented yet"),
         }
     }
@@ -442,7 +455,7 @@ impl GoGithubSourceBundleContentHandler {
         #[template(path = "cifuzz.yml", escape = "none")]
         struct FuzzingTemplateParams {
             project_name: String,
-            language: String
+            language: String,
         }
 
         let fuzzing_template_params = FuzzingTemplateParams {
@@ -460,6 +473,27 @@ impl GoGithubSourceBundleContentHandler {
             facet_type: SupportedFacetType::Fuzzing,
         })
     }
+
+    fn generate_default_source_code_content(
+        &self,
+        _params: &SourceBundleFacetParams,
+    ) -> Result<SourceBundleContent, Box<dyn Error>> {
+        #[derive(Template)]
+        #[template(path = "main.go.tmpl", escape = "none")]
+        struct DefaultSourceCodeTemplateParams {}
+
+        let default_source_code_template_params = DefaultSourceCodeTemplateParams {};
+        let content = default_source_code_template_params.render()?;
+
+        Ok(SourceBundleContent {
+            source_files_content: vec![SourceFileContent {
+                name: "main.go".to_string(),
+                path: "./".to_string(),
+                content,
+            }],
+            facet_type: SupportedFacetType::DefaultSourceCode,
+        })
+    }
 }
 
 pub struct FacetSetParamsGenerator {}
@@ -470,7 +504,10 @@ impl FacetSetParamsGenerator {
         &self,
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, Box<dyn Error>> {
-        use SupportedFacetType::{DependencyUpdateTool, Fuzzing, Gitignore, License, Readme, SLSABuild, Scorecard, SecurityInsights, SecurityPolicy};
+        use SupportedFacetType::{
+            DefaultSourceCode, DependencyUpdateTool, Fuzzing, Gitignore, License, Readme,
+            SLSABuild, Scorecard, SecurityInsights, SecurityPolicy,
+        };
         let supported_facets = vec![
             Readme,
             License,
@@ -492,6 +529,7 @@ impl FacetSetParamsGenerator {
             // code review or branches.
             // CodeReview, // TODO: Implement this
             // BranchProtection, //TODO: Implement this
+            DefaultSourceCode,
         ];
         let facets_params = supported_facets
             .iter()
@@ -506,4 +544,3 @@ impl FacetSetParamsGenerator {
         Ok(FacetSetParams { facets_params })
     }
 }
-

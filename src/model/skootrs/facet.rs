@@ -102,6 +102,7 @@ pub enum SupportedFacetType {
     GUACForwardingConfig,
     Allstar,
     Scorecard,
+    DefaultSourceCode,
 }
 
 impl fmt::Display for SupportedFacetType {
