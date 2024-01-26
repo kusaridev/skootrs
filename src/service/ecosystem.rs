@@ -5,8 +5,7 @@ use std::{error::Error, process::Command};
 use tracing::info;
 
 use crate::model::skootrs::{
-    EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven,
-    InitializedSource, MavenParams,
+    EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven, InitializedSource, MavenParams, SkootError
 };
 
 pub trait EcosystemService {
@@ -14,7 +13,7 @@ pub trait EcosystemService {
         &self,
         params: EcosystemParams,
         source: InitializedSource,
-    ) -> Result<InitializedEcosystem, Box<dyn Error>>;
+    ) -> Result<InitializedEcosystem, SkootError>;
 }
 
 #[derive(Debug)]
@@ -25,7 +24,7 @@ impl EcosystemService for LocalEcosystemService {
         &self,
         params: EcosystemParams,
         source: InitializedSource,
-    ) -> Result<InitializedEcosystem, Box<dyn Error>> {
+    ) -> Result<InitializedEcosystem, SkootError> {
         match params {
             EcosystemParams::Maven(m) => {
                 LocalMavenEcosystemHandler::initialize(&source.path, &m)?;
@@ -54,7 +53,7 @@ impl LocalMavenEcosystemHandler {
     /// # Arguments
     ///
     /// * `path` - The path where the Maven project should be initialized.
-    fn initialize(path: &str, params: &MavenParams) -> Result<(), Box<dyn Error>> {
+    fn initialize(path: &str, params: &MavenParams) -> Result<(), SkootError> {
         let output = Command::new("mvn")
             .arg("archetype:generate")
             .arg(format!("-DgroupId={}", params.group_id))
@@ -85,7 +84,7 @@ impl LocalGoEcosystemHandler {
     /// # Arguments
     ///
     /// * `path` - The path where the Go module should be initialized.
-    fn initialize(path: &str, params: &GoParams) -> Result<(), Box<dyn Error>> {
+    fn initialize(path: &str, params: &GoParams) -> Result<(), SkootError> {
         let output = Command::new("go")
             .arg("mod")
             .arg("init")

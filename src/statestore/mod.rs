@@ -17,7 +17,7 @@ use std::error::Error;
 
 use surrealdb::{engine::local::{Db, RocksDb}, Surreal};
 
-use crate::model::skootrs::InitializedProject;
+use crate::model::skootrs::{InitializedProject, SkootError};
 
 #[derive(Debug)]
 pub struct SurrealProjectStateStore {
@@ -25,7 +25,7 @@ pub struct SurrealProjectStateStore {
 }
 
 impl SurrealProjectStateStore {
-    pub async fn new() -> Result<Self, Box<dyn Error>> {
+    pub async fn new() -> Result<Self, SkootError> {
         let db = Surreal::new::<RocksDb>("state.db").await?;
         db.use_ns("kusaridev").use_db("skootrs").await?;
         Ok(Self {
@@ -33,7 +33,7 @@ impl SurrealProjectStateStore {
         })
     }
 
-    pub async fn create(&self, project: InitializedProject) -> Result<Option<InitializedProject>, Box<dyn Error>> {
+    pub async fn create(&self, project: InitializedProject) -> Result<Option<InitializedProject>, SkootError> {
         let created = self.db
             .create(("project", project.repo.full_url()))
             .content(project)
@@ -41,14 +41,14 @@ impl SurrealProjectStateStore {
         Ok(created)
     }
 
-    pub async fn select(&self, repo_url: String) -> Result<Option<InitializedProject>, Box<dyn Error>> {
+    pub async fn select(&self, repo_url: String) -> Result<Option<InitializedProject>, SkootError> {
         let record = self.db
             .select(("project", repo_url))
             .await?;
         Ok(record)
     }
 
-    pub async fn select_all(&self) -> Result<Vec<InitializedProject>, Box<dyn Error>> {
+    pub async fn select_all(&self) -> Result<Vec<InitializedProject>, SkootError> {
         let records = self.db
             .select("project")
             .await?;

@@ -16,7 +16,7 @@
 use std::error::Error;
 
 use clap::Parser;
-use skootrs::{create, dump, get_facet};
+use skootrs::{create, dump, get_facet, model::skootrs::SkootError};
 use tracing::error;
 
 
@@ -35,7 +35,7 @@ enum SkootrsCli{
 }
 
 #[tokio::main]
-async fn main() -> std::result::Result<(), Box<dyn Error>> {
+async fn main() -> std::result::Result<(), SkootError> {
     //tracing_subscriber::fmt::init();
     let subscriber = tracing_subscriber::fmt()
     .with_file(true)

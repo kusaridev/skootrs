@@ -15,10 +15,14 @@
 
 pub mod facet;
 
+use std::error::Error;
+
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
 
 use self::facet::InitializedFacet;
+
+pub type SkootError = Box<dyn Error + Send + Sync>;
 
 /// The general structure of the models here is the struct names take the form:
 /// <Thing>Params reflecting the parameters for something to be created or initilized, like the parameters

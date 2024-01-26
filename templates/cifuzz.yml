@@ -1,3 +1,4 @@
+{% raw %}
 name: CIFuzz
 on:
   push:
@@ -12,12 +13,12 @@ jobs:
    steps:
    - name: Build Fuzzers
      id: build
-     uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@master
+     uses: google/oss-fuzz/infra/cifuzz/actions/build_fuzzers@5acb10b65c2265d3c20d7152478c44a214088221 # master
      with:
        oss-fuzz-project-name: {{ project_name }}
        language: {{ language }}
    - name: Run Fuzzers
-     uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@master
+     uses: google/oss-fuzz/infra/cifuzz/actions/run_fuzzers@5acb10b65c2265d3c20d7152478c44a214088221 # master
      with:
        oss-fuzz-project-name: {{ project_name }}
        language: {{ language }}
@@ -31,8 +32,9 @@ jobs:
        path: ./out/artifacts
    - name: Upload Sarif
      if: always() && steps.build.outcome == 'success'
-     uses: github/codeql-action/upload-sarif@v2
+     uses: github/codeql-action/upload-sarif@4759df8df70c5ebe7042c3029bbace20eee13edd # v2.23.1
      with:
       # Path to SARIF file relative to the root of the repository
       sarif_file: cifuzz-sarif/results.sarif
       checkout_path: cifuzz-sarif
+{% endraw %}

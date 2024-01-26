@@ -19,7 +19,7 @@ use std::{error::Error, process::Command, path::Path, fs};
 
 use tracing::{info, debug};
 
-use crate::model::skootrs::{InitializedRepo, InitializedSource, SourceParams};
+use crate::model::skootrs::{InitializedRepo, InitializedSource, SkootError, SourceParams};
 
 use super::repo::{LocalRepoService, RepoService};
 
@@ -28,16 +28,16 @@ pub trait SourceService {
         &self,
         params: SourceParams,
         initialized_repo: InitializedRepo,
-    ) -> Result<InitializedSource, Box<dyn Error>>;
-    fn commit_and_push_changes(&self, source: InitializedSource, message: String) -> Result<(), Box<dyn Error>>;
+    ) -> Result<InitializedSource, SkootError>;
+    fn commit_and_push_changes(&self, source: InitializedSource, message: String) -> Result<(), SkootError>;
     fn write_file<P: AsRef<Path>, C: AsRef<[u8]>>(
         &self,
         source: InitializedSource,
         path: P,
         name: String,
         contents: C,
-    ) -> Result<(), Box<dyn Error>>;
-    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, Box<dyn Error>>;
+    ) -> Result<(), SkootError>;
+    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, SkootError>;
 }
 
 #[derive(Debug)]
@@ -50,12 +50,12 @@ impl SourceService for LocalSourceService {
         &self,
         params: SourceParams,
         initialized_repo: InitializedRepo,
-    ) -> Result<InitializedSource, Box<dyn Error>> {
+    ) -> Result<InitializedSource, SkootError> {
         let repo_service = LocalRepoService {};
         repo_service.clone_local(initialized_repo, params.parent_path)
     }
 
-    fn commit_and_push_changes(&self, source: InitializedSource, message: String) -> Result<(), Box<dyn Error>> {
+    fn commit_and_push_changes(&self, source: InitializedSource, message: String) -> Result<(), Box<dyn Error + Send + Sync>> {
         let _output = Command::new("git")
             .arg("add")
             .arg(".")
@@ -86,7 +86,7 @@ impl SourceService for LocalSourceService {
         path: P,
         name: String,
         contents: C,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), SkootError> {
         let full_path = Path::new(&source.path).join(&path);
         // Ensure path exists
         info!("Creating path {:?}", &full_path);
@@ -97,7 +97,7 @@ impl SourceService for LocalSourceService {
         Ok(())
     }
 
-    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, Box<dyn Error>> {
+    fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, SkootError> {
         let full_path = Path::new(&source.path).join(&path).join(name);
         let contents = fs::read_to_string(full_path)?;
         Ok(contents)

@@ -1,5 +1,5 @@
 # Reporting Security Issues
 
-This project is currently pre-release and should not be used in any non-development (e.g. production) capacity or in any sensitive environments. All security issues, vulnerabilities, etc. should be considered non-sensitive and an issue in the Github repo be opened like any other bug.
+This project is currently pre-release and should not currently be used in any non-development (e.g. production) capacity or in any sensitive environments.
 
-This policy will be updated as the project progresses.
+However, this repo utilizes Github's private vulnerability reporting functionality. Follow the instructions here: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability
