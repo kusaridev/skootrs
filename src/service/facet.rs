@@ -25,7 +25,7 @@ use std::error::Error;
 
 use askama::Template;
 use chrono::Datelike;
-use futures::future;
+
 use tracing::info;
 
 use crate::model::{
@@ -46,26 +46,14 @@ use crate::model::{
 };
 use crate::service::source::SourceService;
 
-use super::{repo, source::LocalSourceService};
+use super::source::LocalSourceService;
 
 #[derive(Debug)]
 pub struct LocalFacetService {}
 
 pub trait RootFacetService {
-    async fn initialize(&self, params: FacetParams) -> Result<InitializedFacet, SkootError>;
-    async fn initialize_all(
-        &self,
-        params: FacetSetParams,
-    ) -> Result<Vec<InitializedFacet>, Box<dyn Error + Send + Sync>> {
-        let futures = params
-            .facets_params
-            .iter()
-            .map(|params| self.initialize(params.clone()) );
-
-        let results = futures::future::try_join_all(futures).await;
-        results
-            //.collect::<Result<Vec<InitializedFacet>, SkootError>>()
-    }
+    fn initialize(&self, params: FacetParams) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
+    fn initialize_all(&self, params: FacetSetParams) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
 }
 
 pub trait SourceFileFacetService {
@@ -91,7 +79,7 @@ impl SourceBundleFacetService for LocalFacetService {
             InitializedEcosystem::Go(_) => GoGithubSourceBundleContentHandler {},
             InitializedEcosystem::Maven(_) => todo!(),
         };
-        let api_bundle_handler = GithubAPIBundleHandler {};
+        let _api_bundle_handler = GithubAPIBundleHandler {};
 
         let source_bundle_content = match params.facet_type {
             SupportedFacetType::Readme
@@ -146,10 +134,10 @@ impl SourceBundleFacetService for LocalFacetService {
 }
 
 pub trait APIBundleFacetService {
-    async fn initialize(
+    fn initialize(
         &self,
         params: APIBundleFacetParams,
-    ) -> Result<APIBundleFacet, SkootError>;
+    ) -> impl std::future::Future<Output = Result<APIBundleFacet, SkootError>> + Send;
 }
 
 impl APIBundleFacetService for LocalFacetService {
@@ -194,6 +182,22 @@ impl RootFacetService for LocalFacetService {
             },
         }
     }
+
+    async fn initialize_all(
+        &self,
+        params: FacetSetParams,
+    ) -> Result<Vec<InitializedFacet>, SkootError> {
+        let futures = params
+        .facets_params
+        .iter()
+        .map(move |params| RootFacetService::initialize(self, params.clone()) );
+
+        let results = futures::future::try_join_all(futures).await?;
+        Ok(results)
+        //.collect::<Result<Vec<InitializedFacet>, SkootError>>()
+    }
+
+    
 }
 
 trait APIBundleHandler {
@@ -213,7 +217,7 @@ impl APIBundleHandler for GithubAPIBundleHandler {
             &params.common.repo
         } {
             InitializedRepo::Github(repo) => repo,
-            _ => unimplemented!("Only Github is supported for the GithubAPIBundleHandler"),
+            // _ => unimplemented!("Only Github is supported for the GithubAPIBundleHandler"),
         };
         match params.facet_type {
             SupportedFacetType::BranchProtection => self.generate_branch_protection(params, &repo).await,
@@ -673,7 +677,7 @@ impl FacetSetParamsGenerator {
         &self,
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, SkootError> {
-        use SupportedFacetType::{CodeReview, BranchProtection, VulnerabilityReporting};
+        use SupportedFacetType::{BranchProtection, VulnerabilityReporting};
         let supported_facets = vec![
             //CodeReview,
             BranchProtection,

@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{error::Error, fmt};
+use std::fmt;
 
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;

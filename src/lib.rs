@@ -32,7 +32,7 @@ use service::{
     repo::LocalRepoService,
     source::{LocalSourceService, SourceService},
 };
-use std::{collections::HashMap, error::Error};
+use std::collections::HashMap;
 
 use crate::model::skootrs::facet::InitializedFacet;
 
