@@ -14,9 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![allow(clippy::module_name_repetitions)]
-
 use std::error::Error;
+
+
+
 
 use crate::{model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams}, service::facet::{FacetSetParamsGenerator, RootFacetService}};
 
@@ -24,7 +25,7 @@ use super::{repo::{LocalRepoService, RepoService}, ecosystem::{LocalEcosystemSer
 use tracing::debug;
 
 pub trait ProjectService {
-    fn initialize(&self, params: ProjectParams) -> impl std::future::Future<Output = Result<InitializedProject, Box<dyn Error>>> + Send;
+    fn initialize(&self, params: ProjectParams) -> impl std::future::Future<Output = Result<InitializedProject, Box<dyn Error + Send + Sync>>> + Send;
 }
 
 #[derive(Debug)]
@@ -36,7 +37,7 @@ pub struct LocalProjectService {
 }
 
 impl ProjectService for LocalProjectService {
-    async fn initialize(&self, params: ProjectParams) -> Result<InitializedProject, Box<dyn Error>> {
+    async fn initialize(&self, params: ProjectParams) -> Result<InitializedProject, Box<dyn Error + Send + Sync>> {
         debug!("Starting repo initialization");
         let initialized_repo = self.repo_service.initialize(params.repo_params.clone()).await?;
         debug!("Starting source initialization");
@@ -52,9 +53,14 @@ impl ProjectService for LocalProjectService {
             repo: initialized_repo.clone(),
             ecosystem: initialized_ecosystem.clone(),
         };
-        let facet_set_params = facet_set_params_generator.generate_default(&common_params)?;
-        let initialized_facets = self.facet_service.initialize_all(facet_set_params)?;
+        //let facet_set_params = facet_set_params_generator.generate_default(&common_params)?;
+        let source_facet_set_params = facet_set_params_generator.generate_default_source_bundle(&common_params)?;
+        let api_facet_set_params = facet_set_params_generator.generate_default_api_bundle(&common_params)?;
+        let initialized_source_facets = self.facet_service.initialize_all(source_facet_set_params).await?;
+        // TODO: Figure out how to better order commits and pushes
         self.source_service.commit_and_push_changes(initialized_source.clone(), "Initialized project".to_string())?;
+        let initialized_api_facets = self.facet_service.initialize_all(api_facet_set_params).await?;
+        let initialized_facets = vec![initialized_source_facets, initialized_api_facets].concat();
 
         debug!("Completed project initialization");
 

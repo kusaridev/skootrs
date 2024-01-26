@@ -4,7 +4,7 @@ use serde::{Serialize, Deserialize};
 use tokio::sync::Mutex;
 use utoipa::ToSchema;
 
-use crate::{model::skootrs::{InitializedProject, ProjectParams}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
+use crate::{model::skootrs::{InitializedProject, ProjectParams, SkootError}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
 
 #[derive(Default)]
 pub(super) struct ProjectStore {
@@ -55,7 +55,7 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
         (status = 409, description = "Project unable to be created", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to create repo".into())))
     )
 )]
-pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<ProjectStore>) -> Result<impl Responder, Box<dyn Error>> {
+pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<ProjectStore>) -> Result<impl Responder, actix_web::Error> {
     // TODO: This should be initialized elsewhere
     let project_service = LocalProjectService {
         repo_service: LocalRepoService {},
@@ -64,7 +64,8 @@ pub(super) async fn create_project(params: Json<ProjectParams>, project_store: D
         facet_service: LocalFacetService {},
     };
 
-    let initialized_project = project_service.initialize(params.into_inner()).await?;
+    let initialized_project = project_service.initialize(params.into_inner()).await
+    .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
     project_store.projects.lock().await.push(initialized_project.clone());
     Ok(HttpResponse::Ok().json(initialized_project))
 }

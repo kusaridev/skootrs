@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::fmt;
+use std::{error::Error, fmt};
 
 use serde::{Serialize, Deserialize};
 use utoipa::ToSchema;
@@ -24,12 +24,14 @@ use super::{InitializedSource, InitializedRepo, InitializedEcosystem};
 pub enum InitializedFacet {
     SourceFile(SourceFileFacet),
     SourceBundle(SourceBundleFacet),
+    APIBundle(APIBundleFacet),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum FacetParams {
     SourceFile(SourceFileFacetParams),
     SourceBundle(SourceBundleFacetParams),
+    APIBundle(APIBundleFacetParams),
 }
 
 /// This is required to create an ordering of what facets get applied
@@ -81,6 +83,25 @@ pub struct SourceBundleFacetParams {
     pub facet_type: SupportedFacetType,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct APIContent {
+    pub name: String,
+    pub url: String,
+    pub response: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct APIBundleFacet {
+    pub apis: Vec<APIContent>,
+    pub facet_type: SupportedFacetType,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct APIBundleFacetParams {
+    pub common: CommonFacetParams,
+    pub facet_type: SupportedFacetType,
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema, PartialEq, Eq)]
 pub enum SupportedFacetType {
     Readme,
@@ -103,6 +124,7 @@ pub enum SupportedFacetType {
     Allstar,
     Scorecard,
     DefaultSourceCode,
+    VulnerabilityReporting,
 }
 
 impl fmt::Display for SupportedFacetType {

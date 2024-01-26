@@ -22,18 +22,18 @@ use chrono::Utc;
 use tracing::{info, debug};
 
 
-use crate::model::{skootrs::{RepoParams, InitializedRepo, GithubUser, InitializedGithubRepo, InitializedSource, GithubRepoParams}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
+use crate::model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoParams, SkootError}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
 pub trait RepoService {
-    fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, Box<dyn Error>>> + Send;
-    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error>>;
+    fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;
+    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError>;
 }
 
 #[derive(Debug)]
 pub struct LocalRepoService {}
 
 impl RepoService for LocalRepoService {
-    async fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, Box<dyn Error>> {
+    async fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, SkootError> {
         match params {
             RepoParams::Github(g) => {
                 let github_repo_handler = GithubRepoHandler {
@@ -44,7 +44,7 @@ impl RepoService for LocalRepoService {
         }
     }
 
-    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error>> {
+    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error + Send + Sync>> {
         match initialized_repo {
             InitializedRepo::Github(g) => {
                 GithubRepoHandler::clone_local(&g, &path)
@@ -59,7 +59,7 @@ struct GithubRepoHandler {
 }
 
 impl GithubRepoHandler {
-    async fn create(&self, github_params: GithubRepoParams) -> Result<InitializedGithubRepo, Box<dyn Error>> {
+    async fn create(&self, github_params: GithubRepoParams) -> Result<InitializedGithubRepo, SkootError> {
         let new_repo = NewGithubRepoParams {
             name: github_params.name.clone(),
             description: github_params.description.clone(),
@@ -111,7 +111,7 @@ impl GithubRepoHandler {
         })
     }
 
-    fn clone_local(initialized_github_repo: &InitializedGithubRepo, path: &str) -> Result<InitializedSource, Box<dyn Error>> {
+    fn clone_local(initialized_github_repo: &InitializedGithubRepo, path: &str) -> Result<InitializedSource, SkootError> {
         debug!("Cloning {}", initialized_github_repo.full_url());
         let clone_url = initialized_github_repo.full_url();
         let _output = Command::new("git")

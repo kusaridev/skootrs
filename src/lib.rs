@@ -22,8 +22,7 @@ pub mod statestore;
 
 use inquire::Text;
 use model::skootrs::{
-    EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams,
-    ProjectParams, RepoParams, SourceParams, SUPPORTED_ECOSYSTEMS,
+    EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectParams, RepoParams, SkootError, SourceParams, SUPPORTED_ECOSYSTEMS
 };
 use octocrab::Page;
 use service::{
@@ -43,7 +42,7 @@ use crate::model::skootrs::facet::InitializedFacet;
 /// The project can be created for either Go or Maven ecosystems right now.
 /// The project is created in Github, cloned down, and then initialized along with any other security supporting
 /// tasks.
-pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
+pub async fn create() -> std::result::Result<(), SkootError> {
     let name = Text::new("The name of the repository").prompt()?;
     let description = Text::new("The description of the repository").prompt()?;
     let user = octocrab::instance().current().user().await?.login;
@@ -137,7 +136,7 @@ pub async fn create() -> std::result::Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
+pub async fn get_facet() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     let repo_to_project: HashMap<String, &InitializedProject> = projects
         .iter()
@@ -151,7 +150,7 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
 
     let project = repo_to_project
         .get(selected_project)
-        .ok_or_else(|| Box::<dyn Error>::from("Failed to get selected project"))?;
+        .ok_or_else(|| SkootError::from("Failed to get selected project"))?;
 
     let facet_to_project: HashMap<String, InitializedFacet> = project
         .facets
@@ -165,6 +164,10 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
                 f.facet_type.to_string(),
                 InitializedFacet::SourceBundle(f.clone()),
             ),
+            InitializedFacet::APIBundle(f) => (
+                f.facet_type.to_string(),
+                InitializedFacet::APIBundle(f.clone()),
+            ),
         })
         .collect::<HashMap<_, _>>();
 
@@ -176,7 +179,7 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
 
     let facet = facet_to_project
         .get(selected_facet)
-        .ok_or_else(|| Box::<dyn Error>::from("Failed to get selected facet"))?;
+        .ok_or_else(|| SkootError::from("Failed to get selected facet"))?;
 
     let facet_content = get_facet_content(facet, project)?;
 
@@ -188,13 +191,13 @@ pub async fn get_facet() -> std::result::Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub async fn dump() -> std::result::Result<(), Box<dyn Error>> {
+pub async fn dump() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     println!("{}", serde_json::to_string_pretty(&projects)?);
     Ok(())
 }
 
-async fn get_all() -> std::result::Result<Vec<InitializedProject>, Box<dyn Error>> {
+async fn get_all() -> std::result::Result<Vec<InitializedProject>, SkootError> {
     let state_store = statestore::SurrealProjectStateStore::new().await?;
     let projects = state_store.select_all().await?;
     Ok(projects)
@@ -203,7 +206,7 @@ async fn get_all() -> std::result::Result<Vec<InitializedProject>, Box<dyn Error
 fn get_facet_content(
     facet: &InitializedFacet,
     project: &InitializedProject,
-) -> std::result::Result<String, Box<dyn Error>> {
+) -> std::result::Result<String, SkootError> {
     match facet {
         InitializedFacet::SourceFile(f) => {
             let source_service = LocalSourceService {};
@@ -219,5 +222,10 @@ fn get_facet_content(
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(content.join("\n"))
         }
+        InitializedFacet::APIBundle(f) => {
+            // TODO: This can make it unclear which API was used
+            let content = f.apis.iter().map(|a| format!("{:?}",  a)).collect::<Vec<_>>();
+            Ok(content.join("\n"))
+        },
     }
 }
