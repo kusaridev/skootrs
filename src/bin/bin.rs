@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::error::Error;
+
 
 use clap::Parser;
 use skootrs::{create, dump, get_facet, model::skootrs::SkootError};

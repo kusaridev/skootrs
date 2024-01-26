@@ -1,6 +1,6 @@
 #![allow(clippy::module_name_repetitions)]
 
-use std::{error::Error, process::Command};
+use std::{process::Command};
 
 use tracing::info;
 

@@ -1,4 +1,3 @@
-{% raw %}
 name: CIFuzz
 on:
   push:
@@ -37,4 +36,3 @@ jobs:
       # Path to SARIF file relative to the root of the repository
       sarif_file: cifuzz-sarif/results.sarif
       checkout_path: cifuzz-sarif
-{% endraw %}

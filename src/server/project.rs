@@ -1,10 +1,9 @@
-use std::error::Error;
 use actix_web::{Responder, web::{ServiceConfig, Data, Json, self}, HttpResponse};
 use serde::{Serialize, Deserialize};
 use tokio::sync::Mutex;
 use utoipa::ToSchema;
 
-use crate::{model::skootrs::{InitializedProject, ProjectParams, SkootError}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
+use crate::{model::skootrs::{InitializedProject, ProjectParams}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
 
 #[derive(Default)]
 pub(super) struct ProjectStore {
