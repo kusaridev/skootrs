@@ -3627,7 +3627,6 @@ dependencies = [
  "serde_json",
  "serde_yaml",
  "surrealdb",
- "thiserror",
  "tokio",
  "tracing",
  "tracing-actix-web",
