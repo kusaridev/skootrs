@@ -38,6 +38,15 @@ pub struct LocalProjectService {
 
 impl ProjectService for LocalProjectService {
     async fn initialize(&self, params: ProjectParams) -> Result<InitializedProject, Box<dyn Error + Send + Sync>> {
+        // TODO: The octocrab initialization should be done in a better place and be parameterized
+        let o: octocrab::Octocrab = octocrab::Octocrab::builder()
+        .personal_token(
+            std::env::var("GITHUB_TOKEN")
+            .expect("GITHUB_TOKEN env var must be populated")
+        )
+        .build()?
+        ;
+        octocrab::initialise(o);
         debug!("Starting repo initialization");
         let initialized_repo = self.repo_service.initialize(params.repo_params.clone()).await?;
         debug!("Starting source initialization");

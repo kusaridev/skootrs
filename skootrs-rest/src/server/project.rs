@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 use tokio::sync::Mutex;
 use utoipa::ToSchema;
 
-use crate::{model::skootrs::{InitializedProject, ProjectParams}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
+use skootrs_lib::{model::skootrs::{InitializedProject, ProjectParams}, service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService}};
 
 #[derive(Default)]
 pub(super) struct ProjectStore {

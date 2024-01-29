@@ -1,5 +1,5 @@
 //
-// Copyright 2023 The Skootrs Authors.
+// Copyright 2024 The Skootrs Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,10 +13,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
+pub mod helpers;
 
 use clap::Parser;
-use skootrs::{create, dump, get_facet, model::skootrs::SkootError};
+use skootrs_lib::model::skootrs::SkootError;
+use skootrs_rest;
+use helpers::{create, dump, get_facet};
 use tracing::error;
 
 
@@ -36,7 +38,6 @@ enum SkootrsCli{
 
 #[tokio::main]
 async fn main() -> std::result::Result<(), SkootError> {
-    //tracing_subscriber::fmt::init();
     let subscriber = tracing_subscriber::fmt()
     .with_file(true)
     .with_line_number(true)
@@ -60,7 +61,7 @@ async fn main() -> std::result::Result<(), SkootError> {
         },
         SkootrsCli::Daemon => {
             tokio::task::spawn_blocking(|| {
-                skootrs::server::rest::run_server().expect("Failed to start REST Server");
+                skootrs_rest::server::rest::run_server().expect("Failed to start REST Server");
             }).await.expect("REST Server Task Panicked");
         },
         SkootrsCli::Dump => {
