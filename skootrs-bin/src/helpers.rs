@@ -1,31 +1,9 @@
-//
-// Copyright 2023 The Skootrs Authors.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-#![feature(array_try_map)]
-
-pub mod model;
-pub mod server;
-pub mod service;
-pub mod statestore;
-
 use inquire::Text;
-use model::skootrs::{
+use skootrs_lib::model::skootrs::{
     EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectParams, RepoParams, SkootError, SourceParams, SUPPORTED_ECOSYSTEMS
 };
 use octocrab::Page;
-use service::{
+use skootrs_lib::service::{
     ecosystem::LocalEcosystemService,
     facet::LocalFacetService,
     project::{LocalProjectService, ProjectService},
@@ -34,7 +12,8 @@ use service::{
 };
 use std::collections::HashMap;
 
-use crate::model::skootrs::facet::InitializedFacet;
+use skootrs_lib::model::skootrs::facet::InitializedFacet;
+use skootrs_statestore::SurrealProjectStateStore;
 
 /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.
 ///
@@ -130,7 +109,7 @@ pub async fn create() -> std::result::Result<(), SkootError> {
         }
     };
 
-    let state_store = statestore::SurrealProjectStateStore::new().await?;
+    let state_store = SurrealProjectStateStore::new().await?;
     state_store.create(initialized_project).await?;
 
     Ok(())
@@ -198,7 +177,7 @@ pub async fn dump() -> std::result::Result<(), SkootError> {
 }
 
 async fn get_all() -> std::result::Result<Vec<InitializedProject>, SkootError> {
-    let state_store = statestore::SurrealProjectStateStore::new().await?;
+    let state_store = SurrealProjectStateStore::new().await?;
     let projects = state_store.select_all().await?;
     Ok(projects)
 }

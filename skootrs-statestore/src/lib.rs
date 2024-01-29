@@ -13,11 +13,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-
 use surrealdb::{engine::local::{Db, RocksDb}, Surreal};
 
-use crate::model::skootrs::{InitializedProject, SkootError};
+use skootrs_lib::model::skootrs::{InitializedProject, SkootError};
 
 #[derive(Debug)]
 pub struct SurrealProjectStateStore {
