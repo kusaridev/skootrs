@@ -213,15 +213,10 @@ impl APIBundleHandler for GithubAPIBundleHandler {
         &self,
         params: &APIBundleFacetParams,
     ) -> Result<APIBundleFacet, SkootError> {
-        let repo = match {
-            &params.common.repo
-        } {
-            InitializedRepo::Github(repo) => repo,
-            // _ => unimplemented!("Only Github is supported for the GithubAPIBundleHandler"),
-        };
+        let InitializedRepo::Github(repo) = &params.common.repo;
         match params.facet_type {
-            SupportedFacetType::BranchProtection => self.generate_branch_protection(params, &repo).await,
-            SupportedFacetType::VulnerabilityReporting => self.generate_vulnerability_reporting(params, &repo).await,
+            SupportedFacetType::BranchProtection => self.generate_branch_protection(params, repo).await,
+            SupportedFacetType::VulnerabilityReporting => self.generate_vulnerability_reporting(params, repo).await,
             _ => todo!("Not implemented yet"),
         }
     }
@@ -263,7 +258,7 @@ impl GithubAPIBundleHandler {
 
         Ok(APIBundleFacet {
             facet_type: SupportedFacetType::BranchProtection,
-            apis: apis,
+            apis,
         })
     }
 
@@ -293,7 +288,7 @@ impl GithubAPIBundleHandler {
 
         Ok(APIBundleFacet {
             facet_type: SupportedFacetType::VulnerabilityReporting,
-            apis: apis,
+            apis,
         })
     }
 }
@@ -678,7 +673,7 @@ impl FacetSetParamsGenerator {
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, SkootError> {
         use SupportedFacetType::{BranchProtection, VulnerabilityReporting};
-        let supported_facets = vec![
+        let supported_facets = [
             //CodeReview,
             BranchProtection,
             VulnerabilityReporting,
@@ -705,7 +700,7 @@ impl FacetSetParamsGenerator {
             DefaultSourceCode, DependencyUpdateTool, Fuzzing, Gitignore, License, Readme,
             SLSABuild, Scorecard, SecurityInsights, SecurityPolicy, SAST,
         };
-        let supported_facets = vec![
+        let supported_facets = [
             Readme,
             License,
             Gitignore,

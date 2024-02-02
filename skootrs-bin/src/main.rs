@@ -17,7 +17,7 @@ pub mod helpers;
 
 use clap::Parser;
 use skootrs_lib::model::skootrs::SkootError;
-use skootrs_rest;
+
 use helpers::{create, dump, get_facet};
 use tracing::error;
 
