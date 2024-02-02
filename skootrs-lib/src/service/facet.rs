@@ -442,8 +442,8 @@ impl DefaultSourceBundleContentHandler {
                 changelog: None,
                 commit_hash: None,
                 expiration_date: chrono::Utc::now() + chrono::Duration::days(365),
-                last_reviewed: None,
-                last_updated: None,
+                last_reviewed: Some(chrono::Utc::now()),
+                last_updated: Some(chrono::Utc::now()),
                 license: Some(format!(
                     "{}/blob/main/LICENSE",
                     &params.common.repo.full_url()
@@ -465,7 +465,7 @@ impl DefaultSourceBundleContentHandler {
             security_contacts: Vec::new(),
             security_testing: Vec::new(),
             vulnerability_reporting: SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
-                accepts_vulnerability_reports: false,
+                accepts_vulnerability_reports: true,
                 bug_bounty_available: None,
                 bug_bounty_url: None,
                 comment: None,
@@ -473,7 +473,7 @@ impl DefaultSourceBundleContentHandler {
                 in_scope: None,
                 out_scope: None,
                 pgp_key: None,
-                security_policy: None,
+                security_policy: Some(format!("{}/blob/main/SECURITY.md", &params.common.repo.full_url())),
             },
         };
 
