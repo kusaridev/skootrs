@@ -82,4 +82,3 @@ pub(super) async fn get_projects(project_store: Data<ProjectStore>) -> impl Resp
 
     HttpResponse::Ok().json(projects.clone())
 }
-

@@ -69,7 +69,7 @@ impl ProjectService for LocalProjectService {
         // TODO: Figure out how to better order commits and pushes
         self.source_service.commit_and_push_changes(initialized_source.clone(), "Initialized project".to_string())?;
         let initialized_api_facets = self.facet_service.initialize_all(api_facet_set_params).await?;
-        let initialized_facets = vec![initialized_source_facets, initialized_api_facets].concat();
+        let initialized_facets = [initialized_source_facets, initialized_api_facets].concat();
 
         debug!("Completed project initialization");
 
