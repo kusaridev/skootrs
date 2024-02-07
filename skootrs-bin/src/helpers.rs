@@ -1,5 +1,5 @@
 use inquire::Text;
-use skootrs_lib::model::skootrs::{
+use skootrs_model::skootrs::{
     EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectParams, RepoParams, SkootError, SourceParams, SUPPORTED_ECOSYSTEMS
 };
 use octocrab::Page;
@@ -12,7 +12,7 @@ use skootrs_lib::service::{
 };
 use std::collections::HashMap;
 
-use skootrs_lib::model::skootrs::facet::InitializedFacet;
+use skootrs_model::skootrs::facet::InitializedFacet;
 use skootrs_statestore::SurrealProjectStateStore;
 
 /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.

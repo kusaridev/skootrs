@@ -1,10 +1,10 @@
 #![allow(clippy::module_name_repetitions)]
 
-use std::{process::Command};
+use std::process::Command;
 
 use tracing::info;
 
-use crate::model::skootrs::{
+use skootrs_model::skootrs::{
     EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven, InitializedSource, MavenParams, SkootError
 };
 
