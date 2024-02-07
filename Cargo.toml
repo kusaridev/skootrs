@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "skootrs-bin", 
-    "skootrs-lib",
+    "skootrs-lib", "skootrs-model",
     "skootrs-rest",
     "skootrs-statestore"
 ]

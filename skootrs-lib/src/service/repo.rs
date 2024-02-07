@@ -22,7 +22,7 @@ use chrono::Utc;
 use tracing::{info, debug};
 
 
-use crate::model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoParams, SkootError}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
+use skootrs_model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoParams, SkootError}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
 pub trait RepoService {
     fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;
@@ -84,7 +84,7 @@ impl GithubRepoHandler {
                 id: RepositoryCreatedEventContextId::from_str(format!("{}/{}", github_params.organization.get_name(), github_params.name.clone()).as_str())?,
                 source: "skootrs.github.creator".into(),
                 timestamp: Utc::now(),
-                type_: crate::model::cd_events::repo_created::RepositoryCreatedEventContextType::DevCdeventsRepositoryCreated011,
+                type_: skootrs_model::cd_events::repo_created::RepositoryCreatedEventContextType::DevCdeventsRepositoryCreated011,
                 version: RepositoryCreatedEventContextVersion::from_str("0.3.0")?,
             }, 
              custom_data: None,
@@ -98,7 +98,7 @@ impl GithubRepoHandler {
                 },
                 id: RepositoryCreatedEventSubjectId::from_str(format!("{}/{}", github_params.organization.get_name(), github_params.name.clone()).as_str())?,
                 source: Some("skootrs.github.creator".into()),
-                type_: crate::model::cd_events::repo_created::RepositoryCreatedEventSubjectType::Repository,
+                type_: skootrs_model::cd_events::repo_created::RepositoryCreatedEventSubjectType::Repository,
             } 
         };
 

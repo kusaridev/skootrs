@@ -15,7 +15,7 @@
 
 use surrealdb::{engine::local::{Db, RocksDb}, Surreal};
 
-use skootrs_lib::model::skootrs::{InitializedProject, SkootError};
+use skootrs_model::skootrs::{InitializedProject, SkootError};
 
 #[derive(Debug)]
 pub struct SurrealProjectStateStore {

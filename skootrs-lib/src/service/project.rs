@@ -19,7 +19,8 @@ use std::error::Error;
 
 
 
-use crate::{model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams}, service::facet::{FacetSetParamsGenerator, RootFacetService}};
+use skootrs_model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams};
+use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
 
 use super::{repo::{LocalRepoService, RepoService}, ecosystem::{LocalEcosystemService, EcosystemService}, source::{LocalSourceService, SourceService}, facet::LocalFacetService};
 use tracing::debug;

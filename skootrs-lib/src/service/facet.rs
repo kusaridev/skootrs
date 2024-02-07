@@ -28,7 +28,7 @@ use chrono::Datelike;
 
 use tracing::info;
 
-use crate::model::{
+use skootrs_model::{
     security_insights::insights10::{
         SecurityInsightsVersion100YamlSchema,
         SecurityInsightsVersion100YamlSchemaContributionPolicy,

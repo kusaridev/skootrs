@@ -29,7 +29,7 @@ dependencies = [
  "actix-rt",
  "actix-service",
  "actix-utils",
- "ahash 0.8.6",
+ "ahash 0.8.7",
  "base64",
  "bitflags 2.4.1",
  "brotli",
@@ -144,7 +144,7 @@ dependencies = [
  "actix-service",
  "actix-utils",
  "actix-web-codegen",
- "ahash 0.8.6",
+ "ahash 0.8.7",
  "bytes",
  "bytestring",
  "cfg-if",
@@ -218,9 +218,9 @@ dependencies = [
 
 [[package]]
 name = "ahash"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91429305e9f0a25f6205c5b8e0d2db09e0708a7a6df0f42212bb56c32c8ac97a"
+checksum = "77c3a9648d43b9cd48db467b3f87fdd6e146bcc88ab0180006cef2179fe11d01"
 dependencies = [
  "cfg-if",
  "getrandom",
@@ -1629,7 +1629,7 @@ version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
 dependencies = [
- "ahash 0.8.6",
+ "ahash 0.8.7",
 ]
 
 [[package]]
@@ -1638,7 +1638,7 @@ version = "0.14.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "290f1a1d9242c78d09ce40a5e87e7554ee637af1351968159f4952f028f75604"
 dependencies = [
- "ahash 0.8.6",
+ "ahash 0.8.7",
  "allocator-api2",
 ]
 
@@ -3656,6 +3656,7 @@ dependencies = [
  "octocrab 0.32.0",
  "serde_json",
  "skootrs-lib",
+ "skootrs-model",
  "skootrs-rest",
  "skootrs-statestore",
  "tokio",
@@ -3667,6 +3668,7 @@ dependencies = [
 name = "skootrs-lib"
 version = "0.1.0"
 dependencies = [
+ "ahash 0.8.7",
  "askama",
  "chrono",
  "futures",
@@ -3676,7 +3678,21 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "skootrs-model",
  "tracing",
+ "utoipa",
+]
+
+[[package]]
+name = "skootrs-model"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "regress",
+ "schemars",
+ "serde",
+ "serde_json",
+ "serde_yaml",
  "utoipa",
 ]
 
@@ -3688,6 +3704,7 @@ dependencies = [
  "serde",
  "serde_json",
  "skootrs-lib",
+ "skootrs-model",
  "tokio",
  "tracing-actix-web",
  "utoipa",
@@ -3701,6 +3718,7 @@ name = "skootrs-statestore"
 version = "0.1.0"
 dependencies = [
  "skootrs-lib",
+ "skootrs-model",
  "surrealdb",
 ]
 
@@ -4960,18 +4978,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.7.28"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d6f15f7ade05d2a4935e34a457b936c23dc70a05cc1d97133dc99e7a3fe0f0e"
+checksum = "74d4d3961e53fa4c9a25a8637fc2bfaf2595b3d3ae34875568a5cf64787716be"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.7.28"
+version = "0.7.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbbad221e3f78500350ecbd7dfa4e63ef945c05f4c61cb7f4d3f84cd0bba649b"
+checksum = "9ce1b18ccd8e73a9321186f97e46f9f04b778851177567b1975109d26a08d2a6"
 dependencies = [
  "proc-macro2",
  "quote",

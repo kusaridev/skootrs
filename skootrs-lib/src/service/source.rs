@@ -19,7 +19,7 @@ use std::{error::Error, process::Command, path::Path, fs};
 
 use tracing::{info, debug};
 
-use crate::model::skootrs::{InitializedRepo, InitializedSource, SkootError, SourceParams};
+use skootrs_model::skootrs::{InitializedRepo, InitializedSource, SkootError, SourceParams};
 
 use super::repo::{LocalRepoService, RepoService};
 

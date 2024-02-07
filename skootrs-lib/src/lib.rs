@@ -15,5 +15,5 @@
 
 #![feature(array_try_map)]
 
-pub mod model;
+//pub mod model;
 pub mod service;

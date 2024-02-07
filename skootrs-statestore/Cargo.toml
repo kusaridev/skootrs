@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 surrealdb = { version = "1.1.1", features = ["kv-rocksdb"] }
 skootrs-lib = { path = "../skootrs-lib" }
+skootrs-model = { path = "../skootrs-model" }
