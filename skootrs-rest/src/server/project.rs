@@ -1,15 +1,10 @@
 use actix_web::{Responder, web::{ServiceConfig, Data, Json, self}, HttpResponse};
 use serde::{Serialize, Deserialize};
-use tokio::sync::Mutex;
+use skootrs_statestore::SurrealProjectStateStore;
 use utoipa::ToSchema;
 
-use skootrs_model::skootrs::{InitializedProject, ProjectParams};
-use skootrs_lib::service::{project::{LocalProjectService, ProjectService}, repo::LocalRepoService, ecosystem::LocalEcosystemService, source::LocalSourceService, facet::LocalFacetService};
-
-#[derive(Default)]
-pub(super) struct ProjectStore {
-    projects: Mutex<Vec<InitializedProject>>
-}
+use skootrs_model::skootrs::ProjectParams;
+use skootrs_lib::service::{ecosystem::LocalEcosystemService, facet::LocalFacetService, project::{LocalProjectService, ProjectService}, repo::LocalRepoService, source::LocalSourceService};
 
 #[derive(Serialize, Deserialize, Clone, ToSchema)]
 pub(super) enum ErrorResponse {
@@ -21,12 +16,14 @@ pub(super) enum ErrorResponse {
     Unauthorized(String),
 }
 
-pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceConfig) {
+pub(super) fn configure(store: Data<SurrealProjectStateStore>) -> impl FnOnce(&mut ServiceConfig) {
     |config: &mut ServiceConfig| {
         config
             .app_data(store)
-            .service(web::resource("/project").route(web::post().to(create_project)))
-            .service(web::resource("/projects").route(web::get().to(get_projects)));
+            .service(web::resource("/projects")
+                .route(web::post().to(create_project))
+                .route(web::get().to(list_projects))
+            );
     }
 }
 
@@ -48,14 +45,14 @@ pub(super) fn configure(store: Data<ProjectStore>) -> impl FnOnce(&mut ServiceCo
 ///
 #[utoipa::path(
     post,
-    path = "/project",
+    path = "/projects",
     request_body = ProjectParams,
     responses( 
         (status = 201, description = "Project created successfully", body = InitializedProject),
         (status = 409, description = "Project unable to be created", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to create repo".into())))
     )
 )]
-pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<ProjectStore>) -> Result<impl Responder, actix_web::Error> {
+pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
     // TODO: This should be initialized elsewhere
     let project_service = LocalProjectService {
         repo_service: LocalRepoService {},
@@ -66,20 +63,20 @@ pub(super) async fn create_project(params: Json<ProjectParams>, project_store: D
 
     let initialized_project = project_service.initialize(params.into_inner()).await
     .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
-    project_store.projects.lock().await.push(initialized_project.clone());
+    project_store.create(initialized_project.clone()).await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
     Ok(HttpResponse::Ok().json(initialized_project))
 }
 
 /// Get all projects
 #[utoipa::path(
     get,
-    path = "/project",
+    path = "/projects",
     responses(
-        (status = 200, description = "List current todo items", body = [APISupportedInitializedProject])
+        (status = 200, description = "List all projects", body = [InitializedProject]),
+        (status = 500, description = "Internal server error", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to list repos".into()))),
     )
 )]
-pub(super) async fn get_projects(project_store: Data<ProjectStore>) -> impl Responder {
-    let projects = project_store.projects.lock().await;
-
-    HttpResponse::Ok().json(projects.clone())
+pub(super) async fn list_projects(project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
+    let projects = project_store.select_all().await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
+    Ok(HttpResponse::Ok().json(projects))
 }

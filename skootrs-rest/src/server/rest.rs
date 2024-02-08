@@ -1,21 +1,25 @@
 use std::net::Ipv4Addr;
 
 use actix_web::{App, HttpServer, web::Data};
+use skootrs_statestore::SurrealProjectStateStore;
 use tracing_actix_web::TracingLogger;
 use utoipa::{OpenApi, Modify, openapi::security::{SecurityScheme, ApiKey, ApiKeyValue}};
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::server::project::{ProjectStore, ErrorResponse};
+use crate::server::project::ErrorResponse;
 use skootrs_model::{skootrs::{InitializedProject, ProjectParams, InitializedRepo, InitializedGithubRepo, InitializedEcosystem, RepoParams, EcosystemParams, GithubUser, GithubRepoParams, SourceParams, InitializedSource, MavenParams, GoParams, InitializedGo, InitializedMaven, facet::{CommonFacetParams, SourceFileFacet, SourceFileFacetParams, InitializedFacet, FacetParams, SupportedFacetType}}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderCommitHash, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess, SecurityInsightsVersion100YamlSchemaSecurityArtifacts, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment, SecurityInsightsVersion100YamlSchemaSecurityContactsItem, SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, SecurityInsightsVersion100YamlSchemaSecurityTestingItem, SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment, SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey}};
+use skootrs_model::skootrs::facet::{SourceBundleFacet, SourceBundleFacetParams, APIBundleFacet, APIBundleFacetParams, SourceFileContent, APIContent};
+
 
 #[actix_web::main]
 pub async fn run_server() -> std::io::Result<()> {
     #[derive(OpenApi)]
     #[openapi(
         paths(
-            crate::server::project::create_project
+            crate::server::project::create_project,
+            crate::server::project::list_projects,
         ),
         components(
             schemas(
@@ -45,6 +49,13 @@ pub async fn run_server() -> std::io::Result<()> {
                 InitializedFacet,
                 FacetParams,
                 SupportedFacetType,
+                InitializedProject,
+                SourceBundleFacet,
+                SourceBundleFacetParams,
+                APIBundleFacet,
+                APIBundleFacetParams,
+                SourceFileContent,
+                APIContent,
 
                 // CD Events Schemas
                 RepositoryCreatedEvent,
@@ -108,7 +119,7 @@ pub async fn run_server() -> std::io::Result<()> {
         }
     }
 
-    let store = Data::new(ProjectStore::default());
+    let store: Data<SurrealProjectStateStore> = Data::new(SurrealProjectStateStore::new().await.map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?);
     // Make instance variable of ApiDoc so all worker threads gets the same instance.
     let openapi = ApiDoc::openapi();
 
