@@ -25,10 +25,10 @@ use self::facet::InitializedFacet;
 pub type SkootError = Box<dyn Error + Send + Sync>;
 
 /// The general structure of the models here is the struct names take the form:
-/// <Thing>Params reflecting the parameters for something to be created or initilized, like the parameters
+/// `<Thing>Params` reflecting the parameters for something to be created or initilized, like the parameters
 /// to create a repo or project.
 /// 
-/// Initialized<Thing> models the data and state for a created or initialized thing, like a repo created inside of Github.
+/// `Initialized<Thing>` models the data and state for a created or initialized thing, like a repo created inside of Github.
 /// This module is purely focused on the data for skootrs, and not for performing any of the operations. In order to make
 /// it easy for (de)serialization, the structs and impls only contain the logic for the data, and not for the operations,
 /// which falls under service.
@@ -41,6 +41,8 @@ pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = [
 
 // TODO: These should be their own structs, but they're currently not any different from the params structs.
 
+/// Represents a project that has been initialized. This is the data and state of a project that has been 
+/// created.
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct InitializedProject {
     pub repo: InitializedRepo,
@@ -49,6 +51,7 @@ pub struct InitializedProject {
     pub facets: Vec<InitializedFacet>,
 }
 
+/// Represents the parameters for creating a project.
 #[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
 pub struct ProjectParams {
     pub name: String,
@@ -57,18 +60,21 @@ pub struct ProjectParams {
     pub source_params: SourceParams,
 }
 
+/// Represents an initialized repository along with its host.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum InitializedRepo {
     Github(InitializedGithubRepo)
 }
 
 impl InitializedRepo {
+    /// Returns the host URL of the repo.
     #[must_use] pub fn host_url(&self) -> String {
         match self {
             Self::Github(x) => x.host_url(),
         }
     }
 
+    /// Returns the full URL to the repo.
     #[must_use] pub fn full_url(&self) -> String {
         match self {
             Self::Github(x) => x.full_url(),
@@ -76,6 +82,7 @@ impl InitializedRepo {
     }
 }
 
+/// Represents an initialized Github repository.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct InitializedGithubRepo {
     pub name: String,
@@ -83,10 +90,12 @@ pub struct InitializedGithubRepo {
 }
 
 impl InitializedGithubRepo {
+    /// Returns the host URL of github.
     #[must_use] pub fn host_url(&self) -> String {
         "https://github.com".into()
     }
 
+    /// Returns the full URL to the github repo.
     #[must_use] pub fn full_url(&self) -> String {
         format!(
             "{}/{}/{}",
@@ -97,23 +106,30 @@ impl InitializedGithubRepo {
     }
 }
 
+/// Represents an initialized ecosystem. The enum is used to represent the different types of ecosystems
+/// that are supported by Skootrs currently.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum InitializedEcosystem {
     Go(InitializedGo),
     Maven(InitializedMaven)
 }
 
+/// Represents the parameters for creating a repository.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum RepoParams {
     Github(GithubRepoParams)
 }
 
+/// Represents the parameters for initializing an ecosystem.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum EcosystemParams {
     Go(GoParams),
     Maven(MavenParams)
 }
 
+/// Represents a Github user which is really just whether or not a repo belongs to  a user or organization.
+/// This is used to create a repo in the Github API. The Github API has different calls for creating a repo
+/// that belongs to the current authorized user or an organization the user has access to.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub enum GithubUser {
     User(String),
@@ -121,6 +137,7 @@ pub enum GithubUser {
 }
 
 impl GithubUser {
+    /// Returns the name of the user or organization.
     #[must_use] pub fn get_name(&self) -> String {
         match self {
             Self::User(x) |
@@ -129,6 +146,7 @@ impl GithubUser {
     }
 }
 
+/// Represents the parameters for creating a Github repository.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct GithubRepoParams {
     pub name: String,
@@ -151,12 +169,14 @@ impl GithubRepoParams {
     }
 }
 
+/// Represents the parameters for initializing a source code repository.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct SourceParams {
     pub parent_path: String,
 }
 
 impl SourceParams {
+    /// Returns the full path to the source code repository with the given name.
     #[must_use] pub fn path(&self, name: &str) -> String {
         format!("{}/{}", self.parent_path, name)
     }
@@ -186,6 +206,7 @@ pub struct GoParams {
     pub host: String,
 }
 
+/// Represents an initialized go module.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct InitializedGo {
     /// The name of the Go module.
@@ -201,6 +222,7 @@ impl InitializedGo {
     }
 }
 
+/// Represents an initialized Maven project.
 #[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
 pub struct InitializedMaven {
     /// The group ID of the Maven project.

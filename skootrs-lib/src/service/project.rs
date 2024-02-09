@@ -16,19 +16,19 @@
 
 use std::error::Error;
 
-
-
-
 use skootrs_model::skootrs::{facet::CommonFacetParams, InitializedProject, InitializedSource, ProjectParams};
 use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
 
 use super::{repo::{LocalRepoService, RepoService}, ecosystem::{LocalEcosystemService, EcosystemService}, source::{LocalSourceService, SourceService}, facet::LocalFacetService};
 use tracing::debug;
 
+/// The `ProjectService` trait provides an interface for initializing and managing a Skootrs project.
 pub trait ProjectService {
     fn initialize(&self, params: ProjectParams) -> impl std::future::Future<Output = Result<InitializedProject, Box<dyn Error + Send + Sync>>> + Send;
 }
 
+/// The `LocalProjectService` struct provides an implementation of the `ProjectService` trait for initializing
+/// and managing a Skootrs project on the local machine.
 #[derive(Debug)]
 pub struct LocalProjectService {
     pub repo_service: LocalRepoService,

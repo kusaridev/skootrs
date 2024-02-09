@@ -21,14 +21,18 @@ use std::{error::Error, process::Command, str::FromStr, sync::Arc};
 use chrono::Utc;
 use tracing::{info, debug};
 
-
 use skootrs_model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoParams, SkootError}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
 
+/// The `RepoService` trait provides an interface for initializing and managing a project's source code
+/// repository. This repo is usually something like Github or Gitlab.
 pub trait RepoService {
     fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;
     fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError>;
 }
 
+/// The `LocalRepoService` struct provides an implementation of the `RepoService` trait for initializing
+/// and managing a project's source code repository from the local machine. This doesn't mean the repo is
+/// local, but that the operations like API calls are run from the local machine.
 #[derive(Debug)]
 pub struct LocalRepoService {}
 
@@ -53,6 +57,7 @@ impl RepoService for LocalRepoService {
     }
 }
 
+/// The `GithubRepoHandler` struct represents a handler for initializing and managing Github repos.
 #[derive(Debug)]
 struct GithubRepoHandler {
     client: Arc<octocrab::Octocrab>,

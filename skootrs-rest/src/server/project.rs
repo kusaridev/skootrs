@@ -1,3 +1,18 @@
+//
+// Copyright 2024 The Skootrs Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use actix_web::{Responder, web::{ServiceConfig, Data, Json, self}, HttpResponse};
 use serde::{Serialize, Deserialize};
 use skootrs_statestore::SurrealProjectStateStore;
@@ -6,6 +21,7 @@ use utoipa::ToSchema;
 use skootrs_model::skootrs::ProjectParams;
 use skootrs_lib::service::{ecosystem::LocalEcosystemService, facet::LocalFacetService, project::{LocalProjectService, ProjectService}, repo::LocalRepoService, source::LocalSourceService};
 
+/// An Error response for the REST API
 #[derive(Serialize, Deserialize, Clone, ToSchema)]
 pub(super) enum ErrorResponse {
     /// When Project is not found by search term.
@@ -16,6 +32,7 @@ pub(super) enum ErrorResponse {
     Unauthorized(String),
 }
 
+/// Configures the services and routes for the Skootrs REST API
 pub(super) fn configure(store: Data<SurrealProjectStateStore>) -> impl FnOnce(&mut ServiceConfig) {
     |config: &mut ServiceConfig| {
         config
