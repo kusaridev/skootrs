@@ -48,18 +48,30 @@ use crate::service::source::SourceService;
 
 use super::source::LocalSourceService;
 
+/// The `LocalFacetService` struct represents a service for creating and managing facets on the local machine.
 #[derive(Debug)]
 pub struct LocalFacetService {}
 
+/// The `RootFacetService` trait provides an interface for initializing and managing a project's facets.
+/// This includes things like initializing and managing source files, source bundles, and API bundles.
+/// It is the root service for all facets and handles which other services to delegate to.
 pub trait RootFacetService {
     fn initialize(&self, params: FacetParams) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
     fn initialize_all(&self, params: FacetSetParams) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
 }
 
+/// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source 
+/// file facets. This includes things like initializing and managing READMEs, licenses, and security policy 
+/// files.
 pub trait SourceFileFacetService {
     fn initialize(&self, params: SourceFileFacetParams) -> Result<SourceFileFacet, SkootError>;
 }
 
+/// The `SourceBundleFacetService` trait provides an interface for initializing and managing a project's source
+/// bundle facets. This includes things like initializing and managing set of files.
+/// 
+/// This replaces the `SourceFileFacetService` trait since it's more generic and can handle more than just
+/// single files.
 pub trait SourceBundleFacetService {
     fn initialize(
         &self,
@@ -133,6 +145,10 @@ impl SourceBundleFacetService for LocalFacetService {
     }
 }
 
+/// The `APIBundleFacetService` trait provides an interface for initializing and managing a project's API
+/// bundle facets. This includes things like initializing and managing API calls to services like Github.
+/// 
+/// These API calls are used to enable features like branch protection, vulnerability reporting, etc.
 pub trait APIBundleFacetService {
     fn initialize(
         &self,
@@ -159,6 +175,7 @@ impl APIBundleFacetService for LocalFacetService {
     }
 }
 
+/// The `SourceBundleContent` struct represents the content of a set of source files.
 pub struct SourceBundleContent {
     pub source_files_content: Vec<SourceFileContent>,
     pub facet_type: SupportedFacetType,
@@ -200,6 +217,9 @@ impl RootFacetService for LocalFacetService {
     
 }
 
+/// The `APIBundleHandler` trait provides an interface for generating an `APIBundleFacet`.
+/// This includes calling APIs to services like Github to enable features like branch protection,
+/// vulnerability reporting, etc.
 trait APIBundleHandler {
     async fn generate(
         &self,
@@ -207,7 +227,10 @@ trait APIBundleHandler {
     ) -> Result<APIBundleFacet, SkootError>;
 }
 
+/// The `GithubAPIBundleHandler` struct represents a handler for generating an `APIBundleFacet` related to
+/// API calls made to Github.
 struct GithubAPIBundleHandler {}
+
 impl APIBundleHandler for GithubAPIBundleHandler {
     async fn generate(
         &self,
@@ -293,6 +316,8 @@ impl GithubAPIBundleHandler {
     }
 }
 
+/// The `SourceBundleContentGenerator` trait provides an interface for generating the
+/// content (i.e. text) for a set of source files.
 trait SourceBundleContentGenerator {
     fn generate_content(
         &self,
@@ -303,6 +328,7 @@ trait SourceBundleContentGenerator {
 /// Handles the generation of source files content that are generic to all projects by default,
 /// e.g. README.md, LICENSE, etc.
 struct DefaultSourceBundleContentHandler {}
+
 impl SourceBundleContentGenerator for DefaultSourceBundleContentHandler {
     fn generate_content(
         &self,
@@ -509,6 +535,7 @@ impl DefaultSourceBundleContentHandler {
 /// Handles the generation of source files content specific to Go projects hosted on Github.
 /// e.g. Github actions running goreleaser
 struct GoGithubSourceBundleContentHandler {}
+
 impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
     fn generate_content(
         &self,
@@ -648,6 +675,8 @@ impl GoGithubSourceBundleContentHandler {
     }
 }
 
+/// The `FacetSetParamsGenerator` struct represents a service for generating params for a set of facets.
+/// This includes things like generating default params for source bundles and API bundles.
 pub struct FacetSetParamsGenerator {}
 
 impl FacetSetParamsGenerator {

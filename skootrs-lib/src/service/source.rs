@@ -23,6 +23,9 @@ use skootrs_model::skootrs::{InitializedRepo, InitializedSource, SkootError, Sou
 
 use super::repo::{LocalRepoService, RepoService};
 
+/// The `SourceService` trait provides an interface for and managing a project's source code.
+/// This code is usually something a local git repo. The service differs from the repo service
+/// in that it's focused on the files and not the repo itself.
 pub trait SourceService {
     fn initialize(
         &self,
@@ -40,6 +43,8 @@ pub trait SourceService {
     fn read_file<P: AsRef<Path>>(&self, source: &InitializedSource, path: P, name: String) -> Result<String, SkootError>;
 }
 
+/// The `LocalSourceService` struct provides an implementation of the `SourceService` trait for initializing
+/// and managing a project's source files from the local machine.
 #[derive(Debug)]
 pub struct LocalSourceService {}
 

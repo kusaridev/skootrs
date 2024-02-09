@@ -1,3 +1,18 @@
+//
+// Copyright 2024 The Skootrs Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use std::net::Ipv4Addr;
 
 use actix_web::{App, HttpServer, web::Data};
@@ -12,7 +27,7 @@ use crate::server::project::ErrorResponse;
 use skootrs_model::{skootrs::{InitializedProject, ProjectParams, InitializedRepo, InitializedGithubRepo, InitializedEcosystem, RepoParams, EcosystemParams, GithubUser, GithubRepoParams, SourceParams, InitializedSource, MavenParams, GoParams, InitializedGo, InitializedMaven, facet::{CommonFacetParams, SourceFileFacet, SourceFileFacetParams, InitializedFacet, FacetParams, SupportedFacetType}}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderCommitHash, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess, SecurityInsightsVersion100YamlSchemaSecurityArtifacts, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment, SecurityInsightsVersion100YamlSchemaSecurityContactsItem, SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, SecurityInsightsVersion100YamlSchemaSecurityTestingItem, SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment, SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey}};
 use skootrs_model::skootrs::facet::{SourceBundleFacet, SourceBundleFacetParams, APIBundleFacet, APIBundleFacetParams, SourceFileContent, APIContent};
 
-
+/// Run the Skootrs REST API server.
 #[actix_web::main]
 pub async fn run_server() -> std::io::Result<()> {
     #[derive(OpenApi)]

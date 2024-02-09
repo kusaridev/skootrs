@@ -115,6 +115,10 @@ pub async fn create() -> std::result::Result<(), SkootError> {
     Ok(())
 }
 
+/// Returns `Ok(())` if the able to print out the content of the facet, otherwise returns an error.
+/// 
+/// This function prompts the user to select a project and then a facet of that project to fetch from the state store.
+/// It then prints out the content of the facet.
 pub async fn get_facet() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     let repo_to_project: HashMap<String, &InitializedProject> = projects
@@ -162,14 +166,14 @@ pub async fn get_facet() -> std::result::Result<(), SkootError> {
 
     let facet_content = get_facet_content(facet, project)?;
 
-    //let facet_path = format!("{}/{}", facet.path, facet.name);
-
-    //let content = std::fs::read_to_string(facet_path)?;
     println!("{facet_content}");
 
     Ok(())
 }
 
+/// Returns `Ok(())` if the able to print out a dump of the statestore.
+/// 
+/// This function prints out the content of the state store in a pretty printed JSON format.
 pub async fn dump() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     println!("{}", serde_json::to_string_pretty(&projects)?);

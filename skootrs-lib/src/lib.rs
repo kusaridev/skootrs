@@ -13,7 +13,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This is the main entry point for core functionality in the Skootrs project.
+//! 
+//! It contains the main traits and implementations for the core functionality of the project.
+//! This includes the creation of a project, managing of the project's repository, and the management
+//! of the project's source code.
+//! 
+//! This crate also contains the concept of a facet, which is an abstraction for some piece of a project
+//! that is managed by Skootrs to provide a secure-by-default project. This includes things like sets of files
+//! in the source code or calls to the repository API. For example the SECURITY.md file or the API call that
+//! enables branch protection would be facets.
 #![feature(array_try_map)]
 
-//pub mod model;
 pub mod service;

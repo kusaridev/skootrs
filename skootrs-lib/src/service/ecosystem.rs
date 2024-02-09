@@ -5,9 +5,12 @@ use std::process::Command;
 use tracing::info;
 
 use skootrs_model::skootrs::{
-    EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven, InitializedSource, MavenParams, SkootError
+    EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven,
+    InitializedSource, MavenParams, SkootError,
 };
 
+/// The `EcosystemService` trait provides an interface for initializing and managing a project's ecosystem.
+/// An ecosystem is the language or packaging ecosystem that a project is built in, such as Maven or Go.
 pub trait EcosystemService {
     fn initialize(
         &self,
@@ -16,6 +19,8 @@ pub trait EcosystemService {
     ) -> Result<InitializedEcosystem, SkootError>;
 }
 
+/// The `LocalEcosystemService` struct provides an implementation of the `EcosystemService` trait for initializing 
+/// and managing a project's ecosystem on the local machine.
 #[derive(Debug)]
 pub struct LocalEcosystemService {}
 
@@ -44,15 +49,14 @@ impl EcosystemService for LocalEcosystemService {
     }
 }
 
+
+/// The `LocalMavenEcosystemHandler` struct represents a handler for initializing and managing a Maven 
+/// project on the local machine.
 struct LocalMavenEcosystemHandler {}
 
 impl LocalMavenEcosystemHandler {
     /// Returns `Ok(())` if the Maven project initialization is successful,
     /// otherwise returns an error.
-    ///
-    /// # Arguments
-    ///
-    /// * `path` - The path where the Maven project should be initialized.
     fn initialize(path: &str, params: &MavenParams) -> Result<(), SkootError> {
         let output = Command::new("mvn")
             .arg("archetype:generate")
@@ -70,11 +74,12 @@ impl LocalMavenEcosystemHandler {
                 std::io::ErrorKind::Other,
                 "Failed to run mvn generate",
             )))
-
         }
     }
 }
 
+/// The `LocalGoEcosystemHandler` struct represents a handler for initializing and managing a Go
+/// project on the local machine.
 struct LocalGoEcosystemHandler {}
 
 impl LocalGoEcosystemHandler {

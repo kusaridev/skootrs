@@ -13,16 +13,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! This is the crate where the statestore where the management of Skootrs project state is defined.
+//! The statestore currently supports an in memory SurrealDB instance that writes to a file.
+
 use surrealdb::{engine::local::{Db, RocksDb}, Surreal};
 
 use skootrs_model::skootrs::{InitializedProject, SkootError};
 
+/// The SurrealDB state store for Skootrs projects.
 #[derive(Debug)]
 pub struct SurrealProjectStateStore {
     pub db: Surreal<Db>
 }
 
+/// The functionality for the SurrealDB state store for Skootrs projects.
 impl SurrealProjectStateStore {
+    /// Create a new SurrealDB state store for Skootrs projects if `state.db` does not exist, otherwise open it.
     pub async fn new() -> Result<Self, SkootError> {
         let db = Surreal::new::<RocksDb>("state.db").await?;
         db.use_ns("kusaridev").use_db("skootrs").await?;
@@ -31,6 +37,7 @@ impl SurrealProjectStateStore {
         })
     }
 
+    /// Store a new project in the state store.
     pub async fn create(&self, project: InitializedProject) -> Result<Option<InitializedProject>, SkootError> {
         let created = self.db
             .create(("project", project.repo.full_url()))
@@ -39,6 +46,7 @@ impl SurrealProjectStateStore {
         Ok(created)
     }
 
+    /// Fetch a project from the state store.
     pub async fn select(&self, repo_url: String) -> Result<Option<InitializedProject>, SkootError> {
         let record = self.db
             .select(("project", repo_url))
@@ -46,6 +54,7 @@ impl SurrealProjectStateStore {
         Ok(record)
     }
 
+    /// Fetch all projects from the state store.
     pub async fn select_all(&self) -> Result<Vec<InitializedProject>, SkootError> {
         let records = self.db
             .select("project")
