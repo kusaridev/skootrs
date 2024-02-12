@@ -43,7 +43,8 @@ pub const SUPPORTED_ECOSYSTEMS: [&str; 2] = [
 
 /// Represents a project that has been initialized. This is the data and state of a project that has been 
 /// created.
-#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct InitializedProject {
     pub repo: InitializedRepo,
     pub ecosystem: InitializedEcosystem,
@@ -52,7 +53,8 @@ pub struct InitializedProject {
 }
 
 /// Represents the parameters for creating a project.
-#[derive(Serialize, Deserialize, ToSchema, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct ProjectParams {
     pub name: String,
     pub repo_params: RepoParams,
@@ -61,7 +63,8 @@ pub struct ProjectParams {
 }
 
 /// Represents an initialized repository along with its host.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum InitializedRepo {
     Github(InitializedGithubRepo)
 }
@@ -83,7 +86,8 @@ impl InitializedRepo {
 }
 
 /// Represents an initialized Github repository.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct InitializedGithubRepo {
     pub name: String,
     pub organization: GithubUser,
@@ -108,20 +112,23 @@ impl InitializedGithubRepo {
 
 /// Represents an initialized ecosystem. The enum is used to represent the different types of ecosystems
 /// that are supported by Skootrs currently.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum InitializedEcosystem {
     Go(InitializedGo),
     Maven(InitializedMaven)
 }
 
 /// Represents the parameters for creating a repository.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum RepoParams {
     Github(GithubRepoParams)
 }
 
 /// Represents the parameters for initializing an ecosystem.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum EcosystemParams {
     Go(GoParams),
     Maven(MavenParams)
@@ -130,7 +137,8 @@ pub enum EcosystemParams {
 /// Represents a Github user which is really just whether or not a repo belongs to  a user or organization.
 /// This is used to create a repo in the Github API. The Github API has different calls for creating a repo
 /// that belongs to the current authorized user or an organization the user has access to.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum GithubUser {
     User(String),
     Organization(String),
@@ -147,7 +155,8 @@ impl GithubUser {
 }
 
 /// Represents the parameters for creating a Github repository.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct GithubRepoParams {
     pub name: String,
     pub description: String,
@@ -170,7 +179,8 @@ impl GithubRepoParams {
 }
 
 /// Represents the parameters for initializing a source code repository.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceParams {
     pub parent_path: String,
 }
@@ -189,7 +199,8 @@ pub struct InitializedSource {
 }
 
 /// Represents the Maven ecosystem.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct MavenParams {
     /// The group ID of the Maven project.
     pub group_id: String,
@@ -198,7 +209,8 @@ pub struct MavenParams {
 }
 
 /// Represents the Go ecosystem.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct GoParams {
     /// The name of the Go module.
     pub name: String,
@@ -207,7 +219,8 @@ pub struct GoParams {
 }
 
 /// Represents an initialized go module.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct InitializedGo {
     /// The name of the Go module.
     pub name: String,
@@ -223,7 +236,8 @@ impl InitializedGo {
 }
 
 /// Represents an initialized Maven project.
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct InitializedMaven {
     /// The group ID of the Maven project.
     pub group_id: String,

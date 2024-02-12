@@ -16,18 +16,21 @@
 use std::fmt;
 
 use serde::{Serialize, Deserialize};
+#[cfg(feature = "openapi")]
 use utoipa::ToSchema;
 
 use super::{InitializedSource, InitializedRepo, InitializedEcosystem};
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum InitializedFacet {
     SourceFile(SourceFileFacet),
     SourceBundle(SourceBundleFacet),
     APIBundle(APIBundleFacet),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum FacetParams {
     SourceFile(SourceFileFacetParams),
     SourceBundle(SourceBundleFacetParams),
@@ -35,12 +38,14 @@ pub enum FacetParams {
 }
 
 /// This is required to create an ordering of what facets get applied
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct FacetSetParams {
     pub facets_params: Vec<FacetParams>,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct CommonFacetParams {
     pub project_name: String,
     pub source: InitializedSource,
@@ -48,14 +53,16 @@ pub struct CommonFacetParams {
     pub ecosystem: InitializedEcosystem,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileFacet {
     pub name: String,
     pub path: String,
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileFacetParams {
     //pub name: String,
     //pub path: String,
@@ -64,45 +71,52 @@ pub struct SourceFileFacetParams {
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileContent {
     pub name: String,
     pub path: String,
     pub content: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceBundleFacet {
     pub source_files: Vec<SourceFileContent>,
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceBundleFacetParams {
     pub common: CommonFacetParams,
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIContent {
     pub name: String,
     pub url: String,
     pub response: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIBundleFacet {
     pub apis: Vec<APIContent>,
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIBundleFacetParams {
     pub common: CommonFacetParams,
     pub facet_type: SupportedFacetType,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, ToSchema, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum SupportedFacetType {
     Readme,
     SecurityInsights,

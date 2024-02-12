@@ -13,6 +13,10 @@ utoipa = { version = "4.1.0" }
 chrono = { version = "0.4.31", features = ["serde"] }
 schemars = { version = "0.8.16", features = ["chrono", "url"] }
 regress = "0.7.1"
+leptos-struct-table = { version = "0.7.0", features = ["chrono", "uuid"] }
 
 [lints]
 workspace = true
+
+[features]
+openapi = [] 
