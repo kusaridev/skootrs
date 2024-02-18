@@ -27,6 +27,7 @@ on:
 
 permissions:
   actions: read # for detecting the Github Actions environment.
+  contents: read
 
 jobs:
   goreleaser:
@@ -138,6 +139,11 @@ jobs:
           IMAGE_URI_DIGEST: ${{ needs.goreleaser.outputs.image }}@${{ needs.goreleaser.outputs.digest }}
 
   provenance-bins:
+    permissions:
+      id-token: write
+      actions: read
+      contents: write
+      packages: write
     name: generate provenance for binaries
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
@@ -148,6 +154,11 @@ jobs:
 
   provenance-container:
     name: generate provenance for container
+    permissions:
+      id-token: write
+      actions: read
+      contents: write
+      packages: write
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0 # must use semver here
