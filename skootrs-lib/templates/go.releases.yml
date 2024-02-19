@@ -1,4 +1,5 @@
 {% raw %}
+
 #
 # Copyright 2022 The GUAC Authors.
 #
@@ -107,6 +108,9 @@ jobs:
 
   sbom-container:
     # generate sbom for container as goreleaser can't - https://goreleaser.com/customization/sbom/#limitations
+    permissions:
+      id-token: write
+      packages: write
     name: generate sbom for container
     runs-on: ubuntu-latest
     needs: [goreleaser]
@@ -132,8 +136,7 @@ jobs:
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
-          cosign attach sbom --sbom spdx.sbom.json ${IMAGE_URI_DIGEST}
-          cosign sign -a git_sha=$GITHUB_SHA --attachment sbom ${IMAGE_URI_DIGEST} --yes
+          cosign attest --predicate spdx.sbom.json ${IMAGE_URI_DIGEST} --yes
         shell: bash
         env:
           IMAGE_URI_DIGEST: ${{ needs.goreleaser.outputs.image }}@${{ needs.goreleaser.outputs.digest }}

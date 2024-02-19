@@ -543,6 +543,11 @@ impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
     ) -> Result<SourceBundleContent, SkootError> {
         match params.facet_type {
             SupportedFacetType::Gitignore => self.generate_gitignore_content(params),
+            // TODO: Rename this to something like SecureBuild.
+            // This also does a bunch of other stuff like setting up releases, generating SBOM, etc.
+            // So for now just we just use it instead of creating multiple facets.
+            // The better option is to probably set up some mapping of properties like SLSA, SBOMGenerating, etc.
+            // to a single SecureBuild facet.
             SupportedFacetType::SLSABuild => self.generate_slsa_build_content(params),
             SupportedFacetType::DependencyUpdateTool => {
                 self.generate_dependency_update_tool_content(params)
@@ -581,21 +586,55 @@ impl GoGithubSourceBundleContentHandler {
     // Note: Content mostly taken from https://github.com/guacsec/guac/blob/f1703bd4ca3c0ec0fa55c5a3401d50578fb1680e/.github/workflows/release.yaml
     fn generate_slsa_build_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetParams,
     ) -> Result<SourceBundleContent, SkootError> {
         // TODO: This should really be a struct that serializes to yaml instead of just a file template
         #[derive(Template)]
         #[template(path = "go.releases.yml", escape = "none")]
-        struct SLSABuildTemplateParams {}
+        struct ReleaseTemplateParams {}
 
-        let slsa_build_template_params = SLSABuildTemplateParams {};
-        let content = slsa_build_template_params.render()?;
+        #[derive(Template)]
+        #[template(path = "Dockerfile.goreleaser", escape = "none")]
+        struct DockerfileTemplateParams {
+            project_name: String,
+        }
+
+        #[derive(Template)]
+        #[template(path = "goreleaser.yml", escape = "none")]
+        struct GoReleaserTemplateParams {
+            project_name: String,
+            module_name: String,
+        }
+        
+        let module = match &params.common.ecosystem {
+            InitializedEcosystem::Go(go) => go.module(),
+            _ => unreachable!("Ecosystem should be Go"),
+        };
+
+        let slsa_build_template_params = ReleaseTemplateParams {};
+        let dockerfile_template_params = DockerfileTemplateParams {
+            project_name: params.common.project_name.clone(),
+        };
+        let goreleaser_template_params = GoReleaserTemplateParams {
+            project_name: params.common.project_name.clone(),
+            module_name: module,
+        };
 
         Ok(SourceBundleContent {
             source_files_content: vec![SourceFileContent {
                 name: "releases.yml".to_string(),
                 path: ".github/workflows/".to_string(),
-                content,
+                content: slsa_build_template_params.render()?,
+            },
+            SourceFileContent {
+                name: "Dockerfile.goreleaser".to_string(),
+                path: "./".to_string(),
+                content: dockerfile_template_params.render()?,
+            },
+            SourceFileContent {
+                name: ".goreleaser.yml".to_string(),
+                path: "./".to_string(),
+                content: goreleaser_template_params.render()?,
             }],
             facet_type: SupportedFacetType::SLSABuild,
         })
@@ -726,7 +765,7 @@ impl FacetSetParamsGenerator {
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, SkootError> {
         use SupportedFacetType::{
-            DefaultSourceCode, DependencyUpdateTool, Fuzzing, Gitignore, License, Readme,
+            DefaultSourceCode, DependencyUpdateTool, Gitignore, License, Readme,
             SLSABuild, Scorecard, SecurityInsights, SecurityPolicy, SAST,
         };
         let supported_facets = [
@@ -739,7 +778,9 @@ impl FacetSetParamsGenerator {
             // SBOMGenerator, // Handled by the SLSABuild facet
             // StaticCodeAnalysis,
             DependencyUpdateTool,
-            Fuzzing,
+            // TODO: Fuzzing right now requires a bunch of resources that are unavailable to most projects without
+            // some sort of manual intervention. This is disabled until some option becomes available.
+            // Fuzzing,
             Scorecard,
             // PublishPackages,
             // PinnedDependencies,
