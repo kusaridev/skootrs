@@ -110,3 +110,67 @@ impl LocalGoEcosystemHandler {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempdir::TempDir;
+
+    #[test]
+    fn test_local_maven_ecosystem_handler_initialize_success() {
+        let temp_dir = TempDir::new("test").unwrap();
+        let path = temp_dir.path().to_str().unwrap();
+        let params = MavenParams {
+            group_id: "com.example".to_string(),
+            artifact_id: "my-project".to_string(),
+        };
+
+        let result = LocalMavenEcosystemHandler::initialize(path, &params);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_local_maven_ecosystem_handler_initialize_failure() {
+        let temp_dir = TempDir::new("test").unwrap();
+        let path = temp_dir.path().to_str().unwrap();
+        let params = MavenParams {
+            // Invalid group ID
+            group_id: "".to_string(),
+            artifact_id: "my-project".to_string(),
+        };
+
+        let result = LocalMavenEcosystemHandler::initialize(path, &params);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_local_go_ecosystem_handler_initialize_success() {
+        let temp_dir = TempDir::new("test").unwrap();
+        let path = temp_dir.path().to_str().unwrap();
+        let params = GoParams {
+            name: "my-project".to_string(),
+            host: "github.com".to_string(),
+        };
+
+        let result = LocalGoEcosystemHandler::initialize(path, &params);
+
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_local_go_ecosystem_handler_initialize_failure() {
+        let temp_dir = TempDir::new("test").unwrap();
+        let path = temp_dir.path().to_str().unwrap();
+        let params = GoParams {
+            // Invalid project name
+            name: "".to_string(),
+            host: "github.com".to_string(),
+        };
+
+        let result = LocalGoEcosystemHandler::initialize(path, &params);
+
+        assert!(result.is_err());
+    }
+}

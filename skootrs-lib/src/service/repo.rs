@@ -38,6 +38,13 @@ pub struct LocalRepoService {}
 
 impl RepoService for LocalRepoService {
     async fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, SkootError> {
+        // TODO: The octocrab initialization should be done in a better place and be parameterized
+        let o: octocrab::Octocrab = octocrab::Octocrab::builder()
+            .personal_token(
+                    std::env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN env var must be populated"),
+            )
+            .build()?;
+        octocrab::initialise(o);
         match params {
             RepoParams::Github(g) => {
                 let github_repo_handler = GithubRepoHandler {
@@ -141,4 +148,32 @@ struct NewGithubRepoParams {
     has_issues: bool,
     has_projects: bool,
     has_wiki: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use tempdir::TempDir;
+
+    use super::*;
+
+    // TODO: Mock out, or create test to create a repo/delete a repo
+
+    #[test]
+    fn test_clone_local_github_repo() {
+        let initialized_github_repo = InitializedGithubRepo {
+            name: "skootrs".to_string(),
+            organization: GithubUser::Organization("kusaridev".to_string()),
+        };
+
+        let temp_dir = TempDir::new("test").unwrap();
+        let path = temp_dir.path().to_str().unwrap();
+        let result = GithubRepoHandler::clone_local(&initialized_github_repo, path);
+        assert!(result.is_ok());
+
+        let initialized_source = result.unwrap();
+        assert_eq!(
+            initialized_source.path,
+            format!("{}/{}", path, initialized_github_repo.name)
+        );
+    }
 }
