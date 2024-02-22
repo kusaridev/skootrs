@@ -63,7 +63,13 @@ pub trait RootFacetService {
 /// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source 
 /// file facets. This includes things like initializing and managing READMEs, licenses, and security policy 
 /// files.
+///
 pub trait SourceFileFacetService {
+    /// Initializes a source file facet.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source file facet can't be initialized.
     fn initialize(&self, params: SourceFileFacetParams) -> Result<SourceFileFacet, SkootError>;
 }
 
@@ -73,6 +79,11 @@ pub trait SourceFileFacetService {
 /// This replaces the `SourceFileFacetService` trait since it's more generic and can handle more than just
 /// single files.
 pub trait SourceBundleFacetService {
+    /// Initializes a source bundle facet.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source bundle facet can't be initialized.
     fn initialize(
         &self,
         params: SourceBundleFacetParams,
@@ -80,6 +91,11 @@ pub trait SourceBundleFacetService {
 }
 
 impl SourceBundleFacetService for LocalFacetService {
+    /// Initializes a source bundle facet.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source bundle facet can't be initialized.
     fn initialize(
         &self,
         params: SourceBundleFacetParams,
@@ -91,7 +107,6 @@ impl SourceBundleFacetService for LocalFacetService {
             InitializedEcosystem::Go(_) => GoGithubSourceBundleContentHandler {},
             InitializedEcosystem::Maven(_) => todo!(),
         };
-        let _api_bundle_handler = GithubAPIBundleHandler {};
 
         let source_bundle_content = match params.facet_type {
             SupportedFacetType::Readme
@@ -238,8 +253,8 @@ impl APIBundleHandler for GithubAPIBundleHandler {
     ) -> Result<APIBundleFacet, SkootError> {
         let InitializedRepo::Github(repo) = &params.common.repo;
         match params.facet_type {
-            SupportedFacetType::BranchProtection => self.generate_branch_protection(params, repo).await,
-            SupportedFacetType::VulnerabilityReporting => self.generate_vulnerability_reporting(params, repo).await,
+            SupportedFacetType::BranchProtection => self.generate_branch_protection(repo).await,
+            SupportedFacetType::VulnerabilityReporting => self.generate_vulnerability_reporting(repo).await,
             _ => todo!("Not implemented yet"),
         }
     }
@@ -248,7 +263,6 @@ impl APIBundleHandler for GithubAPIBundleHandler {
 impl GithubAPIBundleHandler {
     async fn generate_branch_protection(
         &self,
-        _params: &APIBundleFacetParams,
         repo: &InitializedGithubRepo,
     ) -> Result<APIBundleFacet, SkootError> {
         let enforce_branch_protection_endpoint = format!(
@@ -287,7 +301,6 @@ impl GithubAPIBundleHandler {
 
     async fn generate_vulnerability_reporting(
         &self,
-        _params: &APIBundleFacetParams,
         repo: &InitializedGithubRepo,
     ) -> Result<APIBundleFacet, SkootError> {
         let vulnerability_reporting_endpoint = format!(
@@ -606,6 +619,7 @@ impl GoGithubSourceBundleContentHandler {
             module_name: String,
         }
         
+        #[allow(clippy::match_wildcard_for_single_variants)]
         let module = match &params.common.ecosystem {
             InitializedEcosystem::Go(go) => go.module(),
             _ => unreachable!("Ecosystem should be Go"),
@@ -719,11 +733,17 @@ impl GoGithubSourceBundleContentHandler {
 pub struct FacetSetParamsGenerator {}
 
 impl FacetSetParamsGenerator {
+    /// Generates the default set of facet params for a project.
+    /// This includes things like generating default source bundle and API bundle facet params.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if any of the facet set params can't be generated.
     pub fn generate_default(
         &self,
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, Box<dyn Error + Send + Sync>> {
-        let source_bundle_params = self.generate_default_source_bundle(common_params)?;
+        let source_bundle_params = self.generate_default_source_bundle_facet_params(common_params)?;
         let api_bundle_params = self.generate_default_api_bundle(common_params)?;
         let total_params = FacetSetParams {
             facets_params: [
@@ -736,6 +756,11 @@ impl FacetSetParamsGenerator {
         Ok(total_params)
     }
 
+    /// Generates the default set of API bundle facet params for a project.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the default set of API bundle facets can't be generated.
     pub fn generate_default_api_bundle(
         &self,
         common_params: &CommonFacetParams,
@@ -760,7 +785,12 @@ impl FacetSetParamsGenerator {
     }
 
     // TODO: Come up with a better solution than hard coding the default facets
-    pub fn generate_default_source_bundle(
+    /// Generates the default set of source bundle facet params for a project.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the default set of source bundle facets can't be generated.
+    pub fn generate_default_source_bundle_facet_params(
         &self,
         common_params: &CommonFacetParams,
     ) -> Result<FacetSetParams, SkootError> {

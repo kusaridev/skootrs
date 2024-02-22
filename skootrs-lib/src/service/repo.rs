@@ -26,7 +26,19 @@ use skootrs_model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRep
 /// The `RepoService` trait provides an interface for initializing and managing a project's source code
 /// repository. This repo is usually something like Github or Gitlab.
 pub trait RepoService {
+    /// Initializes a project's source code repository. This is usually a remote repo hosted on a service
+    /// like Github or Gitlab.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source code repository can't be initialized.
     fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;
+
+    /// Clones a project's source code repository to the local machine.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source code repository can't be cloned to the local machine.
     fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError>;
 }
 

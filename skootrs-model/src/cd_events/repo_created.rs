@@ -22,6 +22,7 @@
 #![allow(clippy::clone_on_copy)]
 #![allow(clippy::return_self_not_must_use)]
 #![allow(clippy::default_trait_access)]
+#![allow(clippy::to_string_trait_impl)]
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;

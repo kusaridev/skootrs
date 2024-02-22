@@ -26,16 +26,34 @@ use super::repo::{LocalRepoService, RepoService};
 /// This code is usually something a local git repo. The service differs from the repo service
 /// in that it's focused on the files and not the repo itself.
 pub trait SourceService {
+    /// Initializes a source code directory for a project. This usually involves cloning a repo from
+    /// a repo service.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source code directory can't be initialized.
     fn initialize(
         &self,
         params: SourceParams,
         initialized_repo: InitializedRepo,
     ) -> Result<InitializedSource, SkootError>;
+
+    /// Commits changes to the repo and pushed them to the remote.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the changes can't be committed and pushed to the remote.
     fn commit_and_push_changes(
         &self,
         source: InitializedSource,
         message: String,
     ) -> Result<(), SkootError>;
+
+    /// Writes a file to the source code directory.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file can't be written to the source code directory.
     fn write_file<P: AsRef<Path>, C: AsRef<[u8]>>(
         &self,
         source: InitializedSource,
@@ -43,6 +61,12 @@ pub trait SourceService {
         name: String,
         contents: C,
     ) -> Result<(), SkootError>;
+
+    /// Reads a file from the source code directory.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file can't be read from the source code directory.
     fn read_file<P: AsRef<Path>>(
         &self,
         source: &InitializedSource,

@@ -13,6 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This is the crate where the REST API for Skootrs is defined. The REST API should have feature parity with the CLI.
-//! The REST API uses Actix and also utilizes utoipa for OpenAPI documentation and functionality.
+//! This is the crate where the REST API for `Skootrs` is defined. The REST API should have feature parity with the CLI.
+//! The REST API uses `Actix` and also utilizes utoipa for `OpenAPI` documentation and functionality.
 pub mod server;
