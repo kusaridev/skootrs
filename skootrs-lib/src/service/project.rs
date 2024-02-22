@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::error::Error;
 
 use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
@@ -29,6 +31,11 @@ use tracing::debug;
 
 /// The `ProjectService` trait provides an interface for initializing and managing a Skootrs project.
 pub trait ProjectService {
+    /// Initializes a Skootrs project.
+    ///h
+    /// # Errors
+    ///
+    /// Returns an error if the project can't be initialized for any reason.
     fn initialize(
         &self,
         params: ProjectParams,
@@ -80,7 +87,7 @@ where
         };
         //let facet_set_params = facet_set_params_generator.generate_default(&common_params)?;
         let source_facet_set_params =
-            facet_set_params_generator.generate_default_source_bundle(&common_params)?;
+            facet_set_params_generator.generate_default_source_bundle_facet_params(&common_params)?;
         let api_facet_set_params =
             facet_set_params_generator.generate_default_api_bundle(&common_params)?;
         let initialized_source_facets = self

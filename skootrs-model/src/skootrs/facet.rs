@@ -18,6 +18,8 @@
 //! This includes things like README, SECURITY.md, as well as API calls
 //! like enabling branch protection on GitHub.
 
+#![allow(clippy::module_name_repetitions)]
+
 use std::fmt;
 
 use serde::{Serialize, Deserialize};

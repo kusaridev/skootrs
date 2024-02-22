@@ -12,6 +12,12 @@ use skootrs_model::skootrs::{
 /// The `EcosystemService` trait provides an interface for initializing and managing a project's ecosystem.
 /// An ecosystem is the language or packaging ecosystem that a project is built in, such as Maven or Go.
 pub trait EcosystemService {
+    /// Initializes a project's ecosystem. This involves setting up the project's package or build system.
+    /// For example `go mod init` for Go.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the ecosystem can't be initialized.
     fn initialize(
         &self,
         params: EcosystemParams,

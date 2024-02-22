@@ -21,6 +21,11 @@ use skootrs_statestore::SurrealProjectStateStore;
 /// The project can be created for either Go or Maven ecosystems right now.
 /// The project is created in Github, cloned down, and then initialized along with any other security supporting
 /// tasks.
+///
+/// # Errors
+///
+/// Returns an error if the user is not authenticated with Github, or if the project can't be created
+/// for any other reason.
 pub async fn create() -> std::result::Result<(), SkootError> {
     let name = Text::new("The name of the repository").prompt()?;
     let description = Text::new("The description of the repository").prompt()?;
@@ -119,6 +124,11 @@ pub async fn create() -> std::result::Result<(), SkootError> {
 /// 
 /// This function prompts the user to select a project and then a facet of that project to fetch from the state store.
 /// It then prints out the content of the facet.
+/// 
+/// # Errors
+///
+/// Returns an error if the state store is not able to be accessed or if the selected project or facet
+/// is not found.
 pub async fn get_facet() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     let repo_to_project: HashMap<String, &InitializedProject> = projects
@@ -174,6 +184,9 @@ pub async fn get_facet() -> std::result::Result<(), SkootError> {
 /// Returns `Ok(())` if the able to print out a dump of the statestore.
 /// 
 /// This function prints out the content of the state store in a pretty printed JSON format.
+/// # Errors
+/// 
+/// Returns an error if the state store is not able to be accessed.
 pub async fn dump() -> std::result::Result<(), SkootError> {
     let projects = get_all().await?;
     println!("{}", serde_json::to_string_pretty(&projects)?);
@@ -207,7 +220,7 @@ fn get_facet_content(
         }
         InitializedFacet::APIBundle(f) => {
             // TODO: This can make it unclear which API was used
-            let content = f.apis.iter().map(|a| format!("{:?}",  a)).collect::<Vec<_>>();
+            let content = f.apis.iter().map(|a| format!("{a:?}")).collect::<Vec<_>>();
             Ok(content.join("\n"))
         },
     }

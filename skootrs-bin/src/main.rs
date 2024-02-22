@@ -75,7 +75,7 @@ fn init_tracing() {
         .with(JsonStorageLayer)
         .with(formatting_layer);
     tracing::subscriber::set_global_default(subscriber)
-        .expect("Failed to install `tracing` subscriber.")
+        .expect("Failed to install `tracing` subscriber.");
 }
 
 #[tokio::main]
