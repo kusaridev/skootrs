@@ -20,10 +20,10 @@
 
 pub mod helpers;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use skootrs_model::skootrs::SkootError;
 
-use helpers::{create, dump, get_facet};
+use helpers::{create, dump, get_facet, get_output};
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use tracing::error;
@@ -48,6 +48,18 @@ enum SkootrsCli {
     /// Get the data for a facet of a particular project.
     #[command(name = "get-facet")]
     GetFacet,
+
+    #[command(name = "get")]
+    Get {
+        #[clap(subcommand)]
+        resource: GetCommands,
+    },
+}
+
+/// This is the enum for what nouns the `get` command can take.
+#[derive(Subcommand, Debug)]
+enum GetCommands {
+    Output
 }
 
 fn init_tracing() {
@@ -109,6 +121,15 @@ async fn main() -> std::result::Result<(), SkootError> {
         SkootrsCli::GetFacet => {
             if let Err(ref error) = get_facet().await {
                 error!(error = error.as_ref(), "Failed to get facet");
+            }
+        }
+        SkootrsCli::Get { resource } => {
+            match resource {
+                GetCommands::Output => {
+                    if let Err(ref error) = get_output().await {
+                        error!(error = error.as_ref(), "Failed to get output");
+                    }
+                }
             }
         }
     };
