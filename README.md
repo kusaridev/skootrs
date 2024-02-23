@@ -22,7 +22,8 @@ Commands:
   create     
   daemon     
   dump       
-  get-facet  
+  get-facet
+  get  
   help       Print this message or the help of the given subcommand(s)
 ```
 
@@ -30,6 +31,8 @@ Commands:
 - Daemon - The command for running Skootrs as a REST API.
 - Dump - The command for dumping the output of Skootrs' state database to stdout. Useful for debugging.
 - Get-Facet - The command for dumping the file or API output for a facet for a given project.
+- Get - This is a new command that will be the verb for getting items that Skootrs knows abou
+  - Output - This is a verb for the Get command that will fetch outputs from Skootrs project. Currently this only supports getting SBOMs
 
 To get pretty printing of the logs which are in [bunyan](https://github.com/trentm/node-bunyan) format I recommend piping the skootrs into the bunyan cli. I recommend using [bunyan-rs](https://github.com/LukeMathWalker/bunyan). For example:
 

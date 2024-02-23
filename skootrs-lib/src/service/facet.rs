@@ -21,7 +21,7 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::unused_self)]
 
-use std::error::Error;
+use std::{error::Error, str::FromStr};
 
 use askama::Template;
 use chrono::Datelike;
@@ -30,13 +30,7 @@ use tracing::info;
 
 use skootrs_model::{
     security_insights::insights10::{
-        SecurityInsightsVersion100YamlSchema,
-        SecurityInsightsVersion100YamlSchemaContributionPolicy,
-        SecurityInsightsVersion100YamlSchemaHeader,
-        SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
-        SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-        SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
-        SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
+        SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting
     },
     skootrs::{
         facet::{
@@ -457,6 +451,7 @@ impl DefaultSourceBundleContentHandler {
         })
     }
 
+    #[allow(clippy::too_many_lines)]
     fn generate_security_insights_content(
         &self,
         params: &SourceBundleFacetParams,
@@ -469,7 +464,51 @@ impl DefaultSourceBundleContentHandler {
                 code_of_conduct: None,
                 contributing_policy: None,
             },
-            dependencies: None,
+            dependencies: Some(SecurityInsightsVersion100YamlSchemaDependencies{
+                dependencies_lifecycle: None,
+                dependencies_lists: vec![
+                    format!("{}/blob/main/go.mod", &params.common.repo.full_url())
+                ],
+                env_dependencies_policy: None,
+                sbom: Some(vec![
+                    SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+                        sbom_creation: Some(
+                            SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation::from_str("Created by goreleaser")?),
+                        sbom_file: Some(format!("{}/releases/latest/download/main-linux-amd64.spdx.sbom.json", &params.common.repo.full_url())), 
+                        sbom_format: Some("SPDX".to_string()),
+                        sbom_url: Some("https://spdx.github.io/spdx-spec/v2.3/".to_string()), 
+                    },
+                    SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+                        sbom_creation: Some(
+                            SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation::from_str("Created by goreleaser")?),
+                        sbom_file: Some(format!("{}/releases/latest/download/main-linux-arm.spdx.sbom.json", &params.common.repo.full_url())), 
+                        sbom_format: Some("SPDX".to_string()),
+                        sbom_url: Some("https://spdx.github.io/spdx-spec/v2.3/".to_string()), 
+                    },
+                    SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+                        sbom_creation: Some(
+                            SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation::from_str("Created by goreleaser")?),
+                        sbom_file: Some(format!("{}/releases/latest/download/main-linux-arm64.spdx.sbom.json", &params.common.repo.full_url())), 
+                        sbom_format: Some("SPDX".to_string()),
+                        sbom_url: Some("https://spdx.github.io/spdx-spec/v2.3/".to_string()), 
+                    },
+                    SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+                        sbom_creation: Some(
+                            SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation::from_str("Created by goreleaser")?),
+                        sbom_file: Some(format!("{}/releases/latest/download/main-windows-amd64.exe.spdx.sbom.json", &params.common.repo.full_url())), 
+                        sbom_format: Some("SPDX".to_string()),
+                        sbom_url: Some("https://spdx.github.io/spdx-spec/v2.3/".to_string()), 
+                    },
+                    SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+                        sbom_creation: Some(
+                            SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation::from_str("Created by goreleaser")?),
+                        sbom_file: Some(format!("{}/releases/latest/download/main.spdx.sbom.json", &params.common.repo.full_url())), 
+                        sbom_format: Some("SPDX".to_string()),
+                        sbom_url: Some("https://spdx.github.io/spdx-spec/v2.3/".to_string()), 
+                    },
+                ]),
+                third_party_packages: Some(true),
+            }),
             distribution_points: Vec::new(),
             documentation: None,
             header: SecurityInsightsVersion100YamlSchemaHeader {
@@ -494,6 +533,8 @@ impl DefaultSourceBundleContentHandler {
                 roadmap: None,
                 status: SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus::Active,
             },
+            // TODO: Since security insights doesn't support SLSA, scorecard, etc. explicitly we might want to add it
+            // to security_artifacts.
             security_artifacts: None,
             security_assessments: None,
             security_contacts: Vec::new(),
@@ -515,7 +556,7 @@ impl DefaultSourceBundleContentHandler {
 
         Ok(SourceBundleContent {
             source_files_content: vec![SourceFileContent {
-                name: "SECURITY_INSIGHTS.yml".to_string(),
+                name: "SECURITY-INSIGHTS.yml".to_string(),
                 path: "./".to_string(),
                 content,
             }],
