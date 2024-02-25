@@ -12,13 +12,96 @@ use skootrs_model::{
     security_insights::insights10::SecurityInsightsVersion100YamlSchema,
     skootrs::{
         EcosystemParams, GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams,
-        ProjectParams, RepoParams, SkootError, SourceParams, SUPPORTED_ECOSYSTEMS,
+        ProjectParams, RepoParams, SkootError, SkootrsConfig, SourceParams, SUPPORTED_ECOSYSTEMS,
     },
 };
 use std::collections::HashMap;
 
 use skootrs_model::skootrs::facet::InitializedFacet;
 use skootrs_statestore::SurrealProjectStateStore;
+
+pub struct Project;
+
+impl Project {
+    /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.
+    ///
+    /// Creates a new skootrs project by prompting the user for repository details and language selection.
+    /// The project can be created for either Go or Maven ecosystems right now.
+    /// The project is created in Github, cloned down, and then initialized along with any other security supporting
+    /// tasks. If the project_params is not provided, the user will be prompted for the project details.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the user is not authenticated with Github, or if the project can't be created
+    /// for any other reason.
+    pub async fn create<T: ProjectService>(
+        config: &SkootrsConfig,
+        project_service: T,
+        project_params: Option<ProjectParams>,
+    ) -> Result<(), SkootError> {
+        let project_params = match project_params {
+            Some(p) => p,
+            None => Project::prompt_project(config).await?,
+        };
+
+        project_service.initialize(project_params).await?;
+        Ok(())
+    }
+
+    async fn prompt_project(config: &SkootrsConfig) -> Result<ProjectParams, SkootError> {
+        let name = Text::new("The name of the repository").prompt()?;
+        let description = Text::new("The description of the repository").prompt()?;
+        let user = octocrab::instance().current().user().await?.login;
+        let Page { items, .. } = octocrab::instance()
+            .current()
+            .list_org_memberships_for_authenticated_user()
+            .send()
+            .await?;
+        let organization = inquire::Select::new(
+            "Select an organization",
+            items
+                .iter()
+                .map(|i| i.organization.login.as_str())
+                .chain(vec![user.as_str()])
+                .collect(),
+        )
+        .prompt()?;
+        let language = inquire::Select::new("Select a language", SUPPORTED_ECOSYSTEMS.to_vec());
+
+        let gh_org = match organization {
+            x if x == user => GithubUser::User(x.to_string()),
+            x => GithubUser::Organization(x.to_string()),
+        };
+
+        let repo_params = match language.prompt()? {
+            "Go" => RepoParams::Github(GithubRepoParams {
+                name: name.clone(),
+                description,
+                organization: gh_org,
+            }),
+            "Maven" => RepoParams::Github(GithubRepoParams {
+                name: name.clone(),
+                description,
+                organization: gh_org,
+            }),
+            _ => {
+                unreachable!("Unsupported language")
+            }
+        };
+
+        Ok(ProjectParams {
+            name: name.clone(),
+            repo_params,
+            ecosystem_params: EcosystemParams::Go(GoParams {
+                name: name.clone(),
+                host: format!("github.com/{organization}"),
+            }),
+            source_params: SourceParams {
+                parent_path: config.local_project_path.clone(),
+            },
+        })
+    }
+}
 
 /// Returns `Ok(())` if the project creation is successful, otherwise returns an error.
 ///

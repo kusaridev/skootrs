@@ -251,3 +251,18 @@ impl GoParams {
         format!("{}/{}", self.host, self.name)
     }
 }
+
+/// A set of configuration options for Skootrs.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct SkootrsConfig {
+    pub local_project_path: String,
+}
+
+impl Default for SkootrsConfig {
+    fn default() -> Self {
+        Self {
+            local_project_path: "/tmp".into()
+        }
+    }
+}

@@ -17,25 +17,125 @@
 //!
 //! This crate is for the binary that acts as the CLI which interacts 
 //! with the other crates in the Skootrs project.
+//!
+//! The CLI is built using the `clap` crate, and the commands are
+//! using noun-verb syntax. So the commands are structured like:
+//! `skootrs <noun> <verb>`. For example, `skootrs project create`.
+//!
+//! The CLI if not given any arguments to a command will default to
+//! giving an interactive prompt to the user to fill in the required
+//! information.
 
 pub mod helpers;
 
 use clap::{Parser, Subcommand};
+use skootrs_lib::service::ecosystem::LocalEcosystemService;
+use skootrs_lib::service::facet::LocalFacetService;
+use skootrs_lib::service::project::LocalProjectService;
+use skootrs_lib::service::repo::LocalRepoService;
+use skootrs_lib::service::source::LocalSourceService;
 use skootrs_model::skootrs::SkootError;
+use clio::Input;
 
-use helpers::{create, dump, get_facet, get_output};
+use helpers::{dump, get_facet, get_output};
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use tracing::error;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::{EnvFilter, Registry};
+use serde::de::DeserializeOwned;
 
-/// This is the enum for what commands the CLI can take.
+/// Skootrs is a CLI tool for creating and managing secure-by-default projects.
+/// The commands are  using noun-verb syntax. So the commands are structured like:
+/// `skootrs <noun> <verb>`. For example, `skootrs project create`.
+///
+/// The CLI if not given any arguments to a command will default to
+/// giving an interactive prompt to the user to fill in the required
+/// information.
 #[derive(Parser)]
 #[command(name = "skootrs")]
 #[command(bin_name = "skootrs")]
 enum SkootrsCli {
+    /// Project commands.
+    #[command(name = "project")]
+    Project {
+        #[clap(subcommand)]
+        project: ProjectCommands,
+    },
+
+    /// Facet commands.
+    #[command(name = "facet")]
+    Facet {
+        #[clap(subcommand)]
+        facet: FacetCommands,
+    },
+
+    /// Output commands.
+    #[command(name = "output")]
+    Output {
+        #[clap(subcommand)]
+        output: OutputCommands,
+    },
+
+    /// Daemon commands.
+    #[command(name = "daemon")]
+    Daemon {
+        #[clap(subcommand)]
+        daemon: DaemonCommands,
+    },
+}
+
+/// This is the enum for what nouns the `project` command can take.
+#[derive(Subcommand, Debug)]
+enum ProjectCommands {
+    /// Create a new project.
+    #[command(name = "create")]
+    Create {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
+    /// Get the metadata for a particular project.
+    #[command(name = "get")]
+    Get,
+    /// List all the projects known to the local Skootrs
+    #[command(name = "list")]
+    List,
+}
+
+/// This is the enum for what nouns the `facet` command can take.
+#[derive(Subcommand, Debug)]
+enum FacetCommands {
+    /// Get the data for a facet of a particular project.
+    #[command(name = "get")]
+    Get,
+    /// List all the facets that belong to a particular project.
+    #[command(name = "list")]
+    List
+}
+
+/// This is the enum for what nouns the `output` command can take.
+#[derive(Subcommand, Debug)]
+enum OutputCommands {
+    /// Get the data for a release output of a particular project.
+    #[command(name = "get")]
+    Get,
+    /// List all the release outputs that belong to a particular project.
+    #[command(name = "list")]
+    List
+}
+
+/// This is the enum for what nouns the `daemon` command can take.
+#[derive(Subcommand, Debug)]
+enum DaemonCommands {
+    /// Start the REST server.
+    #[command(name = "start")]
+    Start,
+}
+
+/*enum SkootrsCli {
     /// Create a new project.
     #[command(name = "create")]
     Create,
@@ -60,7 +160,7 @@ enum SkootrsCli {
 #[derive(Subcommand, Debug)]
 enum GetCommands {
     Output
-}
+}*/
 
 fn init_tracing() {
     let app_name = "skootrs";
@@ -90,6 +190,34 @@ fn init_tracing() {
         .expect("Failed to install `tracing` subscriber.");
 }
 
+/// TODO: This probably should be configurable in some way.
+fn init_project_service() -> LocalProjectService<
+    LocalRepoService,
+    LocalEcosystemService,
+    LocalSourceService,
+    LocalFacetService,
+> {
+    let project_service = LocalProjectService {
+        repo_service: LocalRepoService {},
+        ecosystem_service: LocalEcosystemService {},
+        source_service: LocalSourceService {},
+        facet_service: LocalFacetService {},
+    };
+    project_service
+}
+
+fn parse_optional_input<T: DeserializeOwned>(input: Option<Input>) -> Result<Option<T>, SkootError> {
+    match input {
+        Some(input) => {
+            // This should also support JSON since most modern YAML is a superset of JSON.
+            // I don't care enough to support the edge cases right now.
+            let params: T = serde_yaml::from_reader(input)?;
+            Ok(Some(params))
+        }
+        None => Ok(None)
+    }
+}
+
 #[tokio::main]
 async fn main() -> std::result::Result<(), SkootError> {
     init_tracing();
@@ -100,38 +228,72 @@ async fn main() -> std::result::Result<(), SkootError> {
         )
         .build()?;
     octocrab::initialise(o);
+
+    let project_service = init_project_service();
+    // TODO: This should only default when it can't pull a valid config from the environment.
+    let config = skootrs_model::skootrs::SkootrsConfig::default();
+
     match cli {
-        SkootrsCli::Create => {
-            if let Err(ref error) = create().await {
-                error!(error = error.as_ref(), "Failed to create project");
-            }
-        }
-        SkootrsCli::Daemon => {
-            tokio::task::spawn_blocking(|| {
-                skootrs_rest::server::rest::run_server().expect("Failed to start REST Server");
-            })
-            .await
-            .expect("REST Server Task Panicked");
-        }
-        SkootrsCli::Dump => {
-            if let Err(ref error) = dump().await {
-                error!(error = error.as_ref(), "Failed to get info");
-            }
-        }
-        SkootrsCli::GetFacet => {
-            if let Err(ref error) = get_facet().await {
-                error!(error = error.as_ref(), "Failed to get facet");
-            }
-        }
-        SkootrsCli::Get { resource } => {
-            match resource {
-                GetCommands::Output => {
-                    if let Err(ref error) = get_output().await {
-                        error!(error = error.as_ref(), "Failed to get output");
+        SkootrsCli::Project { project } => {
+            match project {
+                ProjectCommands::Create { input } => {
+                    let project_params = parse_optional_input(input)?;
+                    if let Err(ref error) = helpers::Project::create(&config, project_service, project_params).await {
+                        error!(error = error.as_ref(), "Failed to create project");
+                    }
+                }
+                ProjectCommands::Get => {
+                    if let Err(ref error) = dump().await {
+                        error!(error = error.as_ref(), "Failed to get project info");
+                    }
+                }
+                ProjectCommands::List => {
+                    if let Err(ref error) = dump().await {
+                        error!(error = error.as_ref(), "Failed to list projects");
                     }
                 }
             }
         }
-    };
+        SkootrsCli::Facet { facet } => {
+            match facet {
+                FacetCommands::Get => {
+                    if let Err(ref error) = get_facet().await {
+                        error!(error = error.as_ref(), "Failed to get facet");
+                    }
+                }
+                FacetCommands::List => {
+                    if let Err(ref error) = get_facet().await {
+                        error!(error = error.as_ref(), "Failed to list facets for project");
+                    }
+                }
+            }
+        }
+        SkootrsCli::Output { output } => {
+            match output {
+                OutputCommands::Get => {
+                    if let Err(ref error) = get_output().await {
+                        error!(error = error.as_ref(), "Failed to get output");
+                    }
+                }
+                OutputCommands::List => {
+                    if let Err(ref error) = get_output().await {
+                        error!(error = error.as_ref(), "Failed to list outputs for project");
+                    }
+                }
+            }
+        }
+        SkootrsCli::Daemon { daemon } => {
+            match daemon {
+                DaemonCommands::Start => {
+                    tokio::task::spawn_blocking(|| {
+                        skootrs_rest::server::rest::run_server().expect("Failed to start REST Server");
+                    })
+                    .await
+                    .expect("REST Server Task Panicked");
+                }
+            }
+        }
+    }
+
     Ok(())
 }
