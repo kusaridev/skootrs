@@ -20,13 +20,15 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use std::fmt;
+use std::{collections::HashMap, fmt};
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use strum::VariantNames;
 #[cfg(feature = "openapi")]
 use utoipa::ToSchema;
 
-use super::{InitializedSource, InitializedRepo, InitializedEcosystem};
+use super::{InitializedEcosystem, InitializedRepo, InitializedSource};
+use strum::EnumString;
 
 /// Represents a facet that has been initialized. This is an enum of
 /// the various supported facets like API based, and Source file bundle
@@ -34,18 +36,36 @@ use super::{InitializedSource, InitializedRepo, InitializedEcosystem};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum InitializedFacet {
+    /// (DEPRECATED) A facet that is based on a single source file.
     SourceFile(SourceFileFacet),
+    /// A facet that is based on a bundle of source files.
     SourceBundle(SourceBundleFacet),
+    /// A facet that is based on one or more API calls.
     APIBundle(APIBundleFacet),
+}
+
+impl InitializedFacet {
+    /// Helper function to get the facet type of the inner facet.
+    #[must_use]
+    pub fn facet_type(&self) -> SupportedFacetType {
+        match self {
+            Self::SourceFile(facet) => facet.facet_type.clone(),
+            Self::SourceBundle(facet) => facet.facet_type.clone(),
+            Self::APIBundle(facet) => facet.facet_type.clone(),
+        }
+    }
 }
 
 /// Represents the parameters for creating a facet. This should mirror the
 /// `InitializedFacet` enum.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub enum FacetParams {
+pub enum FacetCreateParams {
+    /// (DEPRECATED) Params for creating a `SourceFileFacet`.
     SourceFile(SourceFileFacetParams),
-    SourceBundle(SourceBundleFacetParams),
+    /// Params for creating a `SourceBundleFacet`.
+    SourceBundle(SourceBundleFacetCreateParams),
+    /// Params for creating a `APIBundleFacet`.
     APIBundle(APIBundleFacetParams),
 }
 
@@ -56,8 +76,9 @@ pub enum FacetParams {
 /// boilerplate code.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct FacetSetParams {
-    pub facets_params: Vec<FacetParams>,
+pub struct FacetSetCreateParams {
+    /// The parameters for each `InitializedFacet` that should be created.
+    pub facets_params: Vec<FacetCreateParams>,
 }
 
 /// Represents the common parameters that are shared across all facets.
@@ -65,20 +86,27 @@ pub struct FacetSetParams {
 /// source, repo, and ecosystem.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct CommonFacetParams {
+pub struct CommonFacetCreateParams {
+    /// The name of the project the facet is being created for.
     pub project_name: String,
+    /// The source of the project the facet is being created for.
     pub source: InitializedSource,
+    /// The repo of the project the facet is being created for.
     pub repo: InitializedRepo,
+    /// The ecosystem of the project the facet is being created for.
     pub ecosystem: InitializedEcosystem,
 }
 
-/// (DEPRECATED) Represents a source file facet which is a facet that 
+/// (DEPRECATED) Represents a source file facet which is a facet that
 /// is based on a single source file.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileFacet {
+    /// The name of the source file.
     pub name: String,
+    /// The path of the source file.
     pub path: String,
+    /// The type of facet this is.
     pub facet_type: SupportedFacetType,
 }
 
@@ -86,7 +114,9 @@ pub struct SourceFileFacet {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileFacetParams {
-    pub common: CommonFacetParams,
+    /// The common parameters for the facet being created.
+    pub common: CommonFacetCreateParams,
+    /// The type of facet that is being created.
     pub facet_type: SupportedFacetType,
 }
 
@@ -94,12 +124,49 @@ pub struct SourceFileFacetParams {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceFileContent {
+    /// The name of the source file.
     pub name: String,
+    /// The path of the source file.
     pub path: String,
     // TODO: Since the content can change out of band of Skootrs
     // should we even store the content in the database?
+    /// The `String` content of the source file as a normal UTF8 string.
     pub content: String,
-    // TODO: Add a hash of the content to verify it hasn't changed
+}
+
+/// Represents a source file.
+#[derive(Serialize, Deserialize, Clone, Debug, Hash, Eq, PartialEq)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+#[serde(try_from = "String", into = "String")]
+pub struct SourceFile {
+    /// The name of the source file.
+    pub name: String,
+    /// The path of the source file.
+    pub path: String,
+    /// The hash of the source file.
+    pub hash: String,
+}
+
+impl TryFrom<String> for SourceFile {
+    type Error = String;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let parts: Vec<&str> = value.split(':').collect();
+        if parts.len() != 3 {
+            return Err(format!("Invalid source file string: {value}"));
+        }
+        Ok(Self {
+            name: parts[0].to_string(),
+            path: parts[1].to_string(),
+            hash: parts[2].to_string(),
+        })
+    }
+}
+
+impl From<SourceFile> for String {
+    fn from(value: SourceFile) -> Self {
+        format!("{}:{}:{}", value.name, value.path, value.hash)
+    }
 }
 
 /// Represents a source bundle facet which is a facet that is based
@@ -109,16 +176,23 @@ pub struct SourceFileContent {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct SourceBundleFacet {
-    pub source_files: Vec<SourceFileContent>,
+    /// The source files that make up the facet.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_files: Option<Vec<SourceFile>>,
+    /// The type of facet this is.
     pub facet_type: SupportedFacetType,
+    /// The content of the source files that make up the facet. This is a map of the source file to the content of the source file.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_files_content: Option<HashMap<SourceFile, String>>,
 }
-
 
 /// Represents the parameters for creating a source bundle facet.
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct SourceBundleFacetParams {
-    pub common: CommonFacetParams,
+pub struct SourceBundleFacetCreateParams {
+    /// The common parameters for the facet being created.
+    pub common: CommonFacetCreateParams,
+    /// The type of facet that is being created.
     pub facet_type: SupportedFacetType,
 }
 
@@ -127,17 +201,19 @@ pub struct SourceBundleFacetParams {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIContent {
+    /// The name of the API call.
     pub name: String,
+    /// The URL of the API call.
     pub url: String,
     // TODO: The response can be multiple things like a response code,
     // a JSON response, or something else. Should we store this as a
     // more comples type.
+    /// The response of the API call as a `String`.
     pub response: String,
     // TODO: Include the request as well. This could be useful for
     // audits, as well as for evaluating when the API facet might
     // need to be changed if an API call upstream changes.
 }
-
 
 /// Represents an API bundle facet which is a facet that is based on
 /// an api call. This can be a single API call, or a collection of
@@ -147,7 +223,9 @@ pub struct APIContent {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIBundleFacet {
+    /// The API calls that make up the facet.
     pub apis: Vec<APIContent>,
+    /// The type of facet this is.
     pub facet_type: SupportedFacetType,
 }
 
@@ -155,37 +233,87 @@ pub struct APIBundleFacet {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct APIBundleFacetParams {
-    pub common: CommonFacetParams,
+    /// The common parameters for the facet being created.
+    pub common: CommonFacetCreateParams,
+    /// The type of facet that is being created.
     pub facet_type: SupportedFacetType,
 }
 
 /// Represents the supported facet types. This is an enum of the
 /// various supported facets like README, SECURITY.md, as well as
 /// API calls like enabling branch protection on GitHub.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(
+    Serialize, Deserialize, Clone, Debug, PartialEq, Eq, VariantNames, EnumString, Hash, Default,
+)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum SupportedFacetType {
+    /// A facet type for a README file.
     Readme,
+
+    /// A facet type for a SECURITY-INSIGHTS.yml file.
     SecurityInsights,
+
+    /// A facet type that supports building the project via SLSA.
     SLSABuild,
+
+    /// A facet type that supports generation of SBOMs in the project.
     SBOMGenerator,
+
+    /// A facet type for the project's license.
     License,
+
+    /// A facet type that shows static code analysis (SCA) is run on the project.
     StaticCodeAnalysis,
+
+    /// A facet type for the project's gitignore file.
     Gitignore,
+
+    /// A facet type showing that branch protection has been enabled on the project.
     BranchProtection,
+
+    /// A facet type showing that code review is enabled on the project.
     CodeReview,
+
+    /// A facet type showing that a tool for updating dependencies has been enabled on the project.
     DependencyUpdateTool,
+
+    /// A facet type showing that a tool for fuzzing has been enabled on the project.
     Fuzzing,
+
+    /// A facet type showing that the project publishes its packages.
     PublishPackages,
+
+    /// A facet type showing that the project pins its dependencies.
     PinnedDependencies,
+
+    /// A facet type showing that the project runs a Static Application Security Testing (SAST) tool.
     SAST,
+
+    /// A facet type for the project's security policy.
     SecurityPolicy,
+
+    /// A facet type showing that the project runs a vulnerability scanner.
     VulnerabilityScanner,
+
+    /// A facet type showing that the project has configuration for forwarding security metadata to GUAC.
     GUACForwardingConfig,
+
+    /// A facet type showing that the project has `OpenSSF Allstar` running against it.
     Allstar,
+
+    /// A facet type showing that the project is running `OpenSSF Scorecard`.
     Scorecard,
+
+    /// A facet type showing for the project's default source code. This should be something simple to just show that the project can build with
+    /// trivial source code and all the other facets enabled.
     DefaultSourceCode,
+
+    /// A facet type showing that the project has a mechanism for reporting vulnerabilities.
     VulnerabilityReporting,
+
+    /// A catch all facet type for other facets that don't fit into the above categories.
+    #[default]
+    Other,
 }
 
 impl fmt::Display for SupportedFacetType {

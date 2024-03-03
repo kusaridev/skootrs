@@ -15,7 +15,7 @@
 
 //! Tool for creating and managing secure-by-default projects.
 //!
-//! This crate is for the binary that acts as the CLI which interacts 
+//! This crate is for the binary that acts as the CLI which interacts
 //! with the other crates in the Skootrs project.
 //!
 //! The CLI is built using the `clap` crate, and the commands are
@@ -29,22 +29,22 @@
 pub mod helpers;
 
 use clap::{Parser, Subcommand};
+use clio::Input;
 use skootrs_lib::service::ecosystem::LocalEcosystemService;
 use skootrs_lib::service::facet::LocalFacetService;
 use skootrs_lib::service::project::LocalProjectService;
 use skootrs_lib::service::repo::LocalRepoService;
 use skootrs_lib::service::source::LocalSourceService;
 use skootrs_model::skootrs::SkootError;
-use clio::Input;
 
-use helpers::{dump, get_facet, get_output};
+use helpers::{get_output, Facet, Output};
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
+use serde::de::DeserializeOwned;
 use tracing::error;
 use tracing_bunyan_formatter::{BunyanFormattingLayer, JsonStorageLayer};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::{EnvFilter, Registry};
-use serde::de::DeserializeOwned;
 
 /// Skootrs is a CLI tool for creating and managing secure-by-default projects.
 /// The commands are  using noun-verb syntax. So the commands are structured like:
@@ -99,7 +99,12 @@ enum ProjectCommands {
     },
     /// Get the metadata for a particular project.
     #[command(name = "get")]
-    Get,
+    Get {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
     /// List all the projects known to the local Skootrs
     #[command(name = "list")]
     List,
@@ -110,10 +115,20 @@ enum ProjectCommands {
 enum FacetCommands {
     /// Get the data for a facet of a particular project.
     #[command(name = "get")]
-    Get,
+    Get {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
     /// List all the facets that belong to a particular project.
     #[command(name = "list")]
-    List
+    List {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
 }
 
 /// This is the enum for what nouns the `output` command can take.
@@ -121,10 +136,15 @@ enum FacetCommands {
 enum OutputCommands {
     /// Get the data for a release output of a particular project.
     #[command(name = "get")]
-    Get,
+    Get {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
     /// List all the release outputs that belong to a particular project.
     #[command(name = "list")]
-    List
+    List,
 }
 
 /// This is the enum for what nouns the `daemon` command can take.
@@ -134,33 +154,6 @@ enum DaemonCommands {
     #[command(name = "start")]
     Start,
 }
-
-/*enum SkootrsCli {
-    /// Create a new project.
-    #[command(name = "create")]
-    Create,
-    /// Start the REST server.
-    #[command(name = "daemon")]
-    Daemon,
-    /// Dump the current state of the projects database.
-    #[command(name = "dump")]
-    Dump,
-    /// Get the data for a facet of a particular project.
-    #[command(name = "get-facet")]
-    GetFacet,
-
-    #[command(name = "get")]
-    Get {
-        #[clap(subcommand)]
-        resource: GetCommands,
-    },
-}
-
-/// This is the enum for what nouns the `get` command can take.
-#[derive(Subcommand, Debug)]
-enum GetCommands {
-    Output
-}*/
 
 fn init_tracing() {
     let app_name = "skootrs";
@@ -197,16 +190,17 @@ fn init_project_service() -> LocalProjectService<
     LocalSourceService,
     LocalFacetService,
 > {
-    let project_service = LocalProjectService {
+    LocalProjectService {
         repo_service: LocalRepoService {},
         ecosystem_service: LocalEcosystemService {},
         source_service: LocalSourceService {},
         facet_service: LocalFacetService {},
-    };
-    project_service
+    }
 }
 
-fn parse_optional_input<T: DeserializeOwned>(input: Option<Input>) -> Result<Option<T>, SkootError> {
+fn parse_optional_input<T: DeserializeOwned>(
+    input: Option<Input>,
+) -> Result<Option<T>, SkootError> {
     match input {
         Some(input) => {
             // This should also support JSON since most modern YAML is a superset of JSON.
@@ -214,7 +208,7 @@ fn parse_optional_input<T: DeserializeOwned>(input: Option<Input>) -> Result<Opt
             let params: T = serde_yaml::from_reader(input)?;
             Ok(Some(params))
         }
-        None => Ok(None)
+        None => Ok(None),
     }
 }
 
@@ -231,68 +225,74 @@ async fn main() -> std::result::Result<(), SkootError> {
 
     let project_service = init_project_service();
     // TODO: This should only default when it can't pull a valid config from the environment.
-    let config = skootrs_model::skootrs::SkootrsConfig::default();
+    let config = skootrs_model::skootrs::Config::default();
 
     match cli {
-        SkootrsCli::Project { project } => {
-            match project {
-                ProjectCommands::Create { input } => {
-                    let project_params = parse_optional_input(input)?;
-                    if let Err(ref error) = helpers::Project::create(&config, project_service, project_params).await {
-                        error!(error = error.as_ref(), "Failed to create project");
-                    }
-                }
-                ProjectCommands::Get => {
-                    if let Err(ref error) = dump().await {
-                        error!(error = error.as_ref(), "Failed to get project info");
-                    }
-                }
-                ProjectCommands::List => {
-                    if let Err(ref error) = dump().await {
-                        error!(error = error.as_ref(), "Failed to list projects");
-                    }
+        SkootrsCli::Project { project } => match project {
+            ProjectCommands::Create { input } => {
+                let project_create_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    helpers::Project::create(&config, &project_service, project_create_params).await
+                {
+                    error!(error = error.as_ref(), "Failed to create project");
                 }
             }
-        }
-        SkootrsCli::Facet { facet } => {
-            match facet {
-                FacetCommands::Get => {
-                    if let Err(ref error) = get_facet().await {
-                        error!(error = error.as_ref(), "Failed to get facet");
-                    }
-                }
-                FacetCommands::List => {
-                    if let Err(ref error) = get_facet().await {
-                        error!(error = error.as_ref(), "Failed to list facets for project");
-                    }
+            ProjectCommands::Get { input } => {
+                let project_get_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    helpers::Project::get(&config, &project_service, project_get_params).await
+                {
+                    error!(error = error.as_ref(), "Failed to get project info");
                 }
             }
-        }
-        SkootrsCli::Output { output } => {
-            match output {
-                OutputCommands::Get => {
-                    if let Err(ref error) = get_output().await {
-                        error!(error = error.as_ref(), "Failed to get output");
-                    }
-                }
-                OutputCommands::List => {
-                    if let Err(ref error) = get_output().await {
-                        error!(error = error.as_ref(), "Failed to list outputs for project");
-                    }
+            ProjectCommands::List => {
+                if let Err(ref error) = helpers::Project::print_list().await {
+                    error!(error = error.as_ref(), "Failed to list projects");
                 }
             }
-        }
-        SkootrsCli::Daemon { daemon } => {
-            match daemon {
-                DaemonCommands::Start => {
-                    tokio::task::spawn_blocking(|| {
-                        skootrs_rest::server::rest::run_server().expect("Failed to start REST Server");
-                    })
-                    .await
-                    .expect("REST Server Task Panicked");
+        },
+        SkootrsCli::Facet { facet } => match facet {
+            FacetCommands::Get { input } => {
+                let facet_get_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    Facet::get(&config, &project_service, facet_get_params).await
+                {
+                    error!(error = error.as_ref(), "Failed to get facet");
                 }
             }
-        }
+            FacetCommands::List { input } => {
+                let project_get_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    Facet::print_list(&config, &project_service, project_get_params).await
+                {
+                    error!(error = error.as_ref(), "Failed to list facets for project");
+                }
+            }
+        },
+        SkootrsCli::Output { output } => match output {
+            OutputCommands::Get { input } => {
+                let output_get_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    Output::get(&config, &project_service, output_get_params).await
+                {
+                    error!(error = error.as_ref(), "Failed to get output");
+                }
+            }
+            OutputCommands::List => {
+                if let Err(ref error) = get_output().await {
+                    error!(error = error.as_ref(), "Failed to list outputs for project");
+                }
+            }
+        },
+        SkootrsCli::Daemon { daemon } => match daemon {
+            DaemonCommands::Start => {
+                tokio::task::spawn_blocking(|| {
+                    skootrs_rest::server::rest::run_server().expect("Failed to start REST Server");
+                })
+                .await
+                .expect("REST Server Task Panicked");
+            }
+        },
     }
 
     Ok(())

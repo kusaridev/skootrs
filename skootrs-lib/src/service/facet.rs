@@ -21,7 +21,7 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::unused_self)]
 
-use std::{error::Error, str::FromStr};
+use std::str::FromStr;
 
 use askama::Template;
 use chrono::Datelike;
@@ -34,7 +34,7 @@ use skootrs_model::{
     },
     skootrs::{
         facet::{
-            APIBundleFacet, APIBundleFacetParams, APIContent, CommonFacetParams, FacetParams, FacetSetParams, InitializedFacet, SourceBundleFacet, SourceBundleFacetParams, SourceFileContent, SourceFileFacet, SourceFileFacetParams, SupportedFacetType
+            APIBundleFacet, APIBundleFacetParams, APIContent, CommonFacetCreateParams, FacetCreateParams, FacetSetCreateParams, InitializedFacet, SourceBundleFacet, SourceBundleFacetCreateParams, SourceFile, SourceFileContent, SourceFileFacet, SourceFileFacetParams, SupportedFacetType
         }, InitializedEcosystem, InitializedGithubRepo, InitializedRepo, SkootError
     },
 };
@@ -50,8 +50,8 @@ pub struct LocalFacetService {}
 /// This includes things like initializing and managing source files, source bundles, and API bundles.
 /// It is the root service for all facets and handles which other services to delegate to.
 pub trait RootFacetService {
-    fn initialize(&self, params: FacetParams) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
-    fn initialize_all(&self, params: FacetSetParams) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
+    fn initialize(&self, params: FacetCreateParams) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
+    fn initialize_all(&self, params: FacetSetCreateParams) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
 }
 
 /// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source 
@@ -80,7 +80,7 @@ pub trait SourceBundleFacetService {
     /// Returns an error if the source bundle facet can't be initialized.
     fn initialize(
         &self,
-        params: SourceBundleFacetParams,
+        params: SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleFacet, SkootError>;
 }
 
@@ -92,7 +92,7 @@ impl SourceBundleFacetService for LocalFacetService {
     /// Returns an error if the source bundle facet can't be initialized.
     fn initialize(
         &self,
-        params: SourceBundleFacetParams,
+        params: SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleFacet, SkootError> {
         let source_service = LocalSourceService {};
         let default_source_bundle_content_handler = DefaultSourceBundleContentHandler {};
@@ -130,11 +130,12 @@ impl SourceBundleFacetService for LocalFacetService {
             SupportedFacetType::Allstar => todo!(),
             SupportedFacetType::DefaultSourceCode => language_specific_source_bundle_content_handler.generate_content(&params)?,
             SupportedFacetType::VulnerabilityReporting => unimplemented!("VulnerabilityReporting is not implemented for source bundles"),
+            SupportedFacetType::Other => todo!(),
         };
 
         for source_file_content in &source_bundle_content.source_files_content {
             info!(
-                "Writing file {} to {}",
+                "Starting to write file {} to {}",
                 source_file_content.name, source_file_content.path
             );
             source_service.write_file(
@@ -145,9 +146,22 @@ impl SourceBundleFacetService for LocalFacetService {
             )?;
         }
 
+        let source_files: Vec<SourceFile> = source_bundle_content.source_files_content.iter().map(|source_file_content| {
+            Ok::<SourceFile, SkootError>(SourceFile {
+                name: source_file_content.name.clone(),
+                path: source_file_content.path.clone(),
+                hash: source_service.hash_file(
+                    &params.common.source,
+                    source_file_content.path.clone(),
+                    source_file_content.name.clone(),
+                )?,
+            })
+        }).collect::<Result<Vec<_>, _>>()?;
+
         let source_bundle_facet = SourceBundleFacet {
-            source_files: source_bundle_content.source_files_content,
+            source_files: Some(source_files),
             facet_type: params.facet_type,
+            source_files_content: None
         };
 
         Ok(source_bundle_facet)
@@ -191,18 +205,18 @@ pub struct SourceBundleContent {
 }
 
 impl RootFacetService for LocalFacetService {
-    async fn initialize(&self, params: FacetParams) -> Result<InitializedFacet, SkootError> {
+    async fn initialize(&self, params: FacetCreateParams) -> Result<InitializedFacet, SkootError> {
         match params {
-            FacetParams::SourceFile(_params) => {
+            FacetCreateParams::SourceFile(_params) => {
                 todo!("This has been removed in favor of SourceBundle")
                 /*let source_file_facet = SourceFileFacetService::initialize(self, params)?;
                 Ok(InitializedFacet::SourceFile(source_file_facet))*/
             }
-            FacetParams::SourceBundle(params) => {
+            FacetCreateParams::SourceBundle(params) => {
                 let source_bundle_facet = SourceBundleFacetService::initialize(self, params)?;
                 Ok(InitializedFacet::SourceBundle(source_bundle_facet))
             }
-            FacetParams::APIBundle(params) => {
+            FacetCreateParams::APIBundle(params) => {
                 let api_bundle_facet = APIBundleFacetService::initialize(self, params).await?;
                 Ok(InitializedFacet::APIBundle(api_bundle_facet))
             },
@@ -211,7 +225,7 @@ impl RootFacetService for LocalFacetService {
 
     async fn initialize_all(
         &self,
-        params: FacetSetParams,
+        params: FacetSetCreateParams,
     ) -> Result<Vec<InitializedFacet>, SkootError> {
         let futures = params
         .facets_params
@@ -220,7 +234,6 @@ impl RootFacetService for LocalFacetService {
 
         let results = futures::future::try_join_all(futures).await?;
         Ok(results)
-        //.collect::<Result<Vec<InitializedFacet>, SkootError>>()
     }
 
     
@@ -328,7 +341,7 @@ impl GithubAPIBundleHandler {
 trait SourceBundleContentGenerator {
     fn generate_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError>;
 }
 
@@ -339,7 +352,7 @@ struct DefaultSourceBundleContentHandler {}
 impl SourceBundleContentGenerator for DefaultSourceBundleContentHandler {
     fn generate_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         match params.facet_type {
             SupportedFacetType::Readme => self.generate_readme_content(params),
@@ -355,7 +368,7 @@ impl SourceBundleContentGenerator for DefaultSourceBundleContentHandler {
 impl DefaultSourceBundleContentHandler {
     fn generate_readme_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "README.md", escape = "none")]
@@ -381,7 +394,7 @@ impl DefaultSourceBundleContentHandler {
     // TODO: Support more than Apache 2.0
     fn generate_license_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "LICENSE", escape = "none")]
@@ -409,7 +422,7 @@ impl DefaultSourceBundleContentHandler {
     // TODO: Create actual security policy
     fn generate_security_policy_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         // TODO: Turn this into a real default security policy
         #[derive(Template)]
@@ -431,7 +444,7 @@ impl DefaultSourceBundleContentHandler {
 
     fn generate_scorecard_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         // TODO: This should serialize to yaml instead of just a file template
         #[derive(Template)]
@@ -454,7 +467,7 @@ impl DefaultSourceBundleContentHandler {
     #[allow(clippy::too_many_lines)]
     fn generate_security_insights_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         let insights = SecurityInsightsVersion100YamlSchema {
             contribution_policy: SecurityInsightsVersion100YamlSchemaContributionPolicy {
@@ -566,7 +579,7 @@ impl DefaultSourceBundleContentHandler {
 
     fn generate_sast_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "codeql.yml", escape = "none")]
@@ -593,7 +606,7 @@ struct GoGithubSourceBundleContentHandler {}
 impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
     fn generate_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         match params.facet_type {
             SupportedFacetType::Gitignore => self.generate_gitignore_content(params),
@@ -617,7 +630,7 @@ impl SourceBundleContentGenerator for GoGithubSourceBundleContentHandler {
 impl GoGithubSourceBundleContentHandler {
     fn generate_gitignore_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "go.gitignore", escape = "none")]
@@ -640,7 +653,7 @@ impl GoGithubSourceBundleContentHandler {
     // Note: Content mostly taken from https://github.com/guacsec/guac/blob/f1703bd4ca3c0ec0fa55c5a3401d50578fb1680e/.github/workflows/release.yaml
     fn generate_slsa_build_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         // TODO: This should really be a struct that serializes to yaml instead of just a file template
         #[derive(Template)]
@@ -697,7 +710,7 @@ impl GoGithubSourceBundleContentHandler {
 
     fn generate_dependency_update_tool_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "dependabot.yml", escape = "none")]
@@ -722,7 +735,7 @@ impl GoGithubSourceBundleContentHandler {
 
     fn generate_fuzzing_content(
         &self,
-        params: &SourceBundleFacetParams,
+        params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "cifuzz.yml", escape = "none")]
@@ -749,7 +762,7 @@ impl GoGithubSourceBundleContentHandler {
 
     fn generate_default_source_code_content(
         &self,
-        _params: &SourceBundleFacetParams,
+        _params: &SourceBundleFacetCreateParams,
     ) -> Result<SourceBundleContent, SkootError> {
         #[derive(Template)]
         #[template(path = "main.go.tmpl", escape = "none")]
@@ -782,11 +795,11 @@ impl FacetSetParamsGenerator {
     /// Returns an error if any of the facet set params can't be generated.
     pub fn generate_default(
         &self,
-        common_params: &CommonFacetParams,
-    ) -> Result<FacetSetParams, Box<dyn Error + Send + Sync>> {
+        common_params: &CommonFacetCreateParams,
+    ) -> Result<FacetSetCreateParams, SkootError> {
         let source_bundle_params = self.generate_default_source_bundle_facet_params(common_params)?;
         let api_bundle_params = self.generate_default_api_bundle(common_params)?;
-        let total_params = FacetSetParams {
+        let total_params = FacetSetCreateParams {
             facets_params: [
                 source_bundle_params.facets_params,
                 api_bundle_params.facets_params,
@@ -804,8 +817,8 @@ impl FacetSetParamsGenerator {
     /// Returns an error if the default set of API bundle facets can't be generated.
     pub fn generate_default_api_bundle(
         &self,
-        common_params: &CommonFacetParams,
-    ) -> Result<FacetSetParams, SkootError> {
+        common_params: &CommonFacetCreateParams,
+    ) -> Result<FacetSetCreateParams, SkootError> {
         use SupportedFacetType::{BranchProtection, VulnerabilityReporting};
         let supported_facets = [
             //CodeReview,
@@ -815,14 +828,14 @@ impl FacetSetParamsGenerator {
         let facets_params = supported_facets
             .iter()
             .map(|facet_type| {
-                FacetParams::APIBundle(APIBundleFacetParams {
+                FacetCreateParams::APIBundle(APIBundleFacetParams {
                     common: common_params.clone(),
                     facet_type: facet_type.clone(),
                 })
             })
-            .collect::<Vec<FacetParams>>();
+            .collect::<Vec<FacetCreateParams>>();
 
-        Ok(FacetSetParams { facets_params })
+        Ok(FacetSetCreateParams { facets_params })
     }
 
     // TODO: Come up with a better solution than hard coding the default facets
@@ -833,8 +846,8 @@ impl FacetSetParamsGenerator {
     /// Returns an error if the default set of source bundle facets can't be generated.
     pub fn generate_default_source_bundle_facet_params(
         &self,
-        common_params: &CommonFacetParams,
-    ) -> Result<FacetSetParams, SkootError> {
+        common_params: &CommonFacetCreateParams,
+    ) -> Result<FacetSetCreateParams, SkootError> {
         use SupportedFacetType::{
             DefaultSourceCode, DependencyUpdateTool, Gitignore, License, Readme,
             SLSABuild, Scorecard, SecurityInsights, SecurityPolicy, SAST,
@@ -867,13 +880,13 @@ impl FacetSetParamsGenerator {
         let facets_params = supported_facets
             .iter()
             .map(|facet_type| {
-                FacetParams::SourceBundle(SourceBundleFacetParams {
+                FacetCreateParams::SourceBundle(SourceBundleFacetCreateParams {
                     common: common_params.clone(),
                     facet_type: facet_type.clone(),
                 })
             })
-            .collect::<Vec<FacetParams>>();
+            .collect::<Vec<FacetCreateParams>>();
 
-        Ok(FacetSetParams { facets_params })
+        Ok(FacetSetCreateParams { facets_params })
     }
 }

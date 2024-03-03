@@ -9,3 +9,4 @@ edition = "2021"
 surrealdb = { version = "1.1.1", features = ["kv-rocksdb"] }
 skootrs-lib = { path = "../skootrs-lib" }
 skootrs-model = { path = "../skootrs-model" }
+serde_json = "1.0.114"

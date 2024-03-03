@@ -16,12 +16,12 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use std::{error::Error, process::Command, str::FromStr, sync::Arc};
+use std::{process::Command, str::FromStr, sync::Arc};
 
 use chrono::Utc;
 use tracing::{info, debug};
 
-use skootrs_model::{skootrs::{GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoParams, SkootError}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}};
+use skootrs_model::{cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, skootrs::{InitializedRepoGetParams, GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoCreateParams, SkootError}};
 
 /// The `RepoService` trait provides an interface for initializing and managing a project's source code
 /// repository. This repo is usually something like Github or Gitlab.
@@ -32,7 +32,14 @@ pub trait RepoService {
     /// # Errors
     ///
     /// Returns an error if the source code repository can't be initialized.
-    fn initialize(&self, params: RepoParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;
+    fn initialize(&self, params: RepoCreateParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send;  
+
+    /// Gets a project's source code repository metadata abstraction.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the source code repository metadata can't be retrieved.
+    fn get(&self, params: InitializedRepoGetParams) -> impl std::future::Future<Output = Result<InitializedRepo, SkootError>> + Send; 
 
     /// Clones a project's source code repository to the local machine.
     ///
@@ -40,6 +47,21 @@ pub trait RepoService {
     ///
     /// Returns an error if the source code repository can't be cloned to the local machine.
     fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError>;
+
+    /// Clones a project's source code repository to the local machine, or pulls it if it already exists.
+    ///
+    /// # Errors
+    /// 
+    /// Returns an error if the source code repository can't be cloned or if updates can't be pulled.
+    fn clone_local_or_pull(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError>;
+
+    /// Fectches an arbitrary file from the repository. This is useful for things like fetching a remote
+    /// Skootrs state file, or something like a remote SECURITY-INSIGHTS file kept in the repo.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file can't be fetched from the repository for any reason.
+    fn fetch_file_content<P: AsRef<std::path::Path> + Send>(&self, initialized_repo: &InitializedRepo, path: P) -> impl std::future::Future<Output = Result<String, SkootError>> + std::marker::Send;
 }
 
 /// The `LocalRepoService` struct provides an implementation of the `RepoService` trait for initializing
@@ -49,7 +71,7 @@ pub trait RepoService {
 pub struct LocalRepoService {}
 
 impl RepoService for LocalRepoService {
-    async fn initialize(&self, params: RepoParams) -> Result<InitializedRepo, SkootError> {
+    async fn initialize(&self, params: RepoCreateParams) -> Result<InitializedRepo, SkootError> {
         // TODO: The octocrab initialization should be done in a better place and be parameterized
         let o: octocrab::Octocrab = octocrab::Octocrab::builder()
             .personal_token(
@@ -58,7 +80,7 @@ impl RepoService for LocalRepoService {
             .build()?;
         octocrab::initialise(o);
         match params {
-            RepoParams::Github(g) => {
+            RepoCreateParams::Github(g) => {
                 let github_repo_handler = GithubRepoHandler {
                     client: octocrab::instance(),
                 };
@@ -67,11 +89,86 @@ impl RepoService for LocalRepoService {
         }
     }
 
-    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, Box<dyn Error + Send + Sync>> {
+    fn clone_local(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError> {
         match initialized_repo {
             InitializedRepo::Github(g) => {
                 GithubRepoHandler::clone_local(&g, &path)
             },
+        }
+    }
+    
+    fn clone_local_or_pull(&self, initialized_repo: InitializedRepo, path: String) -> Result<InitializedSource, SkootError> {
+        // Check if path exists and is a git repo
+        let output = Command::new("git")
+            .arg("status")
+            .current_dir(&path)
+            .output()?;
+
+        // If it is, pull updates
+        if output.status.success() {
+            let _output = Command::new("git")
+                .arg("pull")
+                .current_dir(&path)
+                .output()?;
+            Ok(InitializedSource {
+                path,
+            })
+        } else {
+            // If it isn't, clone the repo
+            self.clone_local(initialized_repo, path)
+        }
+    }
+    
+    async fn get(&self, params: InitializedRepoGetParams) -> Result<InitializedRepo, SkootError> {
+        let parsed_url = url::Url::parse(&params.repo_url)?;
+        match parsed_url.host_str() {
+            Some("github.com") => {
+                let path = parsed_url.path();
+                let parts: Vec<&str> = path.split('/').collect();
+                let organization = parts[1];    
+                let name = parts[2];
+                let exists = octocrab::instance().repos(organization, name).get().await.is_ok();
+                if !exists {
+                    return Err("Repo does not exist".into());
+                }
+                Ok(InitializedRepo::Github(InitializedGithubRepo {
+                    name: name.to_string(),
+                    // FIXME: This will probably break in weird ways since repos from a user and organization are handled
+                    // slightly different in the Github API. I am not sure yet what the best way to determine if a repo
+                    // belongs to a user or organization is.
+                    organization: GithubUser::User(organization.to_string()),
+                }))
+            },
+            Some(_) => Err("Unsupported repo host".into()),
+            _ => Err("Invalid repo URL".into()),
+        }
+    }
+
+    async fn fetch_file_content<P: AsRef<std::path::Path> + Send>(&self, initialized_repo: &InitializedRepo, path: P) -> Result<String, SkootError> {
+        match &initialized_repo {
+            InitializedRepo::Github(g) => {
+                let path_str = path.as_ref().to_str().ok_or_else(|| SkootError::from("Failed to convert path to string"))?;
+                let content_items = octocrab::instance().repos(
+                    g.organization.get_name(), g.name.clone()
+                )
+                .get_content()
+                .path(path_str)
+                // TODO: Should this support multiple branches?
+                .r#ref("main")
+                .send()
+                .await?;
+
+                let content = content_items
+                .items
+                .first()
+                .ok_or_else(|| SkootError::from(format!("Failed to get {} from {}", path_str, initialized_repo.full_url())))?;
+
+                debug!("Content: {content:?}");
+                let content_decoded = content.decoded_content().ok_or_else(|| SkootError::from(format!("Failed to decode content from {path_str}")))?;
+                debug!("Content Decoded: {content_decoded:?}");
+                
+                Ok(content_decoded)
+            }
         }
     }
 }
