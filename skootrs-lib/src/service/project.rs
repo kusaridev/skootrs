@@ -207,7 +207,7 @@ where
                         .collect::<HashMap<SourceFile, String>>();
                     Ok(InitializedFacet::SourceBundle(
                         skootrs_model::skootrs::facet::SourceBundleFacet {
-                            facet_type: skootrs_model::skootrs::facet::SupportedFacetType::Readme,
+                            facet_type: s.facet_type.clone(),
                             source_files: None,
                             source_files_content: Some(source_files_content_map),
                         },
