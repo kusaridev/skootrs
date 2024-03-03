@@ -184,12 +184,15 @@ impl Facet {
         let facet_get_params = if let Some(p) = facet_get_params {
             p
         } else {
-            let project = Project::get(config, project_service, None).await?;
-            let facet_map_keys = project.facet_key_set();
+            // let project = Project::get(config, project_service, None).await?;
+            let project_get_params = Project::prompt_get(config).await?;
+            let facet_map_keys = project_service
+                .list_facets(project_get_params.clone())
+                .await?;
             let fmk = Facet::prompt_get(config, facet_map_keys.into_iter().collect())?;
             FacetGetParams {
-                project_url: project.repo.full_url(),
                 facet_map_key: fmk,
+                project_get_params,
             }
         };
 
@@ -226,8 +229,7 @@ impl Facet {
             Some(p) => p,
             None => Project::prompt_get(config).await?,
         };
-        let project = project_service.get(project_get_params).await?;
-        let facet_map_keys = project.facet_key_set();
+        let facet_map_keys = project_service.list_facets(project_get_params).await?;
         println!("{}", serde_json::to_string(&facet_map_keys)?);
         Ok(())
     }
