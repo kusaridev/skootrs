@@ -21,6 +21,8 @@
 #![allow(clippy::return_self_not_must_use)]
 #![allow(clippy::default_trait_access)]
 #![allow(clippy::unwrap_used)]
+#![allow(missing_docs)]
+
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 ///YAML schema for security-insights.yml
@@ -43,32 +45,33 @@ pub struct SecurityInsightsVersion100YamlSchema {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub security_artifacts: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifacts,
-    >,
+    pub security_artifacts: Option<SecurityInsightsVersion100YamlSchemaSecurityArtifacts>,
     #[serde(
         rename = "security-assessments",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub security_assessments: Option<
-        Vec<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>,
-    >,
+    pub security_assessments:
+        Option<Vec<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>>,
     #[serde(rename = "security-contacts")]
     pub security_contacts: Vec<SecurityInsightsVersion100YamlSchemaSecurityContactsItem>,
-    #[serde(rename = "security-testing", default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "security-testing",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub security_testing: Vec<SecurityInsightsVersion100YamlSchemaSecurityTestingItem>,
     #[serde(rename = "vulnerability-reporting")]
     pub vulnerability_reporting: SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchema {
+impl From<&Self> for SecurityInsightsVersion100YamlSchema {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchema {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchema {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchema {
         builder::SecurityInsightsVersion100YamlSchema::default()
     }
 }
@@ -87,9 +90,8 @@ pub struct SecurityInsightsVersion100YamlSchemaContributionPolicy {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub automated_tools_list: Option<
-        Vec<SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem>,
-    >,
+    pub automated_tools_list:
+        Option<Vec<SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem>>,
     ///Link to the project code of conduct.
     #[serde(
         rename = "code-of-conduct",
@@ -105,14 +107,14 @@ pub struct SecurityInsightsVersion100YamlSchemaContributionPolicy {
     )]
     pub contributing_policy: Option<String>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaContributionPolicy {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaContributionPolicy {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaContributionPolicy {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaContributionPolicy {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaContributionPolicy {
         builder::SecurityInsightsVersion100YamlSchemaContributionPolicy::default()
     }
 }
@@ -126,23 +128,21 @@ pub struct SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsL
     pub automated_tool: String,
     ///Short comment.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment,
-    >,
+    pub comment:
+        Option<SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment>,
     ///Define sub-paths where the automated actions are allowed or denied.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<Vec<String>>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
+    #[must_use]
+    pub fn builder(
+    ) -> builder::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
         builder::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem::default()
     }
 }
@@ -158,7 +158,7 @@ impl SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListIte
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
     #[serde(rename = "allowed")]
@@ -166,18 +166,16 @@ pub enum SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsLis
     #[serde(rename = "denied")]
     Denied,
 }
-impl From<
-    &Self,
->
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self>
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl ToString
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
     fn to_string(&self) -> String {
         match *self {
             Self::Allowed => "allowed".to_string(),
@@ -186,7 +184,8 @@ for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem
     }
 }
 impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         match value {
@@ -197,21 +196,24 @@ for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemAction
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -219,88 +221,84 @@ for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem
 }
 ///Short comment.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment(
     String,
 );
 impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<
-    SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment,
-> for String {
+impl From<SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment>
+    for String
+{
     fn from(
         value: SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment,
     ) -> Self {
         value.0
     }
 }
-impl From<
-    &Self,
->
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self>
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment {
+    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -311,9 +309,8 @@ pub struct SecurityInsightsVersion100YamlSchemaDependencies {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub dependencies_lifecycle: Option<
-        SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
-    >,
+    pub dependencies_lifecycle:
+        Option<SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle>,
     #[serde(
         rename = "dependencies-lists",
         default,
@@ -325,9 +322,8 @@ pub struct SecurityInsightsVersion100YamlSchemaDependencies {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub env_dependencies_policy: Option<
-        SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
-    >,
+    pub env_dependencies_policy:
+        Option<SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sbom: Option<Vec<SecurityInsightsVersion100YamlSchemaDependenciesSbomItem>>,
     ///Define if the project uses third-party packages.
@@ -338,14 +334,14 @@ pub struct SecurityInsightsVersion100YamlSchemaDependencies {
     )]
     pub third_party_packages: Option<bool>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependencies {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependencies {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaDependencies {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependencies {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependencies {
         builder::SecurityInsightsVersion100YamlSchemaDependencies::default()
     }
 }
@@ -354,107 +350,102 @@ impl SecurityInsightsVersion100YamlSchemaDependencies {
 pub struct SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
     ///Summary about the dependencies lifecycle policy, third-party packages updating process, and deprecation process. Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment,
-    >,
+    pub comment:
+        Option<SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment>,
     ///Link to the dependencies lifecycle policy.
-    #[serde(rename = "policy-url", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "policy-url",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub policy_url: Option<String>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
+    #[must_use]
+    pub fn builder(
+    ) -> builder::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
         builder::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle::default()
     }
 }
 ///Summary about the dependencies lifecycle policy, third-party packages updating process, and deprecation process. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
-pub struct SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment(
-    String,
-);
+pub struct SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment(String);
 impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment>
-for String {
+impl From<SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment> for String {
     fn from(
         value: SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment,
     ) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -462,217 +453,207 @@ for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment
 pub struct SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
     ///Summary about how third-party dependencies are adopted and consumed in the different environments (dev, test, prod). Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment,
-    >,
+    pub comment:
+        Option<SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment>,
     ///Link to the enviroment dependencies policy.
-    #[serde(rename = "policy-url", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "policy-url",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub policy_url: Option<String>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
+    #[must_use]
+    pub fn builder(
+    ) -> builder::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
         builder::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy::default()
     }
 }
 ///Summary about how third-party dependencies are adopted and consumed in the different environments (dev, test, prod). Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
-pub struct SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment(
-    String,
-);
+pub struct SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment(String);
 impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment>
-for String {
+impl From<SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment> for String {
     fn from(
         value: SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment,
     ) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment {
+    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
     ///Description of how the SBOM is created. Maximum length 560 characters.
-    #[serde(rename = "sbom-creation", default, skip_serializing_if = "Option::is_none")]
-    pub sbom_creation: Option<
-        SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
-    >,
+    #[serde(
+        rename = "sbom-creation",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub sbom_creation: Option<SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation>,
     ///Link to the SBOM file.
     #[serde(rename = "sbom-file", default, skip_serializing_if = "Option::is_none")]
     pub sbom_file: Option<String>,
     ///Name of the SBOM standard used.
-    #[serde(rename = "sbom-format", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "sbom-format",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub sbom_format: Option<String>,
     ///Link to the SBOM standard website or documentation.
     #[serde(rename = "sbom-url", default, skip_serializing_if = "Option::is_none")]
     pub sbom_url: Option<String>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
         builder::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem::default()
     }
 }
 ///Description of how the SBOM is created. Maximum length 560 characters.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation(String);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation>
-for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
-    ) -> Self {
+impl From<SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation> for String {
+    fn from(value: SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+    for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+    for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+    for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation {
+    for SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -682,16 +663,28 @@ pub struct SecurityInsightsVersion100YamlSchemaHeader {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub changelog: Option<String>,
     ///The last commit to which the SECURITY-INSIGHTS.yml refers.
-    #[serde(rename = "commit-hash", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "commit-hash",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub commit_hash: Option<SecurityInsightsVersion100YamlSchemaHeaderCommitHash>,
     ///Expiration date for the SECURITY-INSIGHTS.yml. At most a year later the `last-reviewed` date.
     #[serde(rename = "expiration-date")]
     pub expiration_date: chrono::DateTime<chrono::offset::Utc>,
     ///Last time the SECURITY-INSIGHTS.yml was reviewed. Updating this property requires updating the property `commit-hash`.
-    #[serde(rename = "last-reviewed", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "last-reviewed",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub last_reviewed: Option<chrono::DateTime<chrono::offset::Utc>>,
     ///Last time the SECURITY-INSIGHTS.yml was updated, excluding the properties `commit-hash` and `last-reviewed`.
-    #[serde(rename = "last-updated", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "last-updated",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub last_updated: Option<chrono::DateTime<chrono::offset::Utc>>,
     ///Link to the project license.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -710,29 +703,20 @@ pub struct SecurityInsightsVersion100YamlSchemaHeader {
     #[serde(rename = "schema-version")]
     pub schema_version: SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaHeader {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaHeader {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaHeader {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaHeader {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaHeader {
         builder::SecurityInsightsVersion100YamlSchemaHeader::default()
     }
 }
 ///The last commit to which the SECURITY-INSIGHTS.yml refers.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaHeaderCommitHash(String);
 impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
@@ -746,8 +730,7 @@ impl From<SecurityInsightsVersion100YamlSchemaHeaderCommitHash> for String {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     fn from(value: &Self) -> Self {
         value.clone()
     }
@@ -755,44 +738,42 @@ for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
 impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^\\b[0-9a-f]{5,40}\\b$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^\\b[0-9a-f]{5,40}\\b$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^\\b[0-9a-f]{5,40}\\b$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
-impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
+impl std::convert::TryFrom<&str> for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
+impl std::convert::TryFrom<&String> for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
+impl std::convert::TryFrom<String> for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
+impl<'de> serde::Deserialize<'de> for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 ///Version of the SECURITY-INSIGHTS YAML Schema.
@@ -807,14 +788,13 @@ for SecurityInsightsVersion100YamlSchemaHeaderCommitHash {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
     #[serde(rename = "1.0.0")]
     _100,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
     fn from(value: &Self) -> Self {
         value.clone()
     }
@@ -835,22 +815,19 @@ impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersi
         }
     }
 }
-impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
+impl std::convert::TryFrom<&str> for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
+impl std::convert::TryFrom<&String> for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
+impl std::convert::TryFrom<String> for SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion {
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -870,7 +847,11 @@ pub struct SecurityInsightsVersion100YamlSchemaProjectLifecycle {
     )]
     pub core_maintainers: Option<Vec<String>>,
     ///Link to the project release cycle.
-    #[serde(rename = "release-cycle", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "release-cycle",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub release_cycle: Option<String>,
     ///Shortly describe the release process. Maximum length 560 chars.
     #[serde(
@@ -878,105 +859,92 @@ pub struct SecurityInsightsVersion100YamlSchemaProjectLifecycle {
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub release_process: Option<
-        SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess,
-    >,
+    pub release_process: Option<SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess>,
     ///Link to the project roadmap.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub roadmap: Option<String>,
     ///Define if the project is still active or not.
     pub status: SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycle {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaProjectLifecycle {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaProjectLifecycle {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaProjectLifecycle {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaProjectLifecycle {
         builder::SecurityInsightsVersion100YamlSchemaProjectLifecycle::default()
     }
 }
 ///Shortly describe the release process. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess(String);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess>
-for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess,
-    ) -> Self {
+impl From<SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess> for String {
+    fn from(value: SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+    for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+    for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+    for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
+    for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 ///Define if the project is still active or not.
@@ -991,7 +959,7 @@ for SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     #[serde(rename = "active")]
@@ -1011,8 +979,7 @@ pub enum SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     #[serde(rename = "moved")]
     Moved,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     fn from(value: &Self) -> Self {
         value.clone()
     }
@@ -1047,22 +1014,19 @@ impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaProjectLifecycleS
         }
     }
 }
-impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
+impl std::convert::TryFrom<&str> for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
+impl std::convert::TryFrom<&String> for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
-impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
+impl std::convert::TryFrom<String> for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -1071,29 +1035,34 @@ for SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus {
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
 #[serde(deny_unknown_fields)]
 pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
-    #[serde(rename = "other-artifacts", default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "other-artifacts",
+        default,
+        skip_serializing_if = "Vec::is_empty"
+    )]
     pub other_artifacts: Vec<serde_json::Value>,
     #[serde(
         rename = "self-assessment",
         default,
         skip_serializing_if = "Option::is_none"
     )]
-    pub self_assessment: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
-    >,
-    #[serde(rename = "threat-model", default, skip_serializing_if = "Option::is_none")]
-    pub threat_model: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
-    >,
+    pub self_assessment:
+        Option<SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment>,
+    #[serde(
+        rename = "threat-model",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub threat_model: Option<SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
         builder::SecurityInsightsVersion100YamlSchemaSecurityArtifacts::default()
     }
 }
@@ -1102,109 +1071,103 @@ impl SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
 pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
     ///Additional context regarding the security self assessment or its status. Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment,
-    >,
-    #[serde(rename = "evidence-url", default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment>,
+    #[serde(
+        rename = "evidence-url",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub evidence_url: Option<Vec<String>>,
     ///Define whether a security self assessment for the project has been created. A false value may be used to add comments regarding the status of the assessment.
     #[serde(rename = "self-assessment-created")]
     pub self_assessment_created: bool,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment
+    {
         builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment::default()
     }
 }
 ///Additional context regarding the security self assessment or its status. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
-pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment(
-    String,
-);
+pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment(String);
 impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment>
-for String {
+impl From<SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment> for String {
     fn from(
         value: SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment,
     ) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -1212,109 +1175,98 @@ for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment {
 pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
     ///Additional comment to describe the threat models, giving more context. Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment,
-    >,
-    #[serde(rename = "evidence-url", default, skip_serializing_if = "Option::is_none")]
+    pub comment: Option<SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment>,
+    #[serde(
+        rename = "evidence-url",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub evidence_url: Option<Vec<String>>,
     ///Define if the threat model for the project has been created.
     #[serde(rename = "threat-model-created")]
     pub threat_model_created: bool,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
         builder::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel::default()
     }
 }
 ///Additional comment to describe the threat models, giving more context. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
-pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment(
-    String,
-);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment(String);
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment>
-for String {
+impl From<SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment> for String {
     fn from(
         value: SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment,
     ) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -1324,112 +1276,101 @@ pub struct SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
     #[serde(rename = "auditor-name")]
     pub auditor_name: String,
     ///Link to the security report provided by the auditor.
-    #[serde(rename = "auditor-report", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "auditor-report",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub auditor_report: Option<String>,
     ///Link to the auditor website.
     #[serde(rename = "auditor-url")]
     pub auditor_url: String,
     ///Additional comment to describe the report giving more context. Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment,
-    >,
+    pub comment: Option<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment>,
     ///Year of the report.
     #[serde(rename = "report-year")]
     pub report_year: i64,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
         builder::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem::default()
     }
 }
 ///Additional comment to describe the report giving more context. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment(String);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
-impl From<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment>
-for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment,
-    ) -> Self {
+impl From<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment> for String {
+    fn from(value: SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -1444,14 +1385,14 @@ pub struct SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
     ///Security contact.
     pub value: SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
         builder::SecurityInsightsVersion100YamlSchemaSecurityContactsItem::default()
     }
 }
@@ -1467,7 +1408,7 @@ impl SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
     #[serde(rename = "email")]
@@ -1477,11 +1418,8 @@ pub enum SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
     #[serde(rename = "url")]
     Url,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -1505,22 +1443,23 @@ impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityContactsI
         }
     }
 }
-impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
+impl std::convert::TryFrom<&str> for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
+    for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
+    for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -1528,16 +1467,7 @@ for SecurityInsightsVersion100YamlSchemaSecurityContactsItemType {
 }
 ///Security contact.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue(String);
 impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
@@ -1547,30 +1477,24 @@ impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityContactsIte
     }
 }
 impl From<SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue> for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue,
-    ) -> Self {
+    fn from(value: SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         if regress::Regex::new(
-                "^[\\w+_.-]+@[\\w.-]+$|https?:\\/\\/|[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$",
-            )
-            .unwrap()
-            .find(value)
-            .is_none()
+            "^[\\w+_.-]+@[\\w.-]+$|https?:\\/\\/|[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$",
+        )
+        .unwrap()
+        .find(value)
+        .is_none()
         {
             return Err(
                 "doesn't match pattern \"^[\\w+_.-]+@[\\w.-]+$|https?:\\/\\/|[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$\"",
@@ -1579,38 +1503,38 @@ for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
         Ok(Self(value.to_string()))
     }
 }
-impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+impl std::convert::TryFrom<&str> for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+    for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+    for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue {
+    for SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -1623,7 +1547,11 @@ pub struct SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
     ///Name of the tool used to scan or analyze the project.
     #[serde(rename = "tool-name")]
     pub tool_name: String,
-    #[serde(rename = "tool-rulesets", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "tool-rulesets",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub tool_rulesets: Option<Vec<String>>,
     ///Type of security test: `sast`, `dast`, `iast`, `fuzzer` or `sca`.
     #[serde(rename = "tool-type")]
@@ -1635,29 +1563,20 @@ pub struct SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
     #[serde(rename = "tool-version")]
     pub tool_version: String,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
         builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItem::default()
     }
 }
 ///Additional comment to describe the used tool, giving more context. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment(String);
 impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
@@ -1667,62 +1586,62 @@ impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaSecurityTestingItem
     }
 }
 impl From<SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment> for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment,
-    ) -> Self {
+    fn from(value: SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(Clone, Debug, Deserialize, Serialize, schemars::JsonSchema, ToSchema)]
@@ -1737,16 +1656,15 @@ pub struct SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
     ///Define if the security test is part of the CI.
     pub ci: bool,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration
+    {
         builder::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration::default()
     }
 }
@@ -1762,7 +1680,7 @@ impl SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
     #[serde(rename = "sast")]
@@ -1776,11 +1694,8 @@ pub enum SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
     #[serde(rename = "sca")]
     Sca,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -1795,8 +1710,7 @@ impl ToString for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolTyp
         }
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         match value {
@@ -1810,21 +1724,24 @@ for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType {
+    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -1844,31 +1761,33 @@ pub struct SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
     )]
     pub bug_bounty_available: Option<bool>,
     ///Link to the bug bounty program.
-    #[serde(rename = "bug-bounty-url", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "bug-bounty-url",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub bug_bounty_url: Option<String>,
     ///Additional comment to describe the in-scope list, out-scope list, preferred contact method, or other context. Maximum length 560 chars.
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub comment: Option<
-        SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment,
-    >,
+    pub comment: Option<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment>,
     ///E-mail contact to report vulnerabilities or other related information.
-    #[serde(rename = "email-contact", default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        rename = "email-contact",
+        default,
+        skip_serializing_if = "Option::is_none"
+    )]
     pub email_contact: Option<String>,
     ///In-scope vulnerability categories, according to OWASP Top 10 2021. It is recommended to specify a better in-scope list in the security policy.
     #[serde(rename = "in-scope", default, skip_serializing_if = "Option::is_none")]
-    pub in_scope: Option<
-        Vec<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem>,
-    >,
+    pub in_scope:
+        Option<Vec<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem>>,
     ///Out-of-scope vulnerability categories, according to OWASP Top 10 2021. It is recommended to specify a better out-of-scope list in the security policy.
     #[serde(rename = "out-scope", default, skip_serializing_if = "Option::is_none")]
-    pub out_scope: Option<
-        Vec<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem>,
-    >,
+    pub out_scope:
+        Option<Vec<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem>>,
     ///PGP Public Key.
     #[serde(rename = "pgp-key", default, skip_serializing_if = "Option::is_none")]
-    pub pgp_key: Option<
-        SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey,
-    >,
+    pub pgp_key: Option<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey>,
     ///Link to the security policy.
     #[serde(
         rename = "security-policy",
@@ -1877,95 +1796,85 @@ pub struct SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
     )]
     pub security_policy: Option<String>,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
     fn from(value: &Self) -> Self {
         value.clone()
     }
 }
 impl SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
-    #[must_use] pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
+    #[must_use]
+    pub fn builder() -> builder::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
         builder::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting::default()
     }
 }
 ///Additional comment to describe the in-scope list, out-scope list, preferred contact method, or other context. Maximum length 560 chars.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment(String);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
 impl From<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment> for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment,
-    ) -> Self {
+    fn from(value: SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
-        if regress::Regex::new("^(.|\\n){1,560}$").unwrap().find(value).is_none() {
+        if regress::Regex::new("^(.|\\n){1,560}$")
+            .unwrap()
+            .find(value)
+            .is_none()
+        {
             return Err("doesn't match pattern \"^(.|\\n){1,560}$\"");
         }
         Ok(Self(value.to_string()))
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 #[derive(
@@ -1979,7 +1888,7 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
     #[serde(rename = "broken access control")]
@@ -2005,11 +1914,8 @@ pub enum SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
     #[serde(rename = "other")]
     Other,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
@@ -2038,8 +1944,7 @@ impl ToString for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInSc
         }
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         match value {
@@ -2048,15 +1953,11 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
             "injection" => Ok(Self::Injection),
             "insecure design" => Ok(Self::InsecureDesign),
             "security misconfiguration" => Ok(Self::SecurityMisconfiguration),
-            "vulnerable and outdated components" => {
-                Ok(Self::VulnerableAndOutdatedComponents)
-            }
+            "vulnerable and outdated components" => Ok(Self::VulnerableAndOutdatedComponents),
             "identification and authentication failures" => {
                 Ok(Self::IdentificationAndAuthenticationFailures)
             }
-            "software and data integrity failures" => {
-                Ok(Self::SoftwareAndDataIntegrityFailures)
-            }
+            "software and data integrity failures" => Ok(Self::SoftwareAndDataIntegrityFailures),
             "security logging and monitoring failures" => {
                 Ok(Self::SecurityLoggingAndMonitoringFailures)
             }
@@ -2067,21 +1968,24 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -2098,7 +2002,7 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem {
     PartialEq,
     PartialOrd,
     Serialize,
-    schemars::JsonSchema
+    schemars::JsonSchema,
 )]
 pub enum SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
     #[serde(rename = "broken access control")]
@@ -2124,16 +2028,12 @@ pub enum SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem 
     #[serde(rename = "other")]
     Other,
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl ToString
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+impl ToString for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
     fn to_string(&self) -> String {
         match *self {
             Self::BrokenAccessControl => "broken access control".to_string(),
@@ -2158,8 +2058,7 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
         }
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         match value {
@@ -2168,15 +2067,11 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
             "injection" => Ok(Self::Injection),
             "insecure design" => Ok(Self::InsecureDesign),
             "security misconfiguration" => Ok(Self::SecurityMisconfiguration),
-            "vulnerable and outdated components" => {
-                Ok(Self::VulnerableAndOutdatedComponents)
-            }
+            "vulnerable and outdated components" => Ok(Self::VulnerableAndOutdatedComponents),
             "identification and authentication failures" => {
                 Ok(Self::IdentificationAndAuthenticationFailures)
             }
-            "software and data integrity failures" => {
-                Ok(Self::SoftwareAndDataIntegrityFailures)
-            }
+            "software and data integrity failures" => Ok(Self::SoftwareAndDataIntegrityFailures),
             "security logging and monitoring failures" => {
                 Ok(Self::SecurityLoggingAndMonitoringFailures)
             }
@@ -2187,21 +2082,24 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
@@ -2209,42 +2107,26 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem {
 }
 ///PGP Public Key.
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    schemars::JsonSchema,
-    ToSchema
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, schemars::JsonSchema, ToSchema,
 )]
 pub struct SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey(String);
-impl std::ops::Deref
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+impl std::ops::Deref for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
     type Target = String;
     fn deref(&self) -> &String {
         &self.0
     }
 }
 impl From<SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey> for String {
-    fn from(
-        value: SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey,
-    ) -> Self {
+    fn from(value: SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey) -> Self {
         value.0
     }
 }
-impl From<&Self>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
-    fn from(
-        value: &Self,
-    ) -> Self {
+impl From<&Self> for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+    fn from(value: &Self) -> Self {
         value.clone()
     }
 }
-impl std::str::FromStr
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+impl std::str::FromStr for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
     type Err = &'static str;
     fn from_str(value: &str) -> Result<Self, &'static str> {
         if regress::Regex::new(
@@ -2262,103 +2144,81 @@ for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
     }
 }
 impl std::convert::TryFrom<&str>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey
+{
     type Error = &'static str;
     fn try_from(value: &str) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<&String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey
+{
     type Error = &'static str;
     fn try_from(value: &String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl std::convert::TryFrom<String>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey
+{
     type Error = &'static str;
     fn try_from(value: String) -> Result<Self, &'static str> {
         value.parse()
     }
 }
 impl<'de> serde::Deserialize<'de>
-for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey {
+    for SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
     {
         String::deserialize(deserializer)?
             .parse()
-            .map_err(|e: &'static str| {
-                <D::Error as serde::de::Error>::custom(e.to_string())
-            })
+            .map_err(|e: &'static str| <D::Error as serde::de::Error>::custom(e.to_string()))
     }
 }
 pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchema {
-        contribution_policy: Result<
-            super::SecurityInsightsVersion100YamlSchemaContributionPolicy,
-            String,
-        >,
-        dependencies: Result<
-            Option<super::SecurityInsightsVersion100YamlSchemaDependencies>,
-            String,
-        >,
+        contribution_policy:
+            Result<super::SecurityInsightsVersion100YamlSchemaContributionPolicy, String>,
+        dependencies:
+            Result<Option<super::SecurityInsightsVersion100YamlSchemaDependencies>, String>,
         distribution_points: Result<Vec<String>, String>,
         documentation: Result<Option<Vec<String>>, String>,
         header: Result<super::SecurityInsightsVersion100YamlSchemaHeader, String>,
-        project_lifecycle: Result<
-            super::SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-            String,
-        >,
-        security_artifacts: Result<
-            Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts>,
-            String,
-        >,
+        project_lifecycle:
+            Result<super::SecurityInsightsVersion100YamlSchemaProjectLifecycle, String>,
+        security_artifacts:
+            Result<Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts>, String>,
         security_assessments: Result<
-            Option<
-                Vec<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>,
-            >,
+            Option<Vec<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>>,
             String,
         >,
-        security_contacts: Result<
-            Vec<super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem>,
-            String,
-        >,
-        security_testing: Result<
-            Vec<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem>,
-            String,
-        >,
-        vulnerability_reporting: Result<
-            super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
-            String,
-        >,
+        security_contacts:
+            Result<Vec<super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem>, String>,
+        security_testing:
+            Result<Vec<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem>, String>,
+        vulnerability_reporting:
+            Result<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, String>,
     }
     impl Default for SecurityInsightsVersion100YamlSchema {
         fn default() -> Self {
             Self {
-                contribution_policy: Err(
-                    "no value supplied for contribution_policy".to_string(),
-                ),
+                contribution_policy: Err("no value supplied for contribution_policy".to_string()),
                 dependencies: Ok(Default::default()),
-                distribution_points: Err(
-                    "no value supplied for distribution_points".to_string(),
-                ),
+                distribution_points: Err("no value supplied for distribution_points".to_string()),
                 documentation: Ok(Default::default()),
                 header: Err("no value supplied for header".to_string()),
-                project_lifecycle: Err(
-                    "no value supplied for project_lifecycle".to_string(),
-                ),
+                project_lifecycle: Err("no value supplied for project_lifecycle".to_string()),
                 security_artifacts: Ok(Default::default()),
                 security_assessments: Ok(Default::default()),
-                security_contacts: Err(
-                    "no value supplied for security_contacts".to_string(),
-                ),
+                security_contacts: Err("no value supplied for security_contacts".to_string()),
                 security_testing: Ok(Default::default()),
                 vulnerability_reporting: Err(
-                    "no value supplied for vulnerability_reporting".to_string(),
+                    "no value supplied for vulnerability_reporting".to_string()
                 ),
             }
         }
@@ -2366,19 +2226,12 @@ pub mod builder {
     impl SecurityInsightsVersion100YamlSchema {
         pub fn contribution_policy<T>(mut self, value: T) -> Self
         where
-            T: std::convert::TryInto<
-                super::SecurityInsightsVersion100YamlSchemaContributionPolicy,
-            >,
+            T: std::convert::TryInto<super::SecurityInsightsVersion100YamlSchemaContributionPolicy>,
             T::Error: std::fmt::Display,
         {
-            self
-                .contribution_policy = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for contribution_policy: {e}"
-                    )
-                });
+            self.contribution_policy = value.try_into().map_err(|e| {
+                format!("error converting supplied value for contribution_policy: {e}")
+            });
             self
         }
         pub fn dependencies<T>(mut self, value: T) -> Self
@@ -2388,12 +2241,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .dependencies = value
+            self.dependencies = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for dependencies: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for dependencies: {e}"));
             self
         }
         pub fn distribution_points<T>(mut self, value: T) -> Self
@@ -2401,14 +2251,9 @@ pub mod builder {
             T: std::convert::TryInto<Vec<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .distribution_points = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for distribution_points: {e}"
-                    )
-                });
+            self.distribution_points = value.try_into().map_err(|e| {
+                format!("error converting supplied value for distribution_points: {e}")
+            });
             self
         }
         pub fn documentation<T>(mut self, value: T) -> Self
@@ -2416,12 +2261,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .documentation = value
+            self.documentation = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for documentation: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for documentation: {e}"));
             self
         }
         pub fn header<T>(mut self, value: T) -> Self
@@ -2429,29 +2271,19 @@ pub mod builder {
             T: std::convert::TryInto<super::SecurityInsightsVersion100YamlSchemaHeader>,
             T::Error: std::fmt::Display,
         {
-            self
-                .header = value
+            self.header = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for header: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for header: {e}"));
             self
         }
         pub fn project_lifecycle<T>(mut self, value: T) -> Self
         where
-            T: std::convert::TryInto<
-                super::SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-            >,
+            T: std::convert::TryInto<super::SecurityInsightsVersion100YamlSchemaProjectLifecycle>,
             T::Error: std::fmt::Display,
         {
-            self
-                .project_lifecycle = value
+            self.project_lifecycle = value
                 .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for project_lifecycle: {e}"
-                    )
-                });
+                .map_err(|e| format!("error converting supplied value for project_lifecycle: {e}"));
             self
         }
         pub fn security_artifacts<T>(mut self, value: T) -> Self
@@ -2461,35 +2293,21 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .security_artifacts = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for security_artifacts: {e}"
-                    )
-                });
+            self.security_artifacts = value.try_into().map_err(|e| {
+                format!("error converting supplied value for security_artifacts: {e}")
+            });
             self
         }
         pub fn security_assessments<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    Vec<
-                        super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem,
-                    >,
-                >,
+                Option<Vec<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .security_assessments = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for security_assessments: {e}"
-                    )
-                });
+            self.security_assessments = value.try_into().map_err(|e| {
+                format!("error converting supplied value for security_assessments: {e}")
+            });
             self
         }
         pub fn security_contacts<T>(mut self, value: T) -> Self
@@ -2499,14 +2317,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .security_contacts = value
+            self.security_contacts = value
                 .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for security_contacts: {e}"
-                    )
-                });
+                .map_err(|e| format!("error converting supplied value for security_contacts: {e}"));
             self
         }
         pub fn security_testing<T>(mut self, value: T) -> Self
@@ -2516,14 +2329,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .security_testing = value
+            self.security_testing = value
                 .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for security_testing: {e}"
-                    )
-                });
+                .map_err(|e| format!("error converting supplied value for security_testing: {e}"));
             self
         }
         pub fn vulnerability_reporting<T>(mut self, value: T) -> Self
@@ -2533,23 +2341,17 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .vulnerability_reporting = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for vulnerability_reporting: {e}"
-                    )
-                });
+            self.vulnerability_reporting = value.try_into().map_err(|e| {
+                format!("error converting supplied value for vulnerability_reporting: {e}")
+            });
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchema>
-    for super::SecurityInsightsVersion100YamlSchema {
+        for super::SecurityInsightsVersion100YamlSchema
+    {
         type Error = String;
-        fn try_from(
-            value: SecurityInsightsVersion100YamlSchema,
-        ) -> Result<Self, String> {
+        fn try_from(value: SecurityInsightsVersion100YamlSchema) -> Result<Self, String> {
             Ok(Self {
                 contribution_policy: value.contribution_policy?,
                 dependencies: value.dependencies?,
@@ -2565,8 +2367,7 @@ pub mod builder {
             })
         }
     }
-    impl From<super::SecurityInsightsVersion100YamlSchema>
-    for SecurityInsightsVersion100YamlSchema {
+    impl From<super::SecurityInsightsVersion100YamlSchema> for SecurityInsightsVersion100YamlSchema {
         fn from(value: super::SecurityInsightsVersion100YamlSchema) -> Self {
             Self {
                 contribution_policy: Ok(value.contribution_policy),
@@ -2605,7 +2406,7 @@ pub mod builder {
                     "no value supplied for accepts_automated_pull_requests".to_string(),
                 ),
                 accepts_pull_requests: Err(
-                    "no value supplied for accepts_pull_requests".to_string(),
+                    "no value supplied for accepts_pull_requests".to_string()
                 ),
                 automated_tools_list: Ok(Default::default()),
                 code_of_conduct: Ok(Default::default()),
@@ -2619,14 +2420,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .accepts_automated_pull_requests = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for accepts_automated_pull_requests: {e}"
-                    )
-                });
+            self.accepts_automated_pull_requests = value.try_into().map_err(|e| {
+                format!("error converting supplied value for accepts_automated_pull_requests: {e}")
+            });
             self
         }
         pub fn accepts_pull_requests<T>(mut self, value: T) -> Self
@@ -2634,14 +2430,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .accepts_pull_requests = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for accepts_pull_requests: {e}"
-                    )
-                });
+            self.accepts_pull_requests = value.try_into().map_err(|e| {
+                format!("error converting supplied value for accepts_pull_requests: {e}")
+            });
             self
         }
         pub fn automated_tools_list<T>(mut self, value: T) -> Self
@@ -2655,14 +2446,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .automated_tools_list = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for automated_tools_list: {e}"
-                    )
-                });
+            self.automated_tools_list = value.try_into().map_err(|e| {
+                format!("error converting supplied value for automated_tools_list: {e}")
+            });
             self
         }
         pub fn code_of_conduct<T>(mut self, value: T) -> Self
@@ -2670,12 +2456,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .code_of_conduct = value
+            self.code_of_conduct = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for code_of_conduct: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for code_of_conduct: {e}"));
             self
         }
         pub fn contributing_policy<T>(mut self, value: T) -> Self
@@ -2683,19 +2466,15 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .contributing_policy = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for contributing_policy: {e}"
-                    )
-                });
+            self.contributing_policy = value.try_into().map_err(|e| {
+                format!("error converting supplied value for contributing_policy: {e}")
+            });
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaContributionPolicy>
-    for super::SecurityInsightsVersion100YamlSchemaContributionPolicy {
+        for super::SecurityInsightsVersion100YamlSchemaContributionPolicy
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaContributionPolicy,
@@ -2710,14 +2489,11 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaContributionPolicy>
-    for SecurityInsightsVersion100YamlSchemaContributionPolicy {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaContributionPolicy,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaContributionPolicy
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaContributionPolicy) -> Self {
             Self {
-                accepts_automated_pull_requests: Ok(
-                    value.accepts_automated_pull_requests,
-                ),
+                accepts_automated_pull_requests: Ok(value.accepts_automated_pull_requests),
                 accepts_pull_requests: Ok(value.accepts_pull_requests),
                 automated_tools_list: Ok(value.automated_tools_list),
                 code_of_conduct: Ok(value.code_of_conduct),
@@ -2740,8 +2516,7 @@ pub mod builder {
         >,
         path: Result<Option<Vec<String>>, String>,
     }
-    impl Default
-    for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
+    impl Default for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
         fn default() -> Self {
             Self {
                 action: Err("no value supplied for action".to_string()),
@@ -2759,12 +2534,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .action = value
+            self.action = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for action: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for action: {e}"));
             self
         }
         pub fn automated_tool<T>(mut self, value: T) -> Self
@@ -2772,12 +2544,9 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .automated_tool = value
+            self.automated_tool = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for automated_tool: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for automated_tool: {e}"));
             self
         }
         pub fn comment<T>(mut self, value: T) -> Self
@@ -2789,12 +2558,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn path<T>(mut self, value: T) -> Self
@@ -2802,17 +2568,17 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .path = value
+            self.path = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for path: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
-    >
-    for super::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
+    impl
+        std::convert::TryFrom<
+            SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
+        > for super::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
@@ -2825,9 +2591,9 @@ pub mod builder {
             })
         }
     }
-    impl From<
-        super::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
-    > for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem {
+    impl From<super::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem>
+        for SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem,
         ) -> Self {
@@ -2842,16 +2608,12 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaDependencies {
         dependencies_lifecycle: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle>,
             String,
         >,
         dependencies_lists: Result<Vec<String>, String>,
         env_dependencies_policy: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy>,
             String,
         >,
         sbom: Result<
@@ -2881,14 +2643,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .dependencies_lifecycle = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for dependencies_lifecycle: {e}"
-                    )
-                });
+            self.dependencies_lifecycle = value.try_into().map_err(|e| {
+                format!("error converting supplied value for dependencies_lifecycle: {e}")
+            });
             self
         }
         pub fn dependencies_lists<T>(mut self, value: T) -> Self
@@ -2896,14 +2653,9 @@ pub mod builder {
             T: std::convert::TryInto<Vec<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .dependencies_lists = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for dependencies_lists: {e}"
-                    )
-                });
+            self.dependencies_lists = value.try_into().map_err(|e| {
+                format!("error converting supplied value for dependencies_lists: {e}")
+            });
             self
         }
         pub fn env_dependencies_policy<T>(mut self, value: T) -> Self
@@ -2915,27 +2667,19 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .env_dependencies_policy = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for env_dependencies_policy: {e}"
-                    )
-                });
+            self.env_dependencies_policy = value.try_into().map_err(|e| {
+                format!("error converting supplied value for env_dependencies_policy: {e}")
+            });
             self
         }
         pub fn sbom<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    Vec<super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem>,
-                >,
+                Option<Vec<super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem>>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .sbom = value
+            self.sbom = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for sbom: {e}"));
             self
@@ -2945,19 +2689,15 @@ pub mod builder {
             T: std::convert::TryInto<Option<bool>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .third_party_packages = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for third_party_packages: {e}"
-                    )
-                });
+            self.third_party_packages = value.try_into().map_err(|e| {
+                format!("error converting supplied value for third_party_packages: {e}")
+            });
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaDependencies>
-    for super::SecurityInsightsVersion100YamlSchemaDependencies {
+        for super::SecurityInsightsVersion100YamlSchemaDependencies
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaDependencies,
@@ -2972,7 +2712,8 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaDependencies>
-    for SecurityInsightsVersion100YamlSchemaDependencies {
+        for SecurityInsightsVersion100YamlSchemaDependencies
+    {
         fn from(value: super::SecurityInsightsVersion100YamlSchemaDependencies) -> Self {
             Self {
                 dependencies_lifecycle: Ok(value.dependencies_lifecycle),
@@ -2993,8 +2734,7 @@ pub mod builder {
         >,
         policy_url: Result<Option<String>, String>,
     }
-    impl Default
-    for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
+    impl Default for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
         fn default() -> Self {
             Self {
                 comment: Ok(Default::default()),
@@ -3012,12 +2752,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn policy_url<T>(mut self, value: T) -> Self
@@ -3025,18 +2762,16 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .policy_url = value
+            self.policy_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for policy_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for policy_url: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
-    > for super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
+    impl
+        std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle>
+        for super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
@@ -3047,9 +2782,9 @@ pub mod builder {
             })
         }
     }
-    impl From<
-        super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
-    > for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle {
+    impl From<super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle>
+        for SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle,
         ) -> Self {
@@ -3069,8 +2804,7 @@ pub mod builder {
         >,
         policy_url: Result<Option<String>, String>,
     }
-    impl Default
-    for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
+    impl Default for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
         fn default() -> Self {
             Self {
                 comment: Ok(Default::default()),
@@ -3088,12 +2822,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn policy_url<T>(mut self, value: T) -> Self
@@ -3101,18 +2832,16 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .policy_url = value
+            self.policy_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for policy_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for policy_url: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
-    > for super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
+    impl
+        std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy>
+        for super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
@@ -3123,9 +2852,9 @@ pub mod builder {
             })
         }
     }
-    impl From<
-        super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
-    > for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy {
+    impl From<super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy>
+        for SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy,
         ) -> Self {
@@ -3138,9 +2867,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
         sbom_creation: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation>,
             String,
         >,
         sbom_file: Result<Option<String>, String>,
@@ -3161,18 +2888,13 @@ pub mod builder {
         pub fn sbom_creation<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .sbom_creation = value
+            self.sbom_creation = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for sbom_creation: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for sbom_creation: {e}"));
             self
         }
         pub fn sbom_file<T>(mut self, value: T) -> Self
@@ -3180,12 +2902,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .sbom_file = value
+            self.sbom_file = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for sbom_file: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for sbom_file: {e}"));
             self
         }
         pub fn sbom_format<T>(mut self, value: T) -> Self
@@ -3193,12 +2912,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .sbom_format = value
+            self.sbom_format = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for sbom_format: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for sbom_format: {e}"));
             self
         }
         pub fn sbom_url<T>(mut self, value: T) -> Self
@@ -3206,17 +2922,15 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .sbom_url = value
+            self.sbom_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for sbom_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for sbom_url: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaDependenciesSbomItem>
-    for super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
+        for super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaDependenciesSbomItem,
@@ -3230,10 +2944,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem>
-    for SecurityInsightsVersion100YamlSchemaDependenciesSbomItem {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaDependenciesSbomItem
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaDependenciesSbomItem) -> Self {
             Self {
                 sbom_creation: Ok(value.sbom_creation),
                 sbom_file: Ok(value.sbom_file),
@@ -3245,29 +2958,23 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaHeader {
         changelog: Result<Option<String>, String>,
-        commit_hash: Result<
-            Option<super::SecurityInsightsVersion100YamlSchemaHeaderCommitHash>,
-            String,
-        >,
+        commit_hash:
+            Result<Option<super::SecurityInsightsVersion100YamlSchemaHeaderCommitHash>, String>,
         expiration_date: Result<chrono::DateTime<chrono::offset::Utc>, String>,
         last_reviewed: Result<Option<chrono::DateTime<chrono::offset::Utc>>, String>,
         last_updated: Result<Option<chrono::DateTime<chrono::offset::Utc>>, String>,
         license: Result<Option<String>, String>,
         project_release: Result<Option<String>, String>,
         project_url: Result<String, String>,
-        schema_version: Result<
-            super::SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
-            String,
-        >,
+        schema_version:
+            Result<super::SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion, String>,
     }
     impl Default for SecurityInsightsVersion100YamlSchemaHeader {
         fn default() -> Self {
             Self {
                 changelog: Ok(Default::default()),
                 commit_hash: Ok(Default::default()),
-                expiration_date: Err(
-                    "no value supplied for expiration_date".to_string(),
-                ),
+                expiration_date: Err("no value supplied for expiration_date".to_string()),
                 last_reviewed: Ok(Default::default()),
                 last_updated: Ok(Default::default()),
                 license: Ok(Default::default()),
@@ -3283,12 +2990,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .changelog = value
+            self.changelog = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for changelog: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for changelog: {e}"));
             self
         }
         pub fn commit_hash<T>(mut self, value: T) -> Self
@@ -3298,12 +3002,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .commit_hash = value
+            self.commit_hash = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for commit_hash: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for commit_hash: {e}"));
             self
         }
         pub fn expiration_date<T>(mut self, value: T) -> Self
@@ -3311,12 +3012,9 @@ pub mod builder {
             T: std::convert::TryInto<chrono::DateTime<chrono::offset::Utc>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .expiration_date = value
+            self.expiration_date = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for expiration_date: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for expiration_date: {e}"));
             self
         }
         pub fn last_reviewed<T>(mut self, value: T) -> Self
@@ -3324,12 +3022,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<chrono::DateTime<chrono::offset::Utc>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .last_reviewed = value
+            self.last_reviewed = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for last_reviewed: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for last_reviewed: {e}"));
             self
         }
         pub fn last_updated<T>(mut self, value: T) -> Self
@@ -3337,12 +3032,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<chrono::DateTime<chrono::offset::Utc>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .last_updated = value
+            self.last_updated = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for last_updated: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for last_updated: {e}"));
             self
         }
         pub fn license<T>(mut self, value: T) -> Self
@@ -3350,12 +3042,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .license = value
+            self.license = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for license: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for license: {e}"));
             self
         }
         pub fn project_release<T>(mut self, value: T) -> Self
@@ -3363,12 +3052,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .project_release = value
+            self.project_release = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for project_release: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for project_release: {e}"));
             self
         }
         pub fn project_url<T>(mut self, value: T) -> Self
@@ -3376,12 +3062,9 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .project_url = value
+            self.project_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for project_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for project_url: {e}"));
             self
         }
         pub fn schema_version<T>(mut self, value: T) -> Self
@@ -3391,21 +3074,17 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .schema_version = value
+            self.schema_version = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for schema_version: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for schema_version: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaHeader>
-    for super::SecurityInsightsVersion100YamlSchemaHeader {
+        for super::SecurityInsightsVersion100YamlSchemaHeader
+    {
         type Error = String;
-        fn try_from(
-            value: SecurityInsightsVersion100YamlSchemaHeader,
-        ) -> Result<Self, String> {
+        fn try_from(value: SecurityInsightsVersion100YamlSchemaHeader) -> Result<Self, String> {
             Ok(Self {
                 changelog: value.changelog?,
                 commit_hash: value.commit_hash?,
@@ -3420,7 +3099,8 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaHeader>
-    for SecurityInsightsVersion100YamlSchemaHeader {
+        for SecurityInsightsVersion100YamlSchemaHeader
+    {
         fn from(value: super::SecurityInsightsVersion100YamlSchemaHeader) -> Self {
             Self {
                 changelog: Ok(value.changelog),
@@ -3441,16 +3121,11 @@ pub mod builder {
         core_maintainers: Result<Option<Vec<String>>, String>,
         release_cycle: Result<Option<String>, String>,
         release_process: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess>,
             String,
         >,
         roadmap: Result<Option<String>, String>,
-        status: Result<
-            super::SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
-            String,
-        >,
+        status: Result<super::SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus, String>,
     }
     impl Default for SecurityInsightsVersion100YamlSchemaProjectLifecycle {
         fn default() -> Self {
@@ -3470,12 +3145,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .bug_fixes_only = value
+            self.bug_fixes_only = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for bug_fixes_only: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for bug_fixes_only: {e}"));
             self
         }
         pub fn core_maintainers<T>(mut self, value: T) -> Self
@@ -3483,14 +3155,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .core_maintainers = value
+            self.core_maintainers = value
                 .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for core_maintainers: {e}"
-                    )
-                });
+                .map_err(|e| format!("error converting supplied value for core_maintainers: {e}"));
             self
         }
         pub fn release_cycle<T>(mut self, value: T) -> Self
@@ -3498,29 +3165,21 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .release_cycle = value
+            self.release_cycle = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for release_cycle: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for release_cycle: {e}"));
             self
         }
         pub fn release_process<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .release_process = value
+            self.release_process = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for release_process: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for release_process: {e}"));
             self
         }
         pub fn roadmap<T>(mut self, value: T) -> Self
@@ -3528,12 +3187,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .roadmap = value
+            self.roadmap = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for roadmap: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for roadmap: {e}"));
             self
         }
         pub fn status<T>(mut self, value: T) -> Self
@@ -3543,17 +3199,15 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .status = value
+            self.status = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for status: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for status: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaProjectLifecycle>
-    for super::SecurityInsightsVersion100YamlSchemaProjectLifecycle {
+        for super::SecurityInsightsVersion100YamlSchemaProjectLifecycle
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaProjectLifecycle,
@@ -3569,10 +3223,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaProjectLifecycle>
-    for SecurityInsightsVersion100YamlSchemaProjectLifecycle {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaProjectLifecycle,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaProjectLifecycle
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaProjectLifecycle) -> Self {
             Self {
                 bug_fixes_only: Ok(value.bug_fixes_only),
                 core_maintainers: Ok(value.core_maintainers),
@@ -3587,15 +3240,11 @@ pub mod builder {
     pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
         other_artifacts: Result<Vec<serde_json::Value>, String>,
         self_assessment: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment>,
             String,
         >,
         threat_model: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel>,
             String,
         >,
     }
@@ -3614,51 +3263,39 @@ pub mod builder {
             T: std::convert::TryInto<Vec<serde_json::Value>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .other_artifacts = value
+            self.other_artifacts = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for other_artifacts: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for other_artifacts: {e}"));
             self
         }
         pub fn self_assessment<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .self_assessment = value
+            self.self_assessment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for self_assessment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for self_assessment: {e}"));
             self
         }
         pub fn threat_model<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .threat_model = value
+            self.threat_model = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for threat_model: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for threat_model: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityArtifacts>
-    for super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
+        for super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityArtifacts,
@@ -3671,10 +3308,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts>
-    for SecurityInsightsVersion100YamlSchemaSecurityArtifacts {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaSecurityArtifacts
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaSecurityArtifacts) -> Self {
             Self {
                 other_artifacts: Ok(value.other_artifacts),
                 self_assessment: Ok(value.self_assessment),
@@ -3693,14 +3329,13 @@ pub mod builder {
         evidence_url: Result<Option<Vec<String>>, String>,
         self_assessment_created: Result<bool, String>,
     }
-    impl Default
-    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
+    impl Default for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
         fn default() -> Self {
             Self {
                 comment: Ok(Default::default()),
                 evidence_url: Ok(Default::default()),
                 self_assessment_created: Err(
-                    "no value supplied for self_assessment_created".to_string(),
+                    "no value supplied for self_assessment_created".to_string()
                 ),
             }
         }
@@ -3715,12 +3350,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn evidence_url<T>(mut self, value: T) -> Self
@@ -3728,12 +3360,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .evidence_url = value
+            self.evidence_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for evidence_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for evidence_url: {e}"));
             self
         }
         pub fn self_assessment_created<T>(mut self, value: T) -> Self
@@ -3741,20 +3370,15 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .self_assessment_created = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for self_assessment_created: {e}"
-                    )
-                });
+            self.self_assessment_created = value.try_into().map_err(|e| {
+                format!("error converting supplied value for self_assessment_created: {e}")
+            });
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
-    > for super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
+    impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment>
+        for super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
@@ -3767,7 +3391,8 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment>
-    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment {
+        for SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment,
         ) -> Self {
@@ -3781,9 +3406,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
         comment: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment>,
             String,
         >,
         evidence_url: Result<Option<Vec<String>>, String>,
@@ -3794,9 +3417,7 @@ pub mod builder {
             Self {
                 comment: Ok(Default::default()),
                 evidence_url: Ok(Default::default()),
-                threat_model_created: Err(
-                    "no value supplied for threat_model_created".to_string(),
-                ),
+                threat_model_created: Err("no value supplied for threat_model_created".to_string()),
             }
         }
     }
@@ -3810,12 +3431,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn evidence_url<T>(mut self, value: T) -> Self
@@ -3823,12 +3441,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .evidence_url = value
+            self.evidence_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for evidence_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for evidence_url: {e}"));
             self
         }
         pub fn threat_model_created<T>(mut self, value: T) -> Self
@@ -3836,20 +3451,15 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .threat_model_created = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for threat_model_created: {e}"
-                    )
-                });
+            self.threat_model_created = value.try_into().map_err(|e| {
+                format!("error converting supplied value for threat_model_created: {e}")
+            });
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
-    > for super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
+    impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel>
+        for super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
@@ -3862,7 +3472,8 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel>
-    for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel {
+        for SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel,
         ) -> Self {
@@ -3879,9 +3490,7 @@ pub mod builder {
         auditor_report: Result<Option<String>, String>,
         auditor_url: Result<String, String>,
         comment: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment>,
             String,
         >,
         report_year: Result<i64, String>,
@@ -3903,12 +3512,9 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .auditor_name = value
+            self.auditor_name = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for auditor_name: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for auditor_name: {e}"));
             self
         }
         pub fn auditor_report<T>(mut self, value: T) -> Self
@@ -3916,12 +3522,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .auditor_report = value
+            self.auditor_report = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for auditor_report: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for auditor_report: {e}"));
             self
         }
         pub fn auditor_url<T>(mut self, value: T) -> Self
@@ -3929,29 +3532,21 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .auditor_url = value
+            self.auditor_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for auditor_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for auditor_url: {e}"));
             self
         }
         pub fn comment<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn report_year<T>(mut self, value: T) -> Self
@@ -3959,18 +3554,15 @@ pub mod builder {
             T: std::convert::TryInto<i64>,
             T::Error: std::fmt::Display,
         {
-            self
-                .report_year = value
+            self.report_year = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for report_year: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for report_year: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem,
-    > for super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
+    impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>
+        for super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem,
@@ -3985,10 +3577,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem>
-    for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem) -> Self {
             Self {
                 auditor_name: Ok(value.auditor_name),
                 auditor_report: Ok(value.auditor_report),
@@ -4001,14 +3592,8 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
         primary: Result<Option<bool>, String>,
-        type_: Result<
-            super::SecurityInsightsVersion100YamlSchemaSecurityContactsItemType,
-            String,
-        >,
-        value: Result<
-            super::SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue,
-            String,
-        >,
+        type_: Result<super::SecurityInsightsVersion100YamlSchemaSecurityContactsItemType, String>,
+        value: Result<super::SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, String>,
     }
     impl Default for SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
         fn default() -> Self {
@@ -4025,12 +3610,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<bool>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .primary = value
+            self.primary = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for primary: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for primary: {e}"));
             self
         }
         pub fn type_<T>(mut self, value: T) -> Self
@@ -4040,12 +3622,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .type_ = value
+            self.type_ = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for type_: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for type_: {e}"));
             self
         }
         pub fn value<T>(mut self, value: T) -> Self
@@ -4055,17 +3634,15 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .value = value
+            self.value = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for value: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for value: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityContactsItem>
-    for super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
+        for super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityContactsItem,
@@ -4078,10 +3655,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem>
-    for SecurityInsightsVersion100YamlSchemaSecurityContactsItem {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaSecurityContactsItem
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaSecurityContactsItem) -> Self {
             Self {
                 primary: Ok(value.primary),
                 type_: Ok(value.type_),
@@ -4092,9 +3668,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
         comment: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment>,
             String,
         >,
         integration: Result<
@@ -4103,10 +3677,8 @@ pub mod builder {
         >,
         tool_name: Result<String, String>,
         tool_rulesets: Result<Option<Vec<String>>, String>,
-        tool_type: Result<
-            super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType,
-            String,
-        >,
+        tool_type:
+            Result<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemToolType, String>,
         tool_url: Result<Option<String>, String>,
         tool_version: Result<String, String>,
     }
@@ -4127,18 +3699,13 @@ pub mod builder {
         pub fn comment<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn integration<T>(mut self, value: T) -> Self
@@ -4148,12 +3715,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .integration = value
+            self.integration = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for integration: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for integration: {e}"));
             self
         }
         pub fn tool_name<T>(mut self, value: T) -> Self
@@ -4161,12 +3725,9 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .tool_name = value
+            self.tool_name = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for tool_name: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for tool_name: {e}"));
             self
         }
         pub fn tool_rulesets<T>(mut self, value: T) -> Self
@@ -4174,12 +3735,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<Vec<String>>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .tool_rulesets = value
+            self.tool_rulesets = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for tool_rulesets: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for tool_rulesets: {e}"));
             self
         }
         pub fn tool_type<T>(mut self, value: T) -> Self
@@ -4189,12 +3747,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .tool_type = value
+            self.tool_type = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for tool_type: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for tool_type: {e}"));
             self
         }
         pub fn tool_url<T>(mut self, value: T) -> Self
@@ -4202,12 +3757,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .tool_url = value
+            self.tool_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for tool_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for tool_url: {e}"));
             self
         }
         pub fn tool_version<T>(mut self, value: T) -> Self
@@ -4215,17 +3767,15 @@ pub mod builder {
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self
-                .tool_version = value
+            self.tool_version = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for tool_version: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for tool_version: {e}"));
             self
         }
     }
     impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityTestingItem>
-    for super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
+        for super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityTestingItem,
@@ -4242,10 +3792,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem>
-    for SecurityInsightsVersion100YamlSchemaSecurityTestingItem {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaSecurityTestingItem
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaSecurityTestingItem) -> Self {
             Self {
                 comment: Ok(value.comment),
                 integration: Ok(value.integration),
@@ -4278,12 +3827,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .ad_hoc = value
+            self.ad_hoc = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for ad_hoc: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for ad_hoc: {e}"));
             self
         }
         pub fn before_release<T>(mut self, value: T) -> Self
@@ -4291,12 +3837,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .before_release = value
+            self.before_release = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for before_release: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for before_release: {e}"));
             self
         }
         pub fn ci<T>(mut self, value: T) -> Self
@@ -4304,16 +3847,15 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .ci = value
+            self.ci = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for ci: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration,
-    > for super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
+    impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration>
+        for super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration,
@@ -4326,7 +3868,8 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration>
-    for SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration {
+        for SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration
+    {
         fn from(
             value: super::SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration,
         ) -> Self {
@@ -4343,32 +3886,24 @@ pub mod builder {
         bug_bounty_available: Result<Option<bool>, String>,
         bug_bounty_url: Result<Option<String>, String>,
         comment: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment>,
             String,
         >,
         email_contact: Result<Option<String>, String>,
         in_scope: Result<
             Option<
-                Vec<
-                    super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem,
-                >,
+                Vec<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingInScopeItem>,
             >,
             String,
         >,
         out_scope: Result<
             Option<
-                Vec<
-                    super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem,
-                >,
+                Vec<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingOutScopeItem>,
             >,
             String,
         >,
         pgp_key: Result<
-            Option<
-                super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey,
-            >,
+            Option<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey>,
             String,
         >,
         security_policy: Result<Option<String>, String>,
@@ -4396,14 +3931,9 @@ pub mod builder {
             T: std::convert::TryInto<bool>,
             T::Error: std::fmt::Display,
         {
-            self
-                .accepts_vulnerability_reports = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for accepts_vulnerability_reports: {e}"
-                    )
-                });
+            self.accepts_vulnerability_reports = value.try_into().map_err(|e| {
+                format!("error converting supplied value for accepts_vulnerability_reports: {e}")
+            });
             self
         }
         pub fn bug_bounty_available<T>(mut self, value: T) -> Self
@@ -4411,14 +3941,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<bool>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .bug_bounty_available = value
-                .try_into()
-                .map_err(|e| {
-                    format!(
-                        "error converting supplied value for bug_bounty_available: {e}"
-                    )
-                });
+            self.bug_bounty_available = value.try_into().map_err(|e| {
+                format!("error converting supplied value for bug_bounty_available: {e}")
+            });
             self
         }
         pub fn bug_bounty_url<T>(mut self, value: T) -> Self
@@ -4426,29 +3951,21 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .bug_bounty_url = value
+            self.bug_bounty_url = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for bug_bounty_url: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for bug_bounty_url: {e}"));
             self
         }
         pub fn comment<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .comment = value
+            self.comment = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for comment: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for comment: {e}"));
             self
         }
         pub fn email_contact<T>(mut self, value: T) -> Self
@@ -4456,12 +3973,9 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .email_contact = value
+            self.email_contact = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for email_contact: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for email_contact: {e}"));
             self
         }
         pub fn in_scope<T>(mut self, value: T) -> Self
@@ -4475,12 +3989,9 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .in_scope = value
+            self.in_scope = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for in_scope: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for in_scope: {e}"));
             self
         }
         pub fn out_scope<T>(mut self, value: T) -> Self
@@ -4494,29 +4005,21 @@ pub mod builder {
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .out_scope = value
+            self.out_scope = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for out_scope: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for out_scope: {e}"));
             self
         }
         pub fn pgp_key<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<
-                Option<
-                    super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey,
-                >,
+                Option<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey>,
             >,
             T::Error: std::fmt::Display,
         {
-            self
-                .pgp_key = value
+            self.pgp_key = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for pgp_key: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for pgp_key: {e}"));
             self
         }
         pub fn security_policy<T>(mut self, value: T) -> Self
@@ -4524,18 +4027,15 @@ pub mod builder {
             T: std::convert::TryInto<Option<String>>,
             T::Error: std::fmt::Display,
         {
-            self
-                .security_policy = value
+            self.security_policy = value
                 .try_into()
-                .map_err(|e| {
-                    format!("error converting supplied value for security_policy: {e}")
-                });
+                .map_err(|e| format!("error converting supplied value for security_policy: {e}"));
             self
         }
     }
-    impl std::convert::TryFrom<
-        SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
-    > for super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
+    impl std::convert::TryFrom<SecurityInsightsVersion100YamlSchemaVulnerabilityReporting>
+        for super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting
+    {
         type Error = String;
         fn try_from(
             value: SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
@@ -4554,10 +4054,9 @@ pub mod builder {
         }
     }
     impl From<super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting>
-    for SecurityInsightsVersion100YamlSchemaVulnerabilityReporting {
-        fn from(
-            value: super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
-        ) -> Self {
+        for SecurityInsightsVersion100YamlSchemaVulnerabilityReporting
+    {
+        fn from(value: super::SecurityInsightsVersion100YamlSchemaVulnerabilityReporting) -> Self {
             Self {
                 accepts_vulnerability_reports: Ok(value.accepts_vulnerability_reports),
                 bug_bounty_available: Ok(value.bug_bounty_available),

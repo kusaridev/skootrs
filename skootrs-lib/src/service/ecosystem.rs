@@ -5,7 +5,7 @@ use std::process::Command;
 use tracing::info;
 
 use skootrs_model::skootrs::{
-    EcosystemParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven,
+    EcosystemInitializeParams, GoParams, InitializedEcosystem, InitializedGo, InitializedMaven,
     InitializedSource, MavenParams, SkootError,
 };
 
@@ -20,7 +20,7 @@ pub trait EcosystemService {
     /// Returns an error if the ecosystem can't be initialized.
     fn initialize(
         &self,
-        params: EcosystemParams,
+        params: EcosystemInitializeParams,
         source: InitializedSource,
     ) -> Result<InitializedEcosystem, SkootError>;
 }
@@ -33,18 +33,18 @@ pub struct LocalEcosystemService {}
 impl EcosystemService for LocalEcosystemService {
     fn initialize(
         &self,
-        params: EcosystemParams,
+        params: EcosystemInitializeParams,
         source: InitializedSource,
     ) -> Result<InitializedEcosystem, SkootError> {
         match params {
-            EcosystemParams::Maven(m) => {
+            EcosystemInitializeParams::Maven(m) => {
                 LocalMavenEcosystemHandler::initialize(&source.path, &m)?;
                 Ok(InitializedEcosystem::Maven(InitializedMaven {
                     group_id: m.group_id,
                     artifact_id: m.artifact_id,
                 }))
             }
-            EcosystemParams::Go(g) => {
+            EcosystemInitializeParams::Go(g) => {
                 LocalGoEcosystemHandler::initialize(&source.path, &g)?;
                 Ok(InitializedEcosystem::Go(InitializedGo {
                     name: g.name,

@@ -10,6 +10,7 @@ resolver = "2"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
+missing_docs = "warn"
 
 [workspace.lints.clippy]
 enum_glob_use = "deny"

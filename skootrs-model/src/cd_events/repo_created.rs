@@ -23,6 +23,7 @@
 #![allow(clippy::return_self_not_must_use)]
 #![allow(clippy::default_trait_access)]
 #![allow(clippy::to_string_trait_impl)]
+#![allow(missing_docs)]
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -51,7 +52,8 @@ impl From<&Self> for RepositoryCreatedEvent {
     }
 }
 impl RepositoryCreatedEvent {
-    #[must_use] pub fn builder() -> builder::RepositoryCreatedEvent {
+    #[must_use]
+    pub fn builder() -> builder::RepositoryCreatedEvent {
         builder::RepositoryCreatedEvent::default()
     }
 }
@@ -71,7 +73,8 @@ impl From<&Self> for RepositoryCreatedEventContext {
     }
 }
 impl RepositoryCreatedEventContext {
-    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventContext {
+    #[must_use]
+    pub fn builder() -> builder::RepositoryCreatedEventContext {
         builder::RepositoryCreatedEventContext::default()
     }
 }
@@ -270,7 +273,8 @@ impl From<&Self> for RepositoryCreatedEventSubject {
     }
 }
 impl RepositoryCreatedEventSubject {
-    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventSubject {
+    #[must_use]
+    pub fn builder() -> builder::RepositoryCreatedEventSubject {
         builder::RepositoryCreatedEventSubject::default()
     }
 }
@@ -290,7 +294,8 @@ impl From<&Self> for RepositoryCreatedEventSubjectContent {
     }
 }
 impl RepositoryCreatedEventSubjectContent {
-    #[must_use] pub fn builder() -> builder::RepositoryCreatedEventSubjectContent {
+    #[must_use]
+    pub fn builder() -> builder::RepositoryCreatedEventSubjectContent {
         builder::RepositoryCreatedEventSubjectContent::default()
     }
 }
@@ -553,9 +558,7 @@ pub mod builder {
             T::Error: std::fmt::Display,
         {
             self.custom_data_content_type = value.try_into().map_err(|e| {
-                format!(
-                    "error converting supplied value for custom_data_content_type: {e}"
-                )
+                format!("error converting supplied value for custom_data_content_type: {e}")
             });
             self
         }

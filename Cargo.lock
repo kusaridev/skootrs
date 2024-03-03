@@ -3764,9 +3764,9 @@ dependencies = [
 
 [[package]]
 name = "serde_json"
-version = "1.0.112"
+version = "1.0.114"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d1bd37ce2324cf3bf85e5a25f96eb4baf0d5aa6eba43e7ae8958870c4ec48ed"
+checksum = "c5f09b1bd632ef549eaa9f60a1f8de742bdbc698e6cee2095fc84dde5f549ae0"
 dependencies = [
  "indexmap 2.2.3",
  "itoa",
@@ -3969,6 +3969,7 @@ dependencies = [
  "skootrs-model",
  "skootrs-rest",
  "skootrs-statestore",
+ "strum",
  "tokio",
  "tracing",
  "tracing-bunyan-formatter",
@@ -3982,6 +3983,7 @@ version = "0.1.0"
 dependencies = [
  "ahash 0.8.7",
  "askama",
+ "base64",
  "chrono",
  "futures",
  "octocrab 0.33.3",
@@ -3990,10 +3992,12 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
  "skootrs-model",
  "tempdir",
  "tokio",
  "tracing",
+ "url",
  "utoipa",
 ]
 
@@ -4007,6 +4011,9 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_yaml",
+ "sha2",
+ "strum",
+ "url",
  "utoipa",
 ]
 
@@ -4036,6 +4043,7 @@ dependencies = [
 name = "skootrs-statestore"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "skootrs-lib",
  "skootrs-model",
  "surrealdb",
@@ -4200,6 +4208,28 @@ name = "strsim"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
+
+[[package]]
+name = "strum"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "723b93e8addf9aa965ebe2d11da6d7540fa2283fcea14b3371ff055f7ba13f5f"
+dependencies = [
+ "strum_macros",
+]
+
+[[package]]
+name = "strum_macros"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a3417fc93d76740d974a01654a09777cb500428cc874ca9f45edfe0c4d4cd18"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "rustversion",
+ "syn 2.0.48",
+]
 
 [[package]]
 name = "subtle"

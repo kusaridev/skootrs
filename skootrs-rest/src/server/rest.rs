@@ -24,8 +24,8 @@ use utoipa_redoc::{Redoc, Servable};
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::server::project::ErrorResponse;
-use skootrs_model::{skootrs::{InitializedProject, ProjectParams, InitializedRepo, InitializedGithubRepo, InitializedEcosystem, RepoParams, EcosystemParams, GithubUser, GithubRepoParams, SourceParams, InitializedSource, MavenParams, GoParams, InitializedGo, InitializedMaven, facet::{CommonFacetParams, SourceFileFacet, SourceFileFacetParams, InitializedFacet, FacetParams, SupportedFacetType}}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderCommitHash, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess, SecurityInsightsVersion100YamlSchemaSecurityArtifacts, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment, SecurityInsightsVersion100YamlSchemaSecurityContactsItem, SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, SecurityInsightsVersion100YamlSchemaSecurityTestingItem, SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment, SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey}};
-use skootrs_model::skootrs::facet::{SourceBundleFacet, SourceBundleFacetParams, APIBundleFacet, APIBundleFacetParams, SourceFileContent, APIContent};
+use skootrs_model::{skootrs::{InitializedProject, ProjectCreateParams, InitializedRepo, InitializedGithubRepo, InitializedEcosystem, RepoCreateParams, EcosystemInitializeParams, GithubUser, GithubRepoParams, SourceInitializeParams, InitializedSource, MavenParams, GoParams, InitializedGo, InitializedMaven, facet::{CommonFacetCreateParams, SourceFileFacet, SourceFileFacetParams, InitializedFacet, FacetCreateParams, SupportedFacetType}}, cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, security_insights::insights10::{SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItem, SecurityInsightsVersion100YamlSchemaContributionPolicyAutomatedToolsListItemComment, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycle, SecurityInsightsVersion100YamlSchemaDependenciesDependenciesLifecycleComment, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicy, SecurityInsightsVersion100YamlSchemaDependenciesEnvDependenciesPolicyComment, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderCommitHash, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleReleaseProcess, SecurityInsightsVersion100YamlSchemaSecurityArtifacts, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsSelfAssessmentComment, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModel, SecurityInsightsVersion100YamlSchemaSecurityArtifactsThreatModelComment, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItem, SecurityInsightsVersion100YamlSchemaSecurityAssessmentsItemComment, SecurityInsightsVersion100YamlSchemaSecurityContactsItem, SecurityInsightsVersion100YamlSchemaSecurityContactsItemValue, SecurityInsightsVersion100YamlSchemaSecurityTestingItem, SecurityInsightsVersion100YamlSchemaSecurityTestingItemComment, SecurityInsightsVersion100YamlSchemaSecurityTestingItemIntegration, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingComment, SecurityInsightsVersion100YamlSchemaVulnerabilityReportingPgpKey}};
+use skootrs_model::skootrs::facet::{SourceBundleFacet, SourceBundleFacetCreateParams, APIBundleFacet, APIBundleFacetParams, SourceFileContent, APIContent};
 
 /// Run the Skootrs REST API server.
 #[actix_web::main]
@@ -43,30 +43,30 @@ pub async fn run_server() -> std::io::Result<()> {
 
                 // Skootrs Model schemas
                 InitializedProject,
-                ProjectParams,
+                ProjectCreateParams,
                 InitializedRepo,
                 InitializedGithubRepo,
                 InitializedEcosystem,
-                RepoParams,
-                EcosystemParams,
+                RepoCreateParams,
+                EcosystemInitializeParams,
                 GithubUser,
                 GithubRepoParams,
-                SourceParams,
+                SourceInitializeParams,
                 InitializedSource,
                 MavenParams,
                 GoParams,
                 InitializedGo,
                 InitializedMaven,
                 // Facet Schemas
-                CommonFacetParams,
+                CommonFacetCreateParams,
                 SourceFileFacet,
                 SourceFileFacetParams,
                 InitializedFacet,
-                FacetParams,
+                FacetCreateParams,
                 SupportedFacetType,
                 InitializedProject,
                 SourceBundleFacet,
-                SourceBundleFacetParams,
+                SourceBundleFacetCreateParams,
                 APIBundleFacet,
                 APIBundleFacetParams,
                 SourceFileContent,

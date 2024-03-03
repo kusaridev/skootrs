@@ -15,11 +15,14 @@
 
 #![allow(clippy::module_name_repetitions)]
 
-use std::{error::Error, fs, path::Path, process::Command};
+use std::{fs, path::Path, process::Command};
 
+use sha2::Digest;
 use tracing::{debug, info};
 
-use skootrs_model::skootrs::{InitializedRepo, InitializedSource, SkootError, SourceParams};
+use skootrs_model::skootrs::{
+    InitializedRepo, InitializedSource, SkootError, SourceInitializeParams,
+};
 
 use super::repo::{LocalRepoService, RepoService};
 /// The `SourceService` trait provides an interface for and managing a project's source code.
@@ -34,7 +37,7 @@ pub trait SourceService {
     /// Returns an error if the source code directory can't be initialized.
     fn initialize(
         &self,
-        params: SourceParams,
+        params: SourceInitializeParams,
         initialized_repo: InitializedRepo,
     ) -> Result<InitializedSource, SkootError>;
 
@@ -73,6 +76,25 @@ pub trait SourceService {
         path: P,
         name: String,
     ) -> Result<String, SkootError>;
+
+    /// `hash_file` returns the SHA256 hash of a file.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the file can't be opened and hashed.
+    fn hash_file<P: AsRef<Path>>(
+        &self,
+        source: &InitializedSource,
+        path: P,
+        name: String,
+    ) -> Result<String, SkootError>;
+
+    /// Pulls updates from the remote repo.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the updates can't be pulled from the remote repo.
+    fn pull_updates(&self, source: InitializedSource) -> Result<(), SkootError>;
 }
 
 /// The `LocalSourceService` struct provides an implementation of the `SourceService` trait for initializing
@@ -85,7 +107,7 @@ impl SourceService for LocalSourceService {
     /// otherwise returns an error.
     fn initialize(
         &self,
-        params: SourceParams,
+        params: SourceInitializeParams,
         initialized_repo: InitializedRepo,
     ) -> Result<InitializedSource, SkootError> {
         let repo_service = LocalRepoService {};
@@ -96,7 +118,7 @@ impl SourceService for LocalSourceService {
         &self,
         source: InitializedSource,
         message: String,
-    ) -> Result<(), Box<dyn Error + Send + Sync>> {
+    ) -> Result<(), SkootError> {
         let _output = Command::new("git")
             .arg("add")
             .arg(".")
@@ -148,12 +170,39 @@ impl SourceService for LocalSourceService {
         let contents = fs::read_to_string(full_path)?;
         Ok(contents)
     }
+
+    fn hash_file<P: AsRef<Path>>(
+        &self,
+        source: &InitializedSource,
+        path: P,
+        name: String,
+    ) -> Result<String, SkootError> {
+        let full_path: std::path::PathBuf = Path::new(&source.path).join(&path).join(name);
+        debug!("Hashing file {:?}", &full_path);
+        let mut contents = fs::File::open(&full_path)?;
+        let mut hasher = sha2::Sha256::new();
+        std::io::copy(&mut contents, &mut hasher)?;
+        let hash = hasher.finalize();
+        //let hash = "test".to_string();
+
+        debug!("Hashed file {:?} with hash: {:x}", &full_path, &hash);
+        Ok(format!("{hash:x}"))
+    }
+
+    fn pull_updates(&self, source: InitializedSource) -> Result<(), SkootError> {
+        let _output = Command::new("git")
+            .arg("pull")
+            .current_dir(&source.path)
+            .output()?;
+        info!("Pulled updates for {}", source.path);
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use skootrs_model::skootrs::{GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, SourceParams};
+    use skootrs_model::skootrs::{GithubUser, InitializedGithubRepo};
     use std::path::PathBuf;
     use tempdir::TempDir;
 
@@ -162,18 +211,20 @@ mod tests {
         let source_service = LocalSourceService {};
         let temp_dir = TempDir::new("test").unwrap();
         let parent_path = temp_dir.path().to_str().unwrap();
-        let params = SourceParams {
+        let params = SourceInitializeParams {
             parent_path: parent_path.to_string(),
         };
-        let initialized_repo = InitializedRepo::Github(
-            InitializedGithubRepo {
-                name: "skootrs".to_string(),
-                organization: GithubUser::Organization("kusaridev".to_string()),
+        let initialized_repo = InitializedRepo::Github(InitializedGithubRepo {
+            name: "skootrs".to_string(),
+            organization: GithubUser::Organization("kusaridev".to_string()),
         });
         let result = source_service.initialize(params, initialized_repo);
         assert!(result.is_ok());
         let initialized_source = result.unwrap();
-        assert_eq!(initialized_source.path, format!("{}/{}", parent_path, "skootrs"));
+        assert_eq!(
+            initialized_source.path,
+            format!("{}/{}", parent_path, "skootrs")
+        );
     }
 
     #[test]
@@ -188,7 +239,8 @@ mod tests {
         let contents = "File contents".as_bytes();
         let result = source_service.write_file(initialized_source, path, name.clone(), contents);
         assert!(result.is_ok());
-        let file_path = PathBuf::from(format!("{}/{}", temp_dir.path().to_str().unwrap(), path)).join(name);
+        let file_path =
+            PathBuf::from(format!("{}/{}", temp_dir.path().to_str().unwrap(), path)).join(name);
         assert!(file_path.exists());
         let file_contents = fs::read_to_string(file_path).unwrap();
         assert_eq!(file_contents, "File contents");
@@ -204,11 +256,15 @@ mod tests {
         let path = "subdirectory";
         let name = "file.txt".to_string();
         let contents = "File contents".as_bytes();
-        let result = source_service.write_file(initialized_source.clone(), path, name.clone(), contents);
+        let result =
+            source_service.write_file(initialized_source.clone(), path, name.clone(), contents);
         assert!(result.is_ok());
-        let file_path = PathBuf::from(format!("{}/{}", temp_dir.path().to_str().unwrap(), path)).join(name.clone());
+        let file_path = PathBuf::from(format!("{}/{}", temp_dir.path().to_str().unwrap(), path))
+            .join(name.clone());
         assert!(file_path.exists());
-        let file_contents = source_service.read_file(&initialized_source, path, name).unwrap();
+        let file_contents = source_service
+            .read_file(&initialized_source, path, name)
+            .unwrap();
         assert_eq!(file_contents, "File contents");
     }
 }

@@ -18,7 +18,7 @@ use serde::{Serialize, Deserialize};
 use skootrs_statestore::SurrealProjectStateStore;
 use utoipa::ToSchema;
 
-use skootrs_model::skootrs::ProjectParams;
+use skootrs_model::skootrs::ProjectCreateParams;
 use skootrs_lib::service::{ecosystem::LocalEcosystemService, facet::LocalFacetService, project::{LocalProjectService, ProjectService}, repo::LocalRepoService, source::LocalSourceService};
 
 /// An Error response for the REST API
@@ -69,7 +69,7 @@ pub(super) fn configure(store: Data<SurrealProjectStateStore>) -> impl FnOnce(&m
         (status = 409, description = "Project unable to be created", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to create repo".into())))
     )
 )]
-pub(super) async fn create_project(params: Json<ProjectParams>, project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
+pub(super) async fn create_project(params: Json<ProjectCreateParams>, project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
     // TODO: This should be initialized elsewhere
     let project_service = LocalProjectService {
         repo_service: LocalRepoService {},
