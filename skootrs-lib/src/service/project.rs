@@ -59,6 +59,16 @@ pub trait ProjectService {
         &self,
         params: FacetGetParams,
     ) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
+
+    /// Lists the facets of an initialized project.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the list of facets can't be fetched.
+    fn list_facets(
+        &self,
+        params: ProjectGetParams,
+    ) -> impl std::future::Future<Output = Result<Vec<FacetMapKey>, SkootError>> + Send;
 }
 
 /// The `LocalProjectService` struct provides an implementation of the `ProjectService` trait for initializing
@@ -109,7 +119,6 @@ where
             repo: initialized_repo.clone(),
             ecosystem: initialized_ecosystem.clone(),
         };
-        //let facet_set_params = facet_set_params_generator.generate_default(&common_params)?;
         let source_facet_set_params = facet_set_params_generator
             .generate_default_source_bundle_facet_params(&common_params)?;
         let api_facet_set_params =
@@ -164,12 +173,7 @@ where
         &self,
         params: FacetGetParams,
     ) -> Result<InitializedFacet, SkootError> {
-        let initialized_project = self
-            .get(ProjectGetParams {
-                project_url: params.project_url.clone(),
-            })
-            .await?;
-        //let facet = initialized_project.facets.iter().find(|f| f.facet_type() == params.facet_type);
+        let initialized_project = self.get(params.project_get_params.clone()).await?;
         let facet = initialized_project
             .facets
             .get(&params.facet_map_key)
@@ -219,6 +223,10 @@ where
             InitializedFacet::APIBundle(a) => Ok(InitializedFacet::APIBundle(a.clone())),
             InitializedFacet::SourceFile(_) => Err(SkootError::from("Facet type not supported")),
         }
+    }
+
+    async fn list_facets(&self, params: ProjectGetParams) -> Result<Vec<FacetMapKey>, SkootError> {
+        Ok(self.get(params).await?.facets.keys().cloned().collect())
     }
 }
 

@@ -15,12 +15,7 @@
 
 pub mod facet;
 
-use std::{
-    collections::{HashMap, HashSet},
-    error::Error,
-    fmt,
-    str::FromStr,
-};
+use std::{collections::HashMap, error::Error, fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, VariantNames};
@@ -70,14 +65,6 @@ pub struct InitializedProject {
     pub source: InitializedSource,
     /// The facets associated with the project.
     pub facets: HashMap<FacetMapKey, InitializedFacet>,
-}
-
-impl InitializedProject {
-    /// Returns the set of keys for the facet `HashMap`
-    #[must_use]
-    pub fn facet_key_set(&self) -> HashSet<FacetMapKey> {
-        self.facets.keys().cloned().collect()
-    }
 }
 
 /// A helper enum for how a facet can be pulled from a `HashMap`
@@ -190,8 +177,8 @@ pub enum ProjectOutputType {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub struct FacetGetParams {
-    /// The URL of the Skootrs project to get the facet from.
-    pub project_url: String,
+    /// Parameters for first getting the project.
+    pub project_get_params: ProjectGetParams,
     /// The key of the facet to get from the project.
     pub facet_map_key: FacetMapKey,
 }
