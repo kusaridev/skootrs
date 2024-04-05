@@ -19,7 +19,7 @@ use std::{collections::HashMap, error::Error, fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
 use strum::{EnumString, VariantNames};
-use url::Host;
+use url::{Host, Url};
 use utoipa::ToSchema;
 
 use self::facet::{InitializedFacet, SupportedFacetType};
@@ -153,11 +153,11 @@ pub struct ProjectGetParams {
 /// The paramaters for getting the output of a project, e.g. an SBOM from a release
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct ProjectOutputParams {
+pub struct OutputGetParams {
     /// The URL of the Skootrs project to get the output from.
     pub project_url: String,
     /// The type of output to get from the project.
-    pub project_output_type: ProjectOutputType,
+    pub project_output_type: OutputType,
     // TODO: Should project_output be a part of the ProjectOutputType enum?
     /// The output to get from the project.
     pub project_output: String,
@@ -166,11 +166,69 @@ pub struct ProjectOutputParams {
 /// The set of supported output types
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub enum ProjectOutputType {
+pub enum OutputType {
     /// An output type for getting an SBOM from a project.
-    SBOM,
+    SBOM(OutputSBOMFormatType),
     /// An output type for getting a custom output from a project.
     Custom(String),
+}
+
+/// The set of supported output types
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum Output {
+    /// An output type for getting an SBOM from a project.
+    SBOM(OutputSBOMFormat),
+    /// An output type for getting a custom output from a project.
+    Custom(String),
+}
+
+/// The metadata for downloading an output from a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct OutputDescriptor {
+    /// The name of the output. Useful for identifying the output wihtout the full url.
+    pub name: String,
+    /// The URL to download the output.
+    pub url: Url,
+    /// The type of output this descriptor describes.
+    pub output_type: OutputType,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum OutputSBOMFormat {
+    SPDX(OutputSBOMSPDX),
+    CycloneDX(OutputSBOMCycloneDX),
+    Unknown(OutputSBOMUnknown),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum OutputSBOMFormatType {
+    SPDX,
+    CycloneDX,
+    Unknown,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct OutputSBOMSPDX {
+    pub content: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct OutputSBOMCycloneDX {}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct OutputSBOMUnknown {}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum OutputLocation {
+    Github(GithubOutputLocation),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct GithubOutputLocation {
+    pub owner: String,
+    pub repo: String,
+    pub release: String,
+    pub output: String,
 }
 
 /// The parameters for getting a facet from a project.

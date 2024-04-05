@@ -12,8 +12,8 @@ use skootrs_model::{
     security_insights::insights10::SecurityInsightsVersion100YamlSchema,
     skootrs::{
         Config, EcosystemInitializeParams, FacetGetParams, FacetMapKey, GithubRepoParams,
-        GithubUser, GoParams, InitializedProject, MavenParams, ProjectCreateParams,
-        ProjectGetParams, ProjectOutputParams, ProjectOutputType, RepoCreateParams, SkootError,
+        GithubUser, GoParams, InitializedProject, MavenParams, OutputGetParams, OutputType,
+        ProjectCreateParams, ProjectGetParams, RepoCreateParams, SkootError,
         SourceInitializeParams, SupportedEcosystems, SUPPORTED_ECOSYSTEMS,
     },
 };
@@ -246,7 +246,7 @@ impl Output {
     pub async fn get<'a, T: ProjectService + ?Sized>(
         config: &Config,
         _project_service: &'a T,
-        project_output_params: Option<ProjectOutputParams>,
+        project_output_params: Option<OutputGetParams>,
     ) -> Result<(), SkootError> {
         let project_output_params = match project_output_params {
             Some(p) => p,
@@ -263,7 +263,20 @@ impl Output {
         Ok(())
     }
 
-    async fn prompt_project_output(_config: &Config) -> Result<ProjectOutputParams, SkootError> {
+    /// Prints out the list of project outputs. This includes things like SBOMs or SLSA attestations.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the list of project outputs can't be fetched for some reason.
+    pub async fn print_list<'a, T: ProjectService + ?Sized>(
+        _config: &Config,
+        _project_service: &'a T,
+        project_get_params: Option<ProjectGetParams>,
+    ) -> Result<(), SkootError> {
+        unimplemented!()
+    }
+
+    async fn prompt_project_output(_config: &Config) -> Result<OutputGetParams, SkootError> {
         let projects = Project::list().await?;
         let selected_project =
             inquire::Select::new("Select a project", projects.iter().collect()).prompt()?;
@@ -320,11 +333,11 @@ impl Output {
         };
 
         let selected_output_type_enum = match selected_output_type {
-            "SBOM" => ProjectOutputType::SBOM,
-            _ => ProjectOutputType::Custom("Other".to_string()),
+            "SBOM" => OutputType::SBOM,
+            _ => OutputType::Custom("Other".to_string()),
         };
 
-        Ok(ProjectOutputParams {
+        Ok(OutputGetParams {
             project_url: selected_project.clone(),
             project_output_type: selected_output_type_enum,
             project_output: selected_output.clone(),

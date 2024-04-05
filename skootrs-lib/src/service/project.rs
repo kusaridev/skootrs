@@ -25,7 +25,9 @@ use skootrs_model::skootrs::{
     ProjectGetParams, SkootError,
 };
 
-use super::{ecosystem::EcosystemService, repo::RepoService, source::SourceService};
+use super::{
+    ecosystem::EcosystemService, output::OutputService, repo::RepoService, source::SourceService,
+};
 use tracing::{debug, error, info};
 
 /// The `ProjectService` trait provides an interface for initializing and managing a Skootrs project.
@@ -79,19 +81,22 @@ pub struct LocalProjectService<
     ES: EcosystemService,
     SS: SourceService,
     FS: RootFacetService,
+    OS: OutputService,
 > {
     pub repo_service: RS,
     pub ecosystem_service: ES,
     pub source_service: SS,
     pub facet_service: FS,
+    pub output_service: OS,
 }
 
-impl<RS, ES, SS, FS> ProjectService for LocalProjectService<RS, ES, SS, FS>
+impl<RS, ES, SS, FS, OS> ProjectService for LocalProjectService<RS, ES, SS, FS, OS>
 where
     RS: RepoService + Send + Sync,
     ES: EcosystemService + Send + Sync,
     SS: SourceService + Send + Sync,
     FS: RootFacetService + Send + Sync,
+    OS: OutputService + Send + Sync,
 {
     async fn initialize(
         &self,
