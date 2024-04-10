@@ -15,11 +15,12 @@
 
 use actix_web::{Responder, web::{ServiceConfig, Data, Json, self}, HttpResponse};
 use serde::{Serialize, Deserialize};
-use skootrs_statestore::SurrealProjectStateStore;
+use skootrs_statestore::{InMemoryProjectReferenceCache, ProjectReferenceCache};
+use tokio::sync::Mutex;
 use utoipa::ToSchema;
 
 use skootrs_model::skootrs::ProjectCreateParams;
-use skootrs_lib::service::{ecosystem::LocalEcosystemService, facet::LocalFacetService, project::{LocalProjectService, ProjectService}, repo::LocalRepoService, source::LocalSourceService};
+use skootrs_lib::service::{ecosystem::LocalEcosystemService, facet::LocalFacetService, output::LocalOutputService, project::{LocalProjectService, ProjectService}, repo::LocalRepoService, source::LocalSourceService};
 
 /// An Error response for the REST API
 #[derive(Serialize, Deserialize, Clone, ToSchema)]
@@ -33,7 +34,7 @@ pub(super) enum ErrorResponse {
 }
 
 /// Configures the services and routes for the Skootrs REST API
-pub(super) fn configure(store: Data<SurrealProjectStateStore>) -> impl FnOnce(&mut ServiceConfig) {
+pub(super) fn configure(store: Data<Mutex<InMemoryProjectReferenceCache>>) -> impl FnOnce(&mut ServiceConfig) {
     |config: &mut ServiceConfig| {
         config
             .app_data(store)
@@ -69,18 +70,21 @@ pub(super) fn configure(store: Data<SurrealProjectStateStore>) -> impl FnOnce(&m
         (status = 409, description = "Project unable to be created", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to create repo".into())))
     )
 )]
-pub(super) async fn create_project(params: Json<ProjectCreateParams>, project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
+pub(super) async fn create_project(params: Json<ProjectCreateParams>, project_store: Data<Mutex<InMemoryProjectReferenceCache>>) -> Result<impl Responder, actix_web::Error> {
     // TODO: This should be initialized elsewhere
     let project_service = LocalProjectService {
         repo_service: LocalRepoService {},
         ecosystem_service: LocalEcosystemService {},
         source_service: LocalSourceService {},
         facet_service: LocalFacetService {},
+        output_service: LocalOutputService {},
     };
 
     let initialized_project = project_service.initialize(params.into_inner()).await
     .map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
-    project_store.create(initialized_project.clone()).await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
+    project_store.lock().await.set(initialized_project.repo.full_url()).await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
+    // TODO: Should this return an internal server error if it can't save the cache?
+    project_store.lock().await.save().map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
     Ok(HttpResponse::Ok().json(initialized_project))
 }
 
@@ -93,7 +97,7 @@ pub(super) async fn create_project(params: Json<ProjectCreateParams>, project_st
         (status = 500, description = "Internal server error", body = ErrorResponse, example = json!(ErrorResponse::InitializationError("Unable to list repos".into()))),
     )
 )]
-pub(super) async fn list_projects(project_store: Data<SurrealProjectStateStore>) -> Result<impl Responder, actix_web::Error> {
-    let projects = project_store.select_all().await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
+pub(super) async fn list_projects(project_store: Data<InMemoryProjectReferenceCache>) -> Result<impl Responder, actix_web::Error> {
+    let projects = project_store.list().await.map_err(|err| actix_web::error::ErrorInternalServerError(err.to_string()))?;
     Ok(HttpResponse::Ok().json(projects))
 }

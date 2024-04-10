@@ -150,6 +150,37 @@ pub struct ProjectGetParams {
     pub project_url: String,
 }
 
+/// The parameters for listing all the outputs for a Skootrs project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct ProjectOutputsListParams {
+    /// The initialized project to list the outputs for.
+    pub initialized_project: InitializedProject,
+    /// The release to get the outputs for.
+    pub release: ProjectReleaseParam,
+}
+
+/// The parameters for getting a release from a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub enum ProjectReleaseParam {
+    /// A release based on a tag.
+    Tag(String),
+    /// The latest release.
+    Latest,
+}
+
+impl ProjectReleaseParam {
+    /// Returns the tag of the release.
+    #[must_use]
+    pub fn tag(&self) -> Option<String> {
+        match self {
+            Self::Tag(x) => Some(x.to_string()),
+            Self::Latest => None,
+        }
+    }
+}
+
 /// The paramaters for getting the output of a project, e.g. an SBOM from a release
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
@@ -171,6 +202,26 @@ pub enum ProjectOutputType {
     SBOM,
     /// An output type for getting a custom output from a project.
     Custom(String),
+}
+
+/// The output of a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct ProjectOutput {
+    /// The reference to the project output.
+    pub reference: ProjectOutputReference,
+    /// The output to get from the project.
+    pub output: String,
+}
+
+/// A reference to the output of a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct ProjectOutputReference {
+    /// The type of output to get from the project.
+    pub output_type: ProjectOutputType,
+    /// The name of the output to get from the project.
+    pub name: String,
 }
 
 /// The parameters for getting a facet from a project.
