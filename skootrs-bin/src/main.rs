@@ -28,16 +28,19 @@
 
 pub mod helpers;
 
+use std::io::stdout;
+
 use clap::{Parser, Subcommand};
 use clio::Input;
 use skootrs_lib::service::ecosystem::LocalEcosystemService;
 use skootrs_lib::service::facet::LocalFacetService;
+use skootrs_lib::service::output::LocalOutputService;
 use skootrs_lib::service::project::LocalProjectService;
 use skootrs_lib::service::repo::LocalRepoService;
 use skootrs_lib::service::source::LocalSourceService;
 use skootrs_model::skootrs::SkootError;
 
-use helpers::{get_output, Facet, Output};
+use helpers::{Facet, HandleResponseOutput, Output};
 use opentelemetry::global;
 use opentelemetry_sdk::propagation::TraceContextPropagator;
 use serde::de::DeserializeOwned;
@@ -144,7 +147,12 @@ enum OutputCommands {
     },
     /// List all the release outputs that belong to a particular project.
     #[command(name = "list")]
-    List,
+    List {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
 }
 
 /// This is the enum for what nouns the `daemon` command can take.
@@ -189,12 +197,14 @@ fn init_project_service() -> LocalProjectService<
     LocalEcosystemService,
     LocalSourceService,
     LocalFacetService,
+    LocalOutputService,
 > {
     LocalProjectService {
         repo_service: LocalRepoService {},
         ecosystem_service: LocalEcosystemService {},
         source_service: LocalSourceService {},
         facet_service: LocalFacetService {},
+        output_service: LocalOutputService {},
     }
 }
 
@@ -232,7 +242,9 @@ async fn main() -> std::result::Result<(), SkootError> {
             ProjectCommands::Create { input } => {
                 let project_create_params = parse_optional_input(input)?;
                 if let Err(ref error) =
-                    helpers::Project::create(&config, &project_service, project_create_params).await
+                    helpers::Project::create(&config, &project_service, project_create_params)
+                        .await
+                        .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to create project");
                 }
@@ -240,13 +252,18 @@ async fn main() -> std::result::Result<(), SkootError> {
             ProjectCommands::Get { input } => {
                 let project_get_params = parse_optional_input(input)?;
                 if let Err(ref error) =
-                    helpers::Project::get(&config, &project_service, project_get_params).await
+                    helpers::Project::get(&config, &project_service, project_get_params)
+                        .await
+                        .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to get project info");
                 }
             }
             ProjectCommands::List => {
-                if let Err(ref error) = helpers::Project::print_list().await {
+                if let Err(ref error) = helpers::Project::list()
+                    .await
+                    .handle_response_output(stdout())
+                {
                     error!(error = error.as_ref(), "Failed to list projects");
                 }
             }
@@ -254,16 +271,18 @@ async fn main() -> std::result::Result<(), SkootError> {
         SkootrsCli::Facet { facet } => match facet {
             FacetCommands::Get { input } => {
                 let facet_get_params = parse_optional_input(input)?;
-                if let Err(ref error) =
-                    Facet::get(&config, &project_service, facet_get_params).await
+                if let Err(ref error) = Facet::get(&config, &project_service, facet_get_params)
+                    .await
+                    .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to get facet");
                 }
             }
             FacetCommands::List { input } => {
                 let project_get_params = parse_optional_input(input)?;
-                if let Err(ref error) =
-                    Facet::print_list(&config, &project_service, project_get_params).await
+                if let Err(ref error) = Facet::list(&config, &project_service, project_get_params)
+                    .await
+                    .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to list facets for project");
                 }
@@ -272,14 +291,19 @@ async fn main() -> std::result::Result<(), SkootError> {
         SkootrsCli::Output { output } => match output {
             OutputCommands::Get { input } => {
                 let output_get_params = parse_optional_input(input)?;
-                if let Err(ref error) =
-                    Output::get(&config, &project_service, output_get_params).await
+                if let Err(ref error) = Output::get(&config, &project_service, output_get_params)
+                    .await
+                    .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to get output");
                 }
             }
-            OutputCommands::List => {
-                if let Err(ref error) = get_output().await {
+            OutputCommands::List { input } => {
+                let output_list_params = parse_optional_input(input)?;
+                if let Err(ref error) = Output::list(&config, &project_service, output_list_params)
+                    .await
+                    .handle_response_output(stdout())
+                {
                     error!(error = error.as_ref(), "Failed to list outputs for project");
                 }
             }

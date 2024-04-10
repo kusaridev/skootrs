@@ -22,10 +22,12 @@ use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
 use skootrs_model::skootrs::{
     facet::{CommonFacetCreateParams, InitializedFacet, SourceFile},
     FacetGetParams, FacetMapKey, InitializedProject, InitializedSource, ProjectCreateParams,
-    ProjectGetParams, SkootError,
+    ProjectGetParams, ProjectOutputReference, ProjectOutputsListParams, SkootError,
 };
 
-use super::{ecosystem::EcosystemService, repo::RepoService, source::SourceService};
+use super::{
+    ecosystem::EcosystemService, output::OutputService, repo::RepoService, source::SourceService,
+};
 use tracing::{debug, error, info};
 
 /// The `ProjectService` trait provides an interface for initializing and managing a Skootrs project.
@@ -69,6 +71,11 @@ pub trait ProjectService {
         &self,
         params: ProjectGetParams,
     ) -> impl std::future::Future<Output = Result<Vec<FacetMapKey>, SkootError>> + Send;
+
+    fn outputs_list(
+        &self,
+        params: ProjectOutputsListParams,
+    ) -> impl std::future::Future<Output = Result<Vec<ProjectOutputReference>, SkootError>> + Send;
 }
 
 /// The `LocalProjectService` struct provides an implementation of the `ProjectService` trait for initializing
@@ -79,19 +86,22 @@ pub struct LocalProjectService<
     ES: EcosystemService,
     SS: SourceService,
     FS: RootFacetService,
+    OS: OutputService,
 > {
     pub repo_service: RS,
     pub ecosystem_service: ES,
     pub source_service: SS,
     pub facet_service: FS,
+    pub output_service: OS,
 }
 
-impl<RS, ES, SS, FS> ProjectService for LocalProjectService<RS, ES, SS, FS>
+impl<RS, ES, SS, FS, OS> ProjectService for LocalProjectService<RS, ES, SS, FS, OS>
 where
     RS: RepoService + Send + Sync,
     ES: EcosystemService + Send + Sync,
     SS: SourceService + Send + Sync,
     FS: RootFacetService + Send + Sync,
+    OS: OutputService + Send + Sync,
 {
     async fn initialize(
         &self,
@@ -225,6 +235,13 @@ where
         }
     }
 
+    async fn outputs_list(
+        &self,
+        params: ProjectOutputsListParams,
+    ) -> Result<Vec<ProjectOutputReference>, SkootError> {
+        self.output_service.outputs_list(params).await
+    }
+
     async fn list_facets(&self, params: ProjectGetParams) -> Result<Vec<FacetMapKey>, SkootError> {
         Ok(self.get(params).await?.facets.keys().cloned().collect())
     }
@@ -240,8 +257,8 @@ mod tests {
             SupportedFacetType,
         },
         EcosystemInitializeParams, GithubRepoParams, GithubUser, GoParams, InitializedEcosystem,
-        InitializedGithubRepo, InitializedGo, InitializedMaven, InitializedRepo, RepoCreateParams,
-        SourceInitializeParams,
+        InitializedGithubRepo, InitializedGo, InitializedMaven, InitializedRepo, ProjectOutputType,
+        RepoCreateParams, SourceInitializeParams,
     };
 
     use super::*;
@@ -249,6 +266,7 @@ mod tests {
     struct MockEcosystemService;
     struct MockSourceService;
     struct MockFacetService;
+    struct MockOutputService;
 
     impl RepoService for MockRepoService {
         async fn initialize(
@@ -494,6 +512,18 @@ mod tests {
         }
     }
 
+    impl OutputService for MockOutputService {
+        async fn outputs_list(
+            &self,
+            _params: ProjectOutputsListParams,
+        ) -> Result<Vec<ProjectOutputReference>, SkootError> {
+            Ok(vec![ProjectOutputReference {
+                name: "test".into(),
+                output_type: ProjectOutputType::SBOM,
+            }])
+        }
+    }
+
     #[tokio::test]
     async fn test_initialize_project() {
         let project_params = ProjectCreateParams {
@@ -517,6 +547,7 @@ mod tests {
             ecosystem_service: MockEcosystemService,
             source_service: MockSourceService,
             facet_service: MockFacetService,
+            output_service: MockOutputService,
         };
 
         let result = local_project_service.initialize(project_params).await;

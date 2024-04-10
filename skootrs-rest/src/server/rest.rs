@@ -16,7 +16,8 @@
 use std::net::Ipv4Addr;
 
 use actix_web::{App, HttpServer, web::Data};
-use skootrs_statestore::SurrealProjectStateStore;
+use skootrs_statestore::InMemoryProjectReferenceCache;
+use tokio::sync::Mutex;
 use tracing_actix_web::TracingLogger;
 use utoipa::{OpenApi, Modify, openapi::security::{SecurityScheme, ApiKey, ApiKeyValue}};
 use utoipa_rapidoc::RapiDoc;
@@ -134,7 +135,7 @@ pub async fn run_server() -> std::io::Result<()> {
         }
     }
 
-    let store: Data<SurrealProjectStateStore> = Data::new(SurrealProjectStateStore::new().await.map_err(|err| std::io::Error::new(std::io::ErrorKind::Other, err))?);
+    let store: Data<Mutex<InMemoryProjectReferenceCache>> = Data::new(Mutex::new(InMemoryProjectReferenceCache::new("/tmp/cache.json".into())));
     // Make instance variable of ApiDoc so all worker threads gets the same instance.
     let openapi = ApiDoc::openapi();
 
