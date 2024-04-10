@@ -386,9 +386,9 @@ checksum = "9d297deb1925b89f2ccc13d7635fa0714f12c87adce1c75356b39ca9b7178567"
 
 [[package]]
 name = "basic-toml"
-version = "0.1.7"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f2139706359229bfa8f19142ac1155b4b80beafb7a60471ac5dd109d4a19778"
+checksum = "823388e228f614e9558c6804262db37960ec8821856535f5c3f59913140558f8"
 dependencies = [
  "serde",
 ]
@@ -2463,13 +2463,11 @@ dependencies = [
 name = "skootrs-lib"
 version = "0.1.0"
 dependencies = [
- "ahash",
  "askama",
  "base64",
  "chrono",
  "futures",
  "octocrab 0.33.3",
- "regress",
  "schemars",
  "serde",
  "serde_json",
@@ -2492,8 +2490,6 @@ dependencies = [
  "schemars",
  "serde",
  "serde_json",
- "serde_yaml",
- "sha2",
  "strum",
  "url",
  "utoipa",
@@ -2504,8 +2500,6 @@ name = "skootrs-rest"
 version = "0.1.0"
 dependencies = [
  "actix-web",
- "opentelemetry",
- "opentelemetry-jaeger",
  "serde",
  "serde_json",
  "skootrs-lib",
@@ -2513,8 +2507,6 @@ dependencies = [
  "skootrs-statestore",
  "tokio",
  "tracing-actix-web",
- "tracing-bunyan-formatter",
- "tracing-subscriber",
  "utoipa",
  "utoipa-rapidoc",
  "utoipa-redoc",
