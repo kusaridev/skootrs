@@ -21,8 +21,9 @@ use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
 
 use skootrs_model::skootrs::{
     facet::{CommonFacetCreateParams, InitializedFacet, SourceFile},
-    FacetGetParams, FacetMapKey, InitializedProject, InitializedSource, ProjectCreateParams,
-    ProjectGetParams, ProjectOutputReference, ProjectOutputsListParams, SkootError,
+    FacetGetParams, FacetMapKey, InitializedProject, InitializedSource, ProjectArchiveParams,
+    ProjectCreateParams, ProjectGetParams, ProjectOutputReference, ProjectOutputsListParams,
+    SkootError,
 };
 
 use super::{
@@ -72,10 +73,25 @@ pub trait ProjectService {
         params: ProjectGetParams,
     ) -> impl std::future::Future<Output = Result<Vec<FacetMapKey>, SkootError>> + Send;
 
+    /// Lists the outputs of an initialized project.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the list of outputs can't be fetched.
     fn outputs_list(
         &self,
         params: ProjectOutputsListParams,
     ) -> impl std::future::Future<Output = Result<Vec<ProjectOutputReference>, SkootError>> + Send;
+
+    /// Archives an initialized project.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the project can't be archived.
+    fn archive(
+        &self,
+        _params: ProjectArchiveParams,
+    ) -> impl std::future::Future<Output = Result<String, SkootError>> + Send;
 }
 
 /// The `LocalProjectService` struct provides an implementation of the `ProjectService` trait for initializing
@@ -245,6 +261,12 @@ where
     async fn list_facets(&self, params: ProjectGetParams) -> Result<Vec<FacetMapKey>, SkootError> {
         Ok(self.get(params).await?.facets.keys().cloned().collect())
     }
+
+    async fn archive(&self, params: ProjectArchiveParams) -> Result<String, SkootError> {
+        self.repo_service
+            .archive(params.initialized_project.repo)
+            .await
+    }
 }
 
 #[cfg(test)]
@@ -341,6 +363,10 @@ mod tests {
             }
 
             Ok("Worked".to_string())
+        }
+
+        async fn archive(&self, initialized_repo: InitializedRepo) -> Result<String, SkootError> {
+            Ok(initialized_repo.full_url())
         }
     }
 

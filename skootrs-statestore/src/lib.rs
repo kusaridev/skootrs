@@ -67,11 +67,8 @@ impl ProjectStateStore for GitProjectStateStore<LocalSourceService> {
         Ok(Some(serde_json::from_str(&project).unwrap()))
     }
 
-    fn update(
-        &self,
-        project: InitializedProject,
-    ) -> impl std::future::Future<Output = Result<(), SkootError>> + Send {
-        self.create(project)
+    async fn update(&self, project: InitializedProject) -> Result<(), SkootError> {
+        self.create(project).await
     }
 }
 
@@ -83,6 +80,10 @@ pub trait ProjectReferenceCache {
         repo_url: String,
     ) -> impl std::future::Future<Output = Result<InitializedProject, SkootError>> + Send;
     fn set(
+        &mut self,
+        repo_url: String,
+    ) -> impl std::future::Future<Output = Result<(), SkootError>> + Send;
+    fn delete(
         &mut self,
         repo_url: String,
     ) -> impl std::future::Future<Output = Result<(), SkootError>> + Send;
@@ -103,12 +104,6 @@ impl ProjectReferenceCache for InMemoryProjectReferenceCache {
 
     async fn get(&mut self, repo_url: String) -> Result<InitializedProject, SkootError> {
         let repo = InitializedRepo::try_from(repo_url)?;
-        /*let local_clone = self
-            .local_repo_service
-            .clone_local(repo, self.clone_path.clone())?;
-        let project =
-            self.local_source_service
-                .read_file(&local_clone, "./", ".skootrs".to_string())?;*/
         let project = self
             .local_repo_service
             .fetch_file_content(&repo, ".skootrs")
@@ -119,6 +114,12 @@ impl ProjectReferenceCache for InMemoryProjectReferenceCache {
 
     async fn set(&mut self, repo_url: String) -> Result<(), SkootError> {
         self.cache.insert(repo_url);
+        self.save()?;
+        Ok(())
+    }
+
+    async fn delete(&mut self, repo_url: String) -> Result<(), SkootError> {
+        self.cache.remove(&repo_url);
         self.save()?;
         Ok(())
     }

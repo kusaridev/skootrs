@@ -19,6 +19,7 @@
 use std::{process::Command, str::FromStr, sync::Arc};
 
 use chrono::Utc;
+use octocrab::Octocrab;
 use tracing::{info, debug};
 
 use skootrs_model::{cd_events::repo_created::{RepositoryCreatedEvent, RepositoryCreatedEventContext, RepositoryCreatedEventContextId, RepositoryCreatedEventContextVersion, RepositoryCreatedEventSubject, RepositoryCreatedEventSubjectContent, RepositoryCreatedEventSubjectContentName, RepositoryCreatedEventSubjectContentUrl, RepositoryCreatedEventSubjectId}, skootrs::{InitializedRepoGetParams, GithubRepoParams, GithubUser, InitializedGithubRepo, InitializedRepo, InitializedSource, RepoCreateParams, SkootError}};
@@ -62,6 +63,8 @@ pub trait RepoService {
     ///
     /// Returns an error if the file can't be fetched from the repository for any reason.
     fn fetch_file_content<P: AsRef<std::path::Path> + Send>(&self, initialized_repo: &InitializedRepo, path: P) -> impl std::future::Future<Output = Result<String, SkootError>> + std::marker::Send;
+
+    fn archive(&self, initialized_repo: InitializedRepo) -> impl std::future::Future<Output = Result<String, SkootError>> + Send;
 }
 
 /// The `LocalRepoService` struct provides an implementation of the `RepoService` trait for initializing
@@ -168,6 +171,32 @@ impl RepoService for LocalRepoService {
                 debug!("Content Decoded: {content_decoded:?}");
                 
                 Ok(content_decoded)
+            }
+        }
+    }
+
+    async fn archive(&self, initialized_repo: InitializedRepo) -> Result<String, SkootError> {
+        match initialized_repo {
+            InitializedRepo::Github(g) => {
+                #[derive(serde::Serialize)]
+                struct ArchiveParams {
+                    archived: bool,
+                }
+                let owner = g.organization.get_name();
+                let repo = g.name.clone();
+                let body = ArchiveParams {
+                    archived: true,
+                };
+
+                info!("Archiving {owner}/{repo}");
+
+                // FIXME: This should work with `Octocrabe::instance()` but for some reason it doesn't pick up the token/session
+                let token = std::env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN env variable is required");
+                let octocrab = Octocrab::builder().personal_token(token).build()?;
+                let archived_response: serde_json::Value = octocrab.patch(format!("/repos/{owner}/{repo}"), Some(&body)).await?;
+                info!("Archived: {archived_response}");
+
+                Ok(g.full_url())
             }
         }
     }

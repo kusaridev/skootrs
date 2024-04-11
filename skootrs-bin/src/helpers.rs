@@ -8,9 +8,9 @@ use skootrs_model::{
     skootrs::{
         facet::InitializedFacet, Config, EcosystemInitializeParams, FacetGetParams, FacetMapKey,
         GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams,
-        ProjectCreateParams, ProjectGetParams, ProjectOutputParams, ProjectOutputReference,
-        ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam, RepoCreateParams,
-        SkootError, SourceInitializeParams, SupportedEcosystems,
+        ProjectArchiveParams, ProjectCreateParams, ProjectGetParams, ProjectOutputParams,
+        ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam,
+        RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
     },
 };
 use std::{collections::HashSet, io::Write, str::FromStr};
@@ -160,8 +160,8 @@ impl Project {
         Ok(project)
     }
 
-    async fn prompt_get(_config: &Config) -> Result<ProjectGetParams, SkootError> {
-        let projects = Project::list().await?;
+    async fn prompt_get(config: &Config) -> Result<ProjectGetParams, SkootError> {
+        let projects = Project::list(config).await?;
         let selected_project =
             inquire::Select::new("Select a project", projects.iter().collect()).prompt()?;
         Ok(ProjectGetParams {
@@ -174,10 +174,34 @@ impl Project {
     /// # Errors
     ///
     /// Returns an error if the cache can't be loaded or if the list of projects can't be fetched.
-    pub async fn list() -> Result<HashSet<String>, SkootError> {
+    pub async fn list(_config: &Config) -> Result<HashSet<String>, SkootError> {
         let cache = InMemoryProjectReferenceCache::load_or_create("./skootcache")?;
         let projects: HashSet<String> = cache.list().await?;
         Ok(projects)
+    }
+
+    /// Archives a project by archiving the repository and removing it from the local cache.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the project can't be archived or deleted from the cache.
+    pub async fn archive<'a, T: ProjectService + ?Sized>(
+        config: &Config,
+        project_service: &'a T,
+        project_archive_params: Option<ProjectArchiveParams>,
+    ) -> Result<(), SkootError> {
+        let project_archive_params = match project_archive_params {
+            Some(p) => p,
+            None => ProjectArchiveParams {
+                initialized_project: Project::get(config, project_service, None).await?,
+            },
+        };
+        let url = project_archive_params.initialized_project.repo.full_url();
+        project_service.archive(project_archive_params).await?;
+        let mut local_cache = InMemoryProjectReferenceCache::load_or_create("./skootcache")?;
+        local_cache.delete(url).await?;
+        local_cache.save()?;
+        Ok(())
     }
 }
 
@@ -295,8 +319,8 @@ impl Output {
         Ok(output_list)
     }
 
-    async fn prompt_project_output(_config: &Config) -> Result<ProjectOutputParams, SkootError> {
-        let projects = Project::list().await?;
+    async fn prompt_project_output(config: &Config) -> Result<ProjectOutputParams, SkootError> {
+        let projects = Project::list(config).await?;
         let selected_project =
             inquire::Select::new("Select a project", projects.iter().collect()).prompt()?;
         let selected_output_type =
