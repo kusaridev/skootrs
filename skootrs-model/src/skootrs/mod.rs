@@ -194,6 +194,14 @@ pub struct ProjectOutputParams {
     pub project_output: String,
 }
 
+/// The parameters for archiving a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct ProjectArchiveParams {
+    /// The initialized project to archive.
+    pub initialized_project: InitializedProject,
+}
+
 /// The set of supported output types
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]

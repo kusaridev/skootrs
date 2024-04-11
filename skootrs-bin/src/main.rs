@@ -108,6 +108,16 @@ enum ProjectCommands {
         #[clap(value_parser)]
         input: Option<Input>,
     },
+
+    /// Archive a project.
+    #[command(name = "archive")]
+    Archive {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
+
     /// List all the projects known to the local Skootrs
     #[command(name = "list")]
     List,
@@ -222,6 +232,7 @@ fn parse_optional_input<T: DeserializeOwned>(
     }
 }
 
+#[allow(clippy::too_many_lines)]
 #[tokio::main]
 async fn main() -> std::result::Result<(), SkootError> {
     init_tracing();
@@ -260,11 +271,20 @@ async fn main() -> std::result::Result<(), SkootError> {
                 }
             }
             ProjectCommands::List => {
-                if let Err(ref error) = helpers::Project::list()
+                if let Err(ref error) = helpers::Project::list(&config)
                     .await
                     .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to list projects");
+                }
+            }
+            ProjectCommands::Archive { input } => {
+                let project_archive_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    helpers::Project::archive(&config, &project_service, project_archive_params)
+                        .await
+                {
+                    error!(error = error.as_ref(), "Failed to archive project");
                 }
             }
         },
