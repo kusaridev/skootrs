@@ -23,7 +23,7 @@ use skootrs_model::skootrs::{
     facet::{CommonFacetCreateParams, InitializedFacet, SourceFile},
     FacetGetParams, FacetMapKey, InitializedProject, InitializedSource, ProjectArchiveParams,
     ProjectCreateParams, ProjectGetParams, ProjectOutput, ProjectOutputGetParams,
-    ProjectOutputReference, ProjectOutputsListParams, SkootError,
+    ProjectOutputReference, ProjectOutputsListParams, ProjectUpdateParams, SkootError,
 };
 
 use super::{
@@ -87,6 +87,11 @@ pub trait ProjectService {
         &self,
         _params: ProjectOutputGetParams,
     ) -> impl std::future::Future<Output = Result<ProjectOutput, SkootError>> + Send;
+
+    fn update(
+        &self,
+        params: ProjectUpdateParams,
+    ) -> impl std::future::Future<Output = Result<InitializedProject, SkootError>> + Send;
 
     /// Archives an initialized project.
     ///
@@ -181,6 +186,7 @@ where
             ecosystem: initialized_ecosystem,
             source: initialized_source,
             facets: initialized_facets,
+            name: params.name.clone(),
         })
     }
 
@@ -254,6 +260,56 @@ where
             InitializedFacet::APIBundle(a) => Ok(InitializedFacet::APIBundle(a.clone())),
             InitializedFacet::SourceFile(_) => Err(SkootError::from("Facet type not supported")),
         }
+    }
+
+    // TODO: A lot of this code is copied from the initialize function. This should be refactored to avoid code duplication.
+    async fn update(&self, params: ProjectUpdateParams) -> Result<InitializedProject, SkootError> {
+        let initialized_project = params.initialized_project.clone();
+        let initialized_repo = initialized_project.repo;
+        let initialized_source = self.repo_service.clone_local_or_pull(
+            initialized_repo.clone(),
+            initialized_project.source.path.clone(),
+        )?;
+        let initialized_ecosystem = initialized_project.ecosystem;
+
+        let facet_set_params_generator = FacetSetParamsGenerator {};
+        let common_params = CommonFacetCreateParams {
+            project_name: initialized_project.name.clone(),
+            source: initialized_source.clone(),
+            repo: initialized_repo.clone(),
+            ecosystem: initialized_ecosystem.clone(),
+        };
+        let source_facet_set_params = facet_set_params_generator
+            .generate_default_source_bundle_facet_params(&common_params)?;
+        let api_facet_set_params =
+            facet_set_params_generator.generate_default_api_bundle(&common_params)?;
+        let initialized_source_facets = self
+            .facet_service
+            .initialize_all(source_facet_set_params)
+            .await?;
+        // TODO: Figure out how to better order commits and pushes
+        self.source_service.commit_and_push_changes(
+            initialized_source.clone(),
+            "Updated facets for project".to_string(),
+        )?;
+        let initialized_api_facets = self
+            .facet_service
+            .initialize_all(api_facet_set_params)
+            .await?;
+        // FIXME: Also add facet by name as well
+        let initialized_facets = [initialized_source_facets, initialized_api_facets]
+            .concat()
+            .into_iter()
+            .map(|f| (FacetMapKey::Type(f.facet_type()), f))
+            .collect::<HashMap<FacetMapKey, InitializedFacet>>();
+
+        Ok(InitializedProject {
+            repo: initialized_repo,
+            ecosystem: initialized_ecosystem,
+            source: initialized_source,
+            facets: initialized_facets,
+            name: initialized_project.name.clone(),
+        })
     }
 
     async fn outputs_list(

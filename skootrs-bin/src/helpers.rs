@@ -7,7 +7,7 @@ use skootrs_model::skootrs::{
     GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectArchiveParams,
     ProjectCreateParams, ProjectGetParams, ProjectOutput, ProjectOutputGetParams,
     ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam,
-    RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
+    ProjectUpdateParams, RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
 };
 use std::{
     collections::{HashMap, HashSet},
@@ -166,6 +166,36 @@ impl Project {
             inquire::Select::new("Select a project", projects.iter().collect()).prompt()?;
         Ok(ProjectGetParams {
             project_url: selected_project.clone(),
+        })
+    }
+
+    /// Updates an existing initialized project to include any updated facets.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the project can't be updated for some reason.
+    pub async fn update<'a, T: ProjectService + ?Sized>(
+        config: &Config,
+        project_service: &'a T,
+        project_update_params: Option<ProjectUpdateParams>,
+    ) -> Result<InitializedProject, SkootError> {
+        let mut cache = InMemoryProjectReferenceCache::load_or_create("./skootcache")?;
+        let project_update_params = match project_update_params {
+            Some(p) => p,
+            None => Project::prompt_update(config, project_service).await?,
+        };
+        let updated_project = project_service.update(project_update_params).await?;
+        cache.set(updated_project.repo.full_url()).await?;
+        Ok(updated_project)
+    }
+
+    async fn prompt_update<'a, T: ProjectService + ?Sized>(
+        config: &Config,
+        project_service: &'a T,
+    ) -> Result<ProjectUpdateParams, SkootError> {
+        let initialized_project = Project::get(config, project_service, None).await?;
+        Ok(ProjectUpdateParams {
+            initialized_project,
         })
     }
 

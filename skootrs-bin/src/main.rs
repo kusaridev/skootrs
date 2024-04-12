@@ -109,6 +109,15 @@ enum ProjectCommands {
         input: Option<Input>,
     },
 
+    /// Update a project.
+    #[command(name = "update")]
+    Update {
+        /// This is an optional input parameter that can be used to pass in a file, pipe, url, or stdin.
+        /// This is expected to be YAML or JSON. If it is not provided, the CLI will prompt the user for the input.
+        #[clap(value_parser)]
+        input: Option<Input>,
+    },
+
     /// Archive a project.
     #[command(name = "archive")]
     Archive {
@@ -268,6 +277,16 @@ async fn main() -> std::result::Result<(), SkootError> {
                         .handle_response_output(stdout())
                 {
                     error!(error = error.as_ref(), "Failed to get project info");
+                }
+            }
+            ProjectCommands::Update { input } => {
+                let project_update_params = parse_optional_input(input)?;
+                if let Err(ref error) =
+                    helpers::Project::update(&config, &project_service, project_update_params)
+                        .await
+                        .handle_response_output(stdout())
+                {
+                    error!(error = error.as_ref(), "Failed to update project");
                 }
             }
             ProjectCommands::List => {
