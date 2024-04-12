@@ -91,7 +91,7 @@ sboms:
   - id: bins
     cmd: trivy
     args: ["fs", ".", "--format", "spdx-json", "--output", "${artifact}.spdx.sbom.json"]
-    artifacts: any
+    artifacts: binary
     documents:
       - "${artifact}.spdx.sbom.json"
 

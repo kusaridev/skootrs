@@ -1,19 +1,19 @@
-use base64::prelude::*;
 use inquire::Text;
 use octocrab::Page;
 use serde::Serialize;
 use skootrs_lib::service::{project::ProjectService, source::LocalSourceService};
-use skootrs_model::{
-    security_insights::insights10::SecurityInsightsVersion100YamlSchema,
-    skootrs::{
-        facet::InitializedFacet, Config, EcosystemInitializeParams, FacetGetParams, FacetMapKey,
-        GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams,
-        ProjectArchiveParams, ProjectCreateParams, ProjectGetParams, ProjectOutputParams,
-        ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam,
-        RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
-    },
+use skootrs_model::skootrs::{
+    facet::InitializedFacet, Config, EcosystemInitializeParams, FacetGetParams, FacetMapKey,
+    GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectArchiveParams,
+    ProjectCreateParams, ProjectGetParams, ProjectOutput, ProjectOutputGetParams,
+    ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam,
+    RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
 };
-use std::{collections::HashSet, io::Write, str::FromStr};
+use std::{
+    collections::{HashMap, HashSet},
+    io::Write,
+    str::FromStr,
+};
 use strum::VariantNames;
 use tracing::debug;
 
@@ -280,18 +280,15 @@ impl Output {
     /// Returns an error if the project output can't be fetched from a project release.
     pub async fn get<'a, T: ProjectService + ?Sized>(
         config: &Config,
-        _project_service: &'a T,
-        project_output_params: Option<ProjectOutputParams>,
-    ) -> Result<String, SkootError> {
+        project_service: &'a T,
+        project_output_params: Option<ProjectOutputGetParams>,
+    ) -> Result<ProjectOutput, SkootError> {
         let project_output_params = match project_output_params {
             Some(p) => p,
-            None => Output::prompt_project_output(config).await?,
+            None => Output::prompt_output_get(config, project_service).await?,
         };
 
-        let output = reqwest::get(project_output_params.project_output)
-            .await?
-            .text()
-            .await?;
+        let output = project_service.output_get(project_output_params).await?;
 
         Ok(output)
     }
@@ -319,71 +316,48 @@ impl Output {
         Ok(output_list)
     }
 
-    async fn prompt_project_output(config: &Config) -> Result<ProjectOutputParams, SkootError> {
-        let projects = Project::list(config).await?;
-        let selected_project =
-            inquire::Select::new("Select a project", projects.iter().collect()).prompt()?;
-        let selected_output_type =
-            inquire::Select::new("Select an output type", vec!["SBOM"]).prompt()?;
-        // TODO: This should probably be passed in by the config?
-        let mut cache = InMemoryProjectReferenceCache::load_or_create("./skootcache")?;
-        let project = cache.get(selected_project.clone()).await?;
-
-        let selected_output = match selected_output_type {
-            "SBOM" => {
-                let skootrs_model::skootrs::InitializedRepo::Github(repo) = &project.repo;
-                let sec_ins_content_items = octocrab::instance()
-                    .repos(repo.organization.get_name(), &repo.name)
-                    .get_content()
-                    .path("SECURITY-INSIGHTS.yml")
-                    .r#ref("main")
-                    .send()
-                    .await?;
-
-                let sec_ins = sec_ins_content_items
-                    .items
-                    .first()
-                    .ok_or_else(|| SkootError::from("Failed to get security insights"))?;
-
-                let content = sec_ins.content.as_ref().ok_or_else(|| {
-                    SkootError::from("Failed to get content of  security insights")
-                })?;
-                let content_decoded =
-                    base64::engine::general_purpose::STANDARD.decode(content.replace('\n', ""))?;
-                let content_str = std::str::from_utf8(&content_decoded)?;
-                let insights: SecurityInsightsVersion100YamlSchema =
-                    serde_yaml::from_str::<SecurityInsightsVersion100YamlSchema>(content_str)?;
-                let sbom_vec = insights
-                    .dependencies
-                    .ok_or_else(|| {
-                        SkootError::from("Failed to get dependencies value from security insights")
-                    })?
-                    .sbom
-                    .ok_or_else(|| {
-                        SkootError::from("Failed to get sbom value from security insights")
-                    })?;
-
-                let sbom_files: Vec<String> = sbom_vec
-                    .iter()
-                    .filter_map(|s| s.sbom_file.clone())
-                    .collect();
-
-                inquire::Select::new("Select an SBOM", sbom_files).prompt()?
-            }
-            _ => {
-                unimplemented!()
-            }
+    async fn prompt_output_get<'a, T: ProjectService + ?Sized>(
+        config: &Config,
+        project_service: &'a T,
+    ) -> Result<ProjectOutputGetParams, SkootError> {
+        let selected_project = Project::get(config, project_service, None).await?;
+        let project_output_list_params = ProjectOutputsListParams {
+            initialized_project: selected_project.clone(),
+            // TODO: This should be a prompt.
+            release: ProjectReleaseParam::Latest,
         };
-
-        let selected_output_type_enum = match selected_output_type {
-            "SBOM" => ProjectOutputType::SBOM,
-            _ => ProjectOutputType::Custom("Other".to_string()),
-        };
-
-        Ok(ProjectOutputParams {
-            project_url: selected_project.clone(),
-            project_output_type: selected_output_type_enum,
+        let output_list =
+            Output::list(config, project_service, Some(project_output_list_params)).await?;
+        let type_output_map: HashMap<String, Vec<String>> = output_list
+            .iter()
+            .map(|o| (o.output_type.to_string(), o.name.clone()))
+            .fold(
+                HashMap::new(),
+                |mut acc: HashMap<String, Vec<String>>, (key, value)| {
+                    acc.entry(key).or_default().push(value);
+                    acc
+                },
+            );
+        let selected_output_type = inquire::Select::new(
+            "Select an output type",
+            type_output_map.keys().cloned().collect(),
+        )
+        .prompt()?;
+        let select_output_type_enum = ProjectOutputType::from_str(&selected_output_type)?;
+        let selected_output = inquire::Select::new(
+            "Select an output",
+            type_output_map
+                .get(&selected_output_type)
+                .ok_or_else(|| SkootError::from("Failed to get output type"))?
+                .clone(),
+        )
+        .prompt()?;
+        Ok(ProjectOutputGetParams {
+            initialized_project: selected_project.clone(),
+            project_output_type: select_output_type_enum,
             project_output: selected_output.clone(),
+            // TODO: This should be selectable
+            release: ProjectReleaseParam::Latest,
         })
     }
 }
