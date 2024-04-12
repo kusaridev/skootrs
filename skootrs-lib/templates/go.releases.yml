@@ -2,6 +2,7 @@
 
 #
 # Copyright 2022 The GUAC Authors.
+# Copyright 2024 The Skootrs Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +15,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-# Note: This file has been copied from the GUAC project for now. It will be changed later
 name: release
 
 on:
@@ -43,11 +42,11 @@ jobs:
       digest: ${{ steps.hash.outputs.digest }}
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           fetch-depth: 0
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -57,9 +56,12 @@ jobs:
         with:
           go-version: "1.21"
       - name: Install cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # main
-      - name: Install syft
-        uses: anchore/sbom-action/download-syft@24b0d5238516480139aa8bc6f92eeb7b54a9eb0a # v0.15.5
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # main
+      - name: Install trivy
+        run: |
+          curl -LO https://github.com/aquasecurity/trivy/releases/download/v0.50.1/trivy_0.50.1_Linux-64bit.deb
+          sudo dpkg -i trivy_0.50.1_Linux-64bit.deb
+          rm trivy_0.50.1_Linux-64bit.deb
 
       - name: Run GoReleaser Snapshot
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
@@ -68,7 +70,7 @@ jobs:
         with:
           distribution: goreleaser
           version: latest
-          args: release --clean --snapshot --skip-sign
+          args: release --clean --snapshot --skip=sign
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GORELEASER_CURRENT_TAG: v0.0.0-snapshot-tag
@@ -117,21 +119,21 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # tag=v3
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # tag=v3
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Trivy in fs mode to generate SBOM
-        uses: aquasecurity/trivy-action@d43c1f16c00cfd3978dde6c07f4bbcf9eb6993ca # master
+        uses: aquasecurity/trivy-action@207cd40078971bb7a078f8504c2061f908569449 # master
         with:
           scan-type: "fs"
           format: "spdx-json"
           output: "spdx.sbom.json"
       - name: Install cosign
-        uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # main
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # main
       - name: Sign image and sbom
         run: |
           #!/usr/bin/env bash
@@ -150,7 +152,7 @@ jobs:
     name: generate provenance for binaries
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.9.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0 # must use semver here
     with:
       base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
       upload-assets: true
@@ -164,7 +166,7 @@ jobs:
       packages: write
     needs: [goreleaser]
     if: startsWith(github.ref, 'refs/tags/')
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0 # must use semver here
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.10.0 # must use semver here
     with:
       image: ${{ needs.goreleaser.outputs.image }}
       digest: ${{ needs.goreleaser.outputs.digest }}
