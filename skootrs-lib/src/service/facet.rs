@@ -28,17 +28,30 @@ use chrono::Datelike;
 
 use tracing::info;
 
+use crate::service::source::SourceService;
 use skootrs_model::{
     security_insights::insights10::{
-        SecurityInsightsVersion100YamlSchema, SecurityInsightsVersion100YamlSchemaContributionPolicy, SecurityInsightsVersion100YamlSchemaDependencies, SecurityInsightsVersion100YamlSchemaDependenciesSbomItem, SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation, SecurityInsightsVersion100YamlSchemaHeader, SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion, SecurityInsightsVersion100YamlSchemaProjectLifecycle, SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus, SecurityInsightsVersion100YamlSchemaVulnerabilityReporting
+        SecurityInsightsVersion100YamlSchema,
+        SecurityInsightsVersion100YamlSchemaContributionPolicy,
+        SecurityInsightsVersion100YamlSchemaDependencies,
+        SecurityInsightsVersion100YamlSchemaDependenciesSbomItem,
+        SecurityInsightsVersion100YamlSchemaDependenciesSbomItemSbomCreation,
+        SecurityInsightsVersion100YamlSchemaHeader,
+        SecurityInsightsVersion100YamlSchemaHeaderSchemaVersion,
+        SecurityInsightsVersion100YamlSchemaProjectLifecycle,
+        SecurityInsightsVersion100YamlSchemaProjectLifecycleStatus,
+        SecurityInsightsVersion100YamlSchemaVulnerabilityReporting,
     },
     skootrs::{
         facet::{
-            APIBundleFacet, APIBundleFacetParams, APIContent, CommonFacetCreateParams, FacetCreateParams, FacetSetCreateParams, InitializedFacet, SourceBundleFacet, SourceBundleFacetCreateParams, SourceFile, SourceFileContent, SourceFileFacet, SourceFileFacetParams, SupportedFacetType
-        }, InitializedEcosystem, InitializedGithubRepo, InitializedRepo, SkootError
+            APIBundleFacet, APIBundleFacetParams, APIContent, CommonFacetCreateParams,
+            FacetCreateParams, FacetSetCreateParams, InitializedFacet, SourceBundleFacet,
+            SourceBundleFacetCreateParams, SourceFile, SourceFileContent, SourceFileFacet,
+            SourceFileFacetParams, SupportedFacetType,
+        },
+        InitializedEcosystem, InitializedGithubRepo, InitializedRepo, SkootError,
     },
 };
-use crate::service::source::SourceService;
 
 use super::source::LocalSourceService;
 
@@ -50,12 +63,18 @@ pub struct LocalFacetService {}
 /// This includes things like initializing and managing source files, source bundles, and API bundles.
 /// It is the root service for all facets and handles which other services to delegate to.
 pub trait RootFacetService {
-    fn initialize(&self, params: FacetCreateParams) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
-    fn initialize_all(&self, params: FacetSetCreateParams) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
+    fn initialize(
+        &self,
+        params: FacetCreateParams,
+    ) -> impl std::future::Future<Output = Result<InitializedFacet, SkootError>> + Send;
+    fn initialize_all(
+        &self,
+        params: FacetSetCreateParams,
+    ) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
 }
 
-/// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source 
-/// file facets. This includes things like initializing and managing READMEs, licenses, and security policy 
+/// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source
+/// file facets. This includes things like initializing and managing READMEs, licenses, and security policy
 /// files.
 ///
 pub trait SourceFileFacetService {
@@ -69,7 +88,7 @@ pub trait SourceFileFacetService {
 
 /// The `SourceBundleFacetService` trait provides an interface for initializing and managing a project's source
 /// bundle facets. This includes things like initializing and managing set of files.
-/// 
+///
 /// This replaces the `SourceFileFacetService` trait since it's more generic and can handle more than just
 /// single files.
 pub trait SourceBundleFacetService {
@@ -124,12 +143,18 @@ impl SourceBundleFacetService for LocalFacetService {
             }
             SupportedFacetType::PublishPackages => todo!(),
             SupportedFacetType::PinnedDependencies => todo!(),
-            SupportedFacetType::SAST => default_source_bundle_content_handler.generate_content(&params)?,
+            SupportedFacetType::SAST => {
+                default_source_bundle_content_handler.generate_content(&params)?
+            }
             SupportedFacetType::VulnerabilityScanner => todo!(),
             SupportedFacetType::GUACForwardingConfig => todo!(),
             SupportedFacetType::Allstar => todo!(),
-            SupportedFacetType::DefaultSourceCode => language_specific_source_bundle_content_handler.generate_content(&params)?,
-            SupportedFacetType::VulnerabilityReporting => unimplemented!("VulnerabilityReporting is not implemented for source bundles"),
+            SupportedFacetType::DefaultSourceCode => {
+                language_specific_source_bundle_content_handler.generate_content(&params)?
+            }
+            SupportedFacetType::VulnerabilityReporting => {
+                unimplemented!("VulnerabilityReporting is not implemented for source bundles")
+            }
             SupportedFacetType::Other => todo!(),
         };
 
@@ -146,22 +171,26 @@ impl SourceBundleFacetService for LocalFacetService {
             )?;
         }
 
-        let source_files: Vec<SourceFile> = source_bundle_content.source_files_content.iter().map(|source_file_content| {
-            Ok::<SourceFile, SkootError>(SourceFile {
-                name: source_file_content.name.clone(),
-                path: source_file_content.path.clone(),
-                hash: source_service.hash_file(
-                    &params.common.source,
-                    source_file_content.path.clone(),
-                    source_file_content.name.clone(),
-                )?,
+        let source_files: Vec<SourceFile> = source_bundle_content
+            .source_files_content
+            .iter()
+            .map(|source_file_content| {
+                Ok::<SourceFile, SkootError>(SourceFile {
+                    name: source_file_content.name.clone(),
+                    path: source_file_content.path.clone(),
+                    hash: source_service.hash_file(
+                        &params.common.source,
+                        source_file_content.path.clone(),
+                        source_file_content.name.clone(),
+                    )?,
+                })
             })
-        }).collect::<Result<Vec<_>, _>>()?;
+            .collect::<Result<Vec<_>, _>>()?;
 
         let source_bundle_facet = SourceBundleFacet {
             source_files: Some(source_files),
             facet_type: params.facet_type,
-            source_files_content: None
+            source_files_content: None,
         };
 
         Ok(source_bundle_facet)
@@ -170,7 +199,7 @@ impl SourceBundleFacetService for LocalFacetService {
 
 /// The `APIBundleFacetService` trait provides an interface for initializing and managing a project's API
 /// bundle facets. This includes things like initializing and managing API calls to services like Github.
-/// 
+///
 /// These API calls are used to enable features like branch protection, vulnerability reporting, etc.
 pub trait APIBundleFacetService {
     fn initialize(
@@ -180,20 +209,17 @@ pub trait APIBundleFacetService {
 }
 
 impl APIBundleFacetService for LocalFacetService {
-    async fn initialize(
-        &self,
-        params: APIBundleFacetParams,
-    ) -> Result<APIBundleFacet, SkootError> {
+    async fn initialize(&self, params: APIBundleFacetParams) -> Result<APIBundleFacet, SkootError> {
         // TODO: This should support more than just Github
         match params.facet_type {
-            SupportedFacetType::CodeReview | SupportedFacetType::BranchProtection | SupportedFacetType::VulnerabilityReporting => {
+            SupportedFacetType::CodeReview
+            | SupportedFacetType::BranchProtection
+            | SupportedFacetType::VulnerabilityReporting => {
                 let github_api_bundle_handler = GithubAPIBundleHandler {};
-                let api_bundle_facet =
-                    github_api_bundle_handler.generate(&params).await?;
+                let api_bundle_facet = github_api_bundle_handler.generate(&params).await?;
                 Ok(api_bundle_facet)
             }
             _ => todo!("Not implemented yet"),
-        
         }
     }
 }
@@ -219,7 +245,7 @@ impl RootFacetService for LocalFacetService {
             FacetCreateParams::APIBundle(params) => {
                 let api_bundle_facet = APIBundleFacetService::initialize(self, params).await?;
                 Ok(InitializedFacet::APIBundle(api_bundle_facet))
-            },
+            }
         }
     }
 
@@ -228,25 +254,20 @@ impl RootFacetService for LocalFacetService {
         params: FacetSetCreateParams,
     ) -> Result<Vec<InitializedFacet>, SkootError> {
         let futures = params
-        .facets_params
-        .iter()
-        .map(move |params| RootFacetService::initialize(self, params.clone()) );
+            .facets_params
+            .iter()
+            .map(move |params| RootFacetService::initialize(self, params.clone()));
 
         let results = futures::future::try_join_all(futures).await?;
         Ok(results)
     }
-
-    
 }
 
 /// The `APIBundleHandler` trait provides an interface for generating an `APIBundleFacet`.
 /// This includes calling APIs to services like Github to enable features like branch protection,
 /// vulnerability reporting, etc.
 trait APIBundleHandler {
-    async fn generate(
-        &self,
-        params: &APIBundleFacetParams,
-    ) -> Result<APIBundleFacet, SkootError>;
+    async fn generate(&self, params: &APIBundleFacetParams) -> Result<APIBundleFacet, SkootError>;
 }
 
 /// The `GithubAPIBundleHandler` struct represents a handler for generating an `APIBundleFacet` related to
@@ -254,14 +275,13 @@ trait APIBundleHandler {
 struct GithubAPIBundleHandler {}
 
 impl APIBundleHandler for GithubAPIBundleHandler {
-    async fn generate(
-        &self,
-        params: &APIBundleFacetParams,
-    ) -> Result<APIBundleFacet, SkootError> {
+    async fn generate(&self, params: &APIBundleFacetParams) -> Result<APIBundleFacet, SkootError> {
         let InitializedRepo::Github(repo) = &params.common.repo;
         match params.facet_type {
             SupportedFacetType::BranchProtection => self.generate_branch_protection(repo).await,
-            SupportedFacetType::VulnerabilityReporting => self.generate_vulnerability_reporting(repo).await,
+            SupportedFacetType::VulnerabilityReporting => {
+                self.generate_vulnerability_reporting(repo).await
+            }
             _ => todo!("Not implemented yet"),
         }
     }
@@ -278,7 +298,10 @@ impl GithubAPIBundleHandler {
             repo = repo.name,
             branch = "main",
         );
-        info!("Enabling branch protection for {}", enforce_branch_protection_endpoint);
+        info!(
+            "Enabling branch protection for {}",
+            enforce_branch_protection_endpoint
+        );
         // TODO: This should be a struct that serializes to json instead of just json directly
         let enforce_branch_protection_body = serde_json::json!({
             "enforce_admins": true,
@@ -290,8 +313,18 @@ impl GithubAPIBundleHandler {
             "allow_deletions": null,
         });
 
+        // FIXME: I don't quite know why in some cases octocrab loses my auth and I have to re-authenticate
+        let o: octocrab::Octocrab = octocrab::Octocrab::builder()
+            .personal_token(
+                std::env::var("GITHUB_TOKEN").expect("GITHUB_TOKEN env var must be populated"),
+            )
+            .build()?;
+        octocrab::initialise(o);
         let response: serde_json::Value = octocrab::instance()
-            .put(&enforce_branch_protection_endpoint, Some(&enforce_branch_protection_body))
+            .put(
+                &enforce_branch_protection_endpoint,
+                Some(&enforce_branch_protection_body),
+            )
             .await?;
 
         let apis = vec![APIContent {
@@ -315,7 +348,10 @@ impl GithubAPIBundleHandler {
             owner = repo.organization.get_name(),
             repo = repo.name,
         );
-        info!("Enabling vulnerability reporting for {}", &vulnerability_reporting_endpoint);
+        info!(
+            "Enabling vulnerability reporting for {}",
+            &vulnerability_reporting_endpoint
+        );
         // Note: This call just returns a status with no JSON output also the normal .put I think expects json
         // output and will fail.
         octocrab::instance()
@@ -326,8 +362,10 @@ impl GithubAPIBundleHandler {
             url: vulnerability_reporting_endpoint.clone(),
             response: "Success".to_string(),
         }];
-        info!("Vulnerability reporting enabled for {}", &vulnerability_reporting_endpoint);
-
+        info!(
+            "Vulnerability reporting enabled for {}",
+            &vulnerability_reporting_endpoint
+        );
 
         Ok(APIBundleFacet {
             facet_type: SupportedFacetType::VulnerabilityReporting,
@@ -672,7 +710,7 @@ impl GoGithubSourceBundleContentHandler {
             project_name: String,
             module_name: String,
         }
-        
+
         #[allow(clippy::match_wildcard_for_single_variants)]
         let module = match &params.common.ecosystem {
             InitializedEcosystem::Go(go) => go.module(),
@@ -689,21 +727,23 @@ impl GoGithubSourceBundleContentHandler {
         };
 
         Ok(SourceBundleContent {
-            source_files_content: vec![SourceFileContent {
-                name: "releases.yml".to_string(),
-                path: ".github/workflows/".to_string(),
-                content: slsa_build_template_params.render()?,
-            },
-            SourceFileContent {
-                name: "Dockerfile.goreleaser".to_string(),
-                path: "./".to_string(),
-                content: dockerfile_template_params.render()?,
-            },
-            SourceFileContent {
-                name: ".goreleaser.yml".to_string(),
-                path: "./".to_string(),
-                content: goreleaser_template_params.render()?,
-            }],
+            source_files_content: vec![
+                SourceFileContent {
+                    name: "releases.yml".to_string(),
+                    path: ".github/workflows/".to_string(),
+                    content: slsa_build_template_params.render()?,
+                },
+                SourceFileContent {
+                    name: "Dockerfile.goreleaser".to_string(),
+                    path: "./".to_string(),
+                    content: dockerfile_template_params.render()?,
+                },
+                SourceFileContent {
+                    name: ".goreleaser.yml".to_string(),
+                    path: "./".to_string(),
+                    content: goreleaser_template_params.render()?,
+                },
+            ],
             facet_type: SupportedFacetType::SLSABuild,
         })
     }
@@ -797,7 +837,8 @@ impl FacetSetParamsGenerator {
         &self,
         common_params: &CommonFacetCreateParams,
     ) -> Result<FacetSetCreateParams, SkootError> {
-        let source_bundle_params = self.generate_default_source_bundle_facet_params(common_params)?;
+        let source_bundle_params =
+            self.generate_default_source_bundle_facet_params(common_params)?;
         let api_bundle_params = self.generate_default_api_bundle(common_params)?;
         let total_params = FacetSetCreateParams {
             facets_params: [
@@ -849,8 +890,8 @@ impl FacetSetParamsGenerator {
         common_params: &CommonFacetCreateParams,
     ) -> Result<FacetSetCreateParams, SkootError> {
         use SupportedFacetType::{
-            DefaultSourceCode, DependencyUpdateTool, Gitignore, License, Readme,
-            SLSABuild, Scorecard, SecurityInsights, SecurityPolicy, SAST,
+            DefaultSourceCode, DependencyUpdateTool, Gitignore, License, Readme, SLSABuild,
+            Scorecard, SecurityInsights, SecurityPolicy, SAST,
         };
         let supported_facets = [
             Readme,

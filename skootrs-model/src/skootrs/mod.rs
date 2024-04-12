@@ -65,6 +65,9 @@ pub struct InitializedProject {
     pub source: InitializedSource,
     /// The facets associated with the project.
     pub facets: HashMap<FacetMapKey, InitializedFacet>,
+    // TODO: What to do if there are name collisions?
+    /// The name of the project.
+    pub name: String,
 }
 
 /// A helper enum for how a facet can be pulled from a `HashMap`
@@ -140,6 +143,14 @@ pub struct ProjectCreateParams {
     pub ecosystem_params: EcosystemInitializeParams,
     /// The parameters for initializing the source code for the project.
     pub source_params: SourceInitializeParams,
+}
+
+/// The parameters for updating a project.
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[cfg_attr(feature = "openapi", derive(ToSchema))]
+pub struct ProjectUpdateParams {
+    /// The initialized project to update.
+    pub initialized_project: InitializedProject,
 }
 
 /// The parameters for getting an existing Skootrs project.
