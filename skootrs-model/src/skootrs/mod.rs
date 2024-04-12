@@ -18,7 +18,7 @@ pub mod facet;
 use std::{collections::HashMap, error::Error, fmt, str::FromStr};
 
 use serde::{Deserialize, Serialize};
-use strum::{EnumString, VariantNames};
+use strum::{Display, EnumString, VariantNames};
 use url::Host;
 use utoipa::ToSchema;
 
@@ -184,14 +184,16 @@ impl ProjectReleaseParam {
 /// The paramaters for getting the output of a project, e.g. an SBOM from a release
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct ProjectOutputParams {
-    /// The URL of the Skootrs project to get the output from.
-    pub project_url: String,
-    /// The type of output to get from the project.
+pub struct ProjectOutputGetParams {
+    /// The initialized project to get the output from.
+    pub initialized_project: InitializedProject,
+    /// The type of output, e.g. SBOM, to get from the project.
     pub project_output_type: ProjectOutputType,
     // TODO: Should project_output be a part of the ProjectOutputType enum?
     /// The output to get from the project.
     pub project_output: String,
+    /// The release to get the output from.
+    pub release: ProjectReleaseParam,
 }
 
 /// The parameters for archiving a project.
@@ -203,12 +205,15 @@ pub struct ProjectArchiveParams {
 }
 
 /// The set of supported output types
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, EnumString, VariantNames, Default, Display)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum ProjectOutputType {
-    /// An output type for getting an SBOM from a project.
+    #[default]
+    /// An output type for an SBOM from a project.
     SBOM,
-    /// An output type for getting a custom output from a project.
+    /// An output type for an in-toto attestation from a project.
+    InToto,
+    /// An output type for a custom output from a project.
     Custom(String),
 }
 

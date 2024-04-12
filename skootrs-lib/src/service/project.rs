@@ -22,8 +22,8 @@ use crate::service::facet::{FacetSetParamsGenerator, RootFacetService};
 use skootrs_model::skootrs::{
     facet::{CommonFacetCreateParams, InitializedFacet, SourceFile},
     FacetGetParams, FacetMapKey, InitializedProject, InitializedSource, ProjectArchiveParams,
-    ProjectCreateParams, ProjectGetParams, ProjectOutputReference, ProjectOutputsListParams,
-    SkootError,
+    ProjectCreateParams, ProjectGetParams, ProjectOutput, ProjectOutputGetParams,
+    ProjectOutputReference, ProjectOutputsListParams, SkootError,
 };
 
 use super::{
@@ -82,6 +82,11 @@ pub trait ProjectService {
         &self,
         params: ProjectOutputsListParams,
     ) -> impl std::future::Future<Output = Result<Vec<ProjectOutputReference>, SkootError>> + Send;
+
+    fn output_get(
+        &self,
+        _params: ProjectOutputGetParams,
+    ) -> impl std::future::Future<Output = Result<ProjectOutput, SkootError>> + Send;
 
     /// Archives an initialized project.
     ///
@@ -255,11 +260,18 @@ where
         &self,
         params: ProjectOutputsListParams,
     ) -> Result<Vec<ProjectOutputReference>, SkootError> {
-        self.output_service.outputs_list(params).await
+        self.output_service.list(params).await
     }
 
     async fn list_facets(&self, params: ProjectGetParams) -> Result<Vec<FacetMapKey>, SkootError> {
         Ok(self.get(params).await?.facets.keys().cloned().collect())
+    }
+
+    async fn output_get(
+        &self,
+        params: ProjectOutputGetParams,
+    ) -> Result<ProjectOutput, SkootError> {
+        self.output_service.get(params).await
     }
 
     async fn archive(&self, params: ProjectArchiveParams) -> Result<String, SkootError> {
@@ -539,7 +551,7 @@ mod tests {
     }
 
     impl OutputService for MockOutputService {
-        async fn outputs_list(
+        async fn list(
             &self,
             _params: ProjectOutputsListParams,
         ) -> Result<Vec<ProjectOutputReference>, SkootError> {
@@ -547,6 +559,19 @@ mod tests {
                 name: "test".into(),
                 output_type: ProjectOutputType::SBOM,
             }])
+        }
+
+        async fn get(
+            &self,
+            _params: skootrs_model::skootrs::ProjectOutputGetParams,
+        ) -> Result<skootrs_model::skootrs::ProjectOutput, SkootError> {
+            Ok(skootrs_model::skootrs::ProjectOutput {
+                reference: ProjectOutputReference {
+                    name: "test".into(),
+                    output_type: ProjectOutputType::SBOM,
+                },
+                output: "test".into(),
+            })
         }
     }
 

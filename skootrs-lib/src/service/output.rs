@@ -17,20 +17,25 @@
 
 use octocrab::models::repos::{Asset, Release};
 use skootrs_model::skootrs::{
-    ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, SkootError,
+    ProjectOutput, ProjectOutputGetParams, ProjectOutputReference, ProjectOutputType,
+    ProjectOutputsListParams, SkootError,
 };
-
 pub trait OutputService {
-    fn outputs_list(
+    fn list(
         &self,
         params: ProjectOutputsListParams,
     ) -> impl std::future::Future<Output = Result<Vec<ProjectOutputReference>, SkootError>> + Send;
+
+    fn get(
+        &self,
+        _params: ProjectOutputGetParams,
+    ) -> impl std::future::Future<Output = Result<ProjectOutput, SkootError>> + Send;
 }
 
 pub struct LocalOutputService;
 
 impl OutputService for LocalOutputService {
-    fn outputs_list(
+    fn list(
         &self,
         params: ProjectOutputsListParams,
     ) -> impl std::future::Future<Output = Result<Vec<ProjectOutputReference>, SkootError>> + Send
@@ -43,6 +48,23 @@ impl OutputService for LocalOutputService {
                     tag: params.release.tag(),
                 };
                 GithubReleaseHandler::outputs_list(github_params)
+            }
+        }
+    }
+
+    async fn get(&self, params: ProjectOutputGetParams) -> Result<ProjectOutput, SkootError> {
+        match params.initialized_project.repo {
+            skootrs_model::skootrs::InitializedRepo::Github(g) => {
+                let github_params = GithubOutputGetParams {
+                    release: GithubReleaseHandler::get_release(GithubReleaseParams {
+                        owner: g.organization.get_name(),
+                        repo: g.name.clone(),
+                        tag: params.release.tag(),
+                    })
+                    .await?,
+                    name: params.project_output,
+                };
+                GithubReleaseHandler::get_output(github_params).await
             }
         }
     }
@@ -92,9 +114,34 @@ impl GithubReleaseHandler {
             // Follows: https://github.com/ossf/sbom-everywhere/blob/main/reference/sbom_naming.md
             _ if asset.name.contains(".spdx.") => ProjectOutputType::SBOM,
             _ if asset.name.contains(".cdx.") => ProjectOutputType::SBOM,
+            _ if asset.name.contains(".intoto.") => ProjectOutputType::InToto,
             // TODO: Add more types
             _ => ProjectOutputType::Custom("Unknown".to_string()),
         }
+    }
+
+    async fn get_output(params: GithubOutputGetParams) -> Result<ProjectOutput, SkootError> {
+        let asset = params
+            .release
+            .assets
+            .iter()
+            .find(|a| a.name == params.name)
+            .ok_or("Asset not found".to_string())?;
+
+        // TODO: Figure out how to support assets in private repos
+        let content = reqwest::get(asset.browser_download_url.clone())
+            .await
+            .map_err(|e| e.to_string())?
+            .text()
+            .await?;
+
+        Ok(ProjectOutput {
+            reference: ProjectOutputReference {
+                name: asset.name.clone(),
+                output_type: Self::get_type(asset),
+            },
+            output: serde_json::to_string_pretty(&content)?,
+        })
     }
 }
 
@@ -102,4 +149,9 @@ struct GithubReleaseParams {
     owner: String,
     repo: String,
     tag: Option<String>,
+}
+
+struct GithubOutputGetParams {
+    release: Release,
+    name: String,
 }
