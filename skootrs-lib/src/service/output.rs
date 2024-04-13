@@ -17,7 +17,7 @@
 
 use octocrab::models::repos::{Asset, Release};
 use skootrs_model::skootrs::{
-    ProjectOutput, ProjectOutputGetParams, ProjectOutputReference, ProjectOutputType,
+    label::Label, ProjectOutput, ProjectOutputGetParams, ProjectOutputReference, ProjectOutputType,
     ProjectOutputsListParams, SkootError,
 };
 pub trait OutputService {
@@ -83,6 +83,7 @@ impl GithubReleaseHandler {
             .map(|asset| ProjectOutputReference {
                 name: asset.name.clone(),
                 output_type: Self::get_type(asset),
+                labels: Self::get_labels(asset),
             })
             .collect();
 
@@ -116,7 +117,16 @@ impl GithubReleaseHandler {
             _ if asset.name.contains(".cdx.") => ProjectOutputType::SBOM,
             _ if asset.name.contains(".intoto.") => ProjectOutputType::InToto,
             // TODO: Add more types
-            _ => ProjectOutputType::Custom("Unknown".to_string()),
+            _ => ProjectOutputType::Unknown("Unknown".to_string()),
+        }
+    }
+
+    fn get_labels(asset: &Asset) -> Vec<Label> {
+        match asset.url {
+            _ if asset.name.contains(".spdx.") => vec![Label::S2C2FAUD4],
+            _ if asset.name.contains(".cdx.") => vec![Label::S2C2FAUD4],
+            _ if asset.name.contains(".intoto.") => vec![Label::SLSABuildLevel3],
+            _ => vec![],
         }
     }
 
@@ -139,6 +149,7 @@ impl GithubReleaseHandler {
             reference: ProjectOutputReference {
                 name: asset.name.clone(),
                 output_type: Self::get_type(asset),
+                labels: Self::get_labels(asset),
             },
             output: serde_json::to_string_pretty(&content)?,
         })

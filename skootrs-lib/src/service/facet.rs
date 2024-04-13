@@ -46,9 +46,9 @@ use skootrs_model::{
         facet::{
             APIBundleFacet, APIBundleFacetParams, APIContent, CommonFacetCreateParams,
             FacetCreateParams, FacetSetCreateParams, InitializedFacet, SourceBundleFacet,
-            SourceBundleFacetCreateParams, SourceFile, SourceFileContent, SourceFileFacet,
-            SourceFileFacetParams, SupportedFacetType,
+            SourceBundleFacetCreateParams, SourceFile, SourceFileContent, SupportedFacetType,
         },
+        label::Label,
         InitializedEcosystem, InitializedGithubRepo, InitializedRepo, SkootError,
     },
 };
@@ -71,19 +71,6 @@ pub trait RootFacetService {
         &self,
         params: FacetSetCreateParams,
     ) -> impl std::future::Future<Output = Result<Vec<InitializedFacet>, SkootError>> + Send;
-}
-
-/// (DEPRECATED) The `SourceFileFacetService` trait provides an interface for initializing and managing a project's source
-/// file facets. This includes things like initializing and managing READMEs, licenses, and security policy
-/// files.
-///
-pub trait SourceFileFacetService {
-    /// Initializes a source file facet.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the source file facet can't be initialized.
-    fn initialize(&self, params: SourceFileFacetParams) -> Result<SourceFileFacet, SkootError>;
 }
 
 /// The `SourceBundleFacetService` trait provides an interface for initializing and managing a project's source
@@ -191,6 +178,7 @@ impl SourceBundleFacetService for LocalFacetService {
             source_files: Some(source_files),
             facet_type: params.facet_type,
             source_files_content: None,
+            labels: params.labels,
         };
 
         Ok(source_bundle_facet)
@@ -233,11 +221,6 @@ pub struct SourceBundleContent {
 impl RootFacetService for LocalFacetService {
     async fn initialize(&self, params: FacetCreateParams) -> Result<InitializedFacet, SkootError> {
         match params {
-            FacetCreateParams::SourceFile(_params) => {
-                todo!("This has been removed in favor of SourceBundle")
-                /*let source_file_facet = SourceFileFacetService::initialize(self, params)?;
-                Ok(InitializedFacet::SourceFile(source_file_facet))*/
-            }
             FacetCreateParams::SourceBundle(params) => {
                 let source_bundle_facet = SourceBundleFacetService::initialize(self, params)?;
                 Ok(InitializedFacet::SourceBundle(source_bundle_facet))
@@ -336,6 +319,7 @@ impl GithubAPIBundleHandler {
         Ok(APIBundleFacet {
             facet_type: SupportedFacetType::BranchProtection,
             apis,
+            labels: vec![],
         })
     }
 
@@ -370,6 +354,7 @@ impl GithubAPIBundleHandler {
         Ok(APIBundleFacet {
             facet_type: SupportedFacetType::VulnerabilityReporting,
             apis,
+            labels: vec![],
         })
     }
 }
@@ -894,40 +879,76 @@ impl FacetSetParamsGenerator {
             Scorecard, SecurityInsights, SecurityPolicy, SAST,
         };
         let supported_facets = [
-            Readme,
-            License,
-            Gitignore,
-            SecurityPolicy,
-            SecurityInsights,
-            SLSABuild,
+            FacetTypeLabels {
+                supported_facet_type: Readme,
+                labels: vec![],
+            },
+            FacetTypeLabels {
+                supported_facet_type: License,
+                labels: vec![],
+            },
+            FacetTypeLabels {
+                supported_facet_type: Gitignore,
+                labels: vec![],
+            },
+            FacetTypeLabels {
+                supported_facet_type: SecurityPolicy,
+                labels: vec![],
+            },
+            FacetTypeLabels {
+                supported_facet_type: SecurityInsights,
+                labels: vec![],
+            },
+            FacetTypeLabels {
+                supported_facet_type: SLSABuild,
+                labels: vec![Label::SLSABuildLevel3, Label::S2C2FAUD1],
+            },
             // SBOMGenerator, // Handled by the SLSABuild facet
             // StaticCodeAnalysis,
-            DependencyUpdateTool,
+            FacetTypeLabels {
+                supported_facet_type: DependencyUpdateTool,
+                labels: vec![Label::S2C2FUPD2],
+            },
             // TODO: Fuzzing right now requires a bunch of resources that are unavailable to most projects without
             // some sort of manual intervention. This is disabled until some option becomes available.
             // Fuzzing,
-            Scorecard,
+            FacetTypeLabels {
+                supported_facet_type: Scorecard,
+                labels: vec![],
+            },
             // PublishPackages,
             // PinnedDependencies,
-            SAST,
+            FacetTypeLabels {
+                supported_facet_type: SAST,
+                labels: vec![Label::S2C2FSCA1],
+            },
             // VulnerabilityScanner,
             // GUACForwardingConfig,
             // These are at the end to allow Skootrs to push initial commits without needing
             // code review or branches.
             // CodeReview, // TODO: Implement this
             //BranchProtection, //TODO: Implement this
-            DefaultSourceCode,
+            FacetTypeLabels {
+                supported_facet_type: DefaultSourceCode,
+                labels: vec![],
+            },
         ];
         let facets_params = supported_facets
             .iter()
-            .map(|facet_type| {
+            .map(|facet_type_labels| {
                 FacetCreateParams::SourceBundle(SourceBundleFacetCreateParams {
                     common: common_params.clone(),
-                    facet_type: facet_type.clone(),
+                    facet_type: facet_type_labels.supported_facet_type.clone(),
+                    labels: facet_type_labels.labels.clone(),
                 })
             })
             .collect::<Vec<FacetCreateParams>>();
 
         Ok(FacetSetCreateParams { facets_params })
     }
+}
+
+struct FacetTypeLabels {
+    supported_facet_type: SupportedFacetType,
+    labels: Vec<Label>,
 }
