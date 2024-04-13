@@ -14,6 +14,7 @@
 // limitations under the License.
 
 pub mod facet;
+pub mod label;
 
 use std::{collections::HashMap, error::Error, fmt, str::FromStr};
 
@@ -22,7 +23,10 @@ use strum::{Display, EnumString, VariantNames};
 use url::Host;
 use utoipa::ToSchema;
 
-use self::facet::{InitializedFacet, SupportedFacetType};
+use self::{
+    facet::{InitializedFacet, SupportedFacetType},
+    label::Label,
+};
 
 /// A helper type for the error type used throughout Skootrs. This is a `Box<dyn Error + Send + Sync>`.
 pub type SkootError = Box<dyn Error + Send + Sync>;
@@ -46,8 +50,10 @@ pub enum SupportedEcosystems {
     /// The Go ecosystem
     #[default]
     Go,
+    // TODO: Add Maven support back.
+    /*
     /// The Maven ecosystem
-    Maven,
+    Maven,*/
 }
 
 // TODO: These should be their own structs, but they're currently not any different from the params structs.
@@ -224,6 +230,8 @@ pub enum ProjectOutputType {
     SBOM,
     /// An output type for an in-toto attestation from a project.
     InToto,
+    /// An output type for an unknown output from a project.
+    Unknown(String),
     /// An output type for a custom output from a project.
     Custom(String),
 }
@@ -246,6 +254,8 @@ pub struct ProjectOutputReference {
     pub output_type: ProjectOutputType,
     /// The name of the output to get from the project.
     pub name: String,
+    /// Labels associated with the output
+    pub labels: Vec<Label>,
 }
 
 /// The parameters for getting a facet from a project.

@@ -251,6 +251,7 @@ where
                             facet_type: s.facet_type.clone(),
                             source_files: None,
                             source_files_content: Some(source_files_content_map),
+                            labels: s.labels.clone(),
                         },
                     ))
                 } else {
@@ -258,7 +259,6 @@ where
                 }
             }
             InitializedFacet::APIBundle(a) => Ok(InitializedFacet::APIBundle(a.clone())),
-            InitializedFacet::SourceFile(_) => Err(SkootError::from("Facet type not supported")),
         }
     }
 
@@ -346,6 +346,7 @@ mod tests {
             APIBundleFacet, APIContent, FacetCreateParams, FacetSetCreateParams, SourceBundleFacet,
             SupportedFacetType,
         },
+        label::Label,
         EcosystemInitializeParams, GithubRepoParams, GithubUser, GoParams, InitializedEcosystem,
         InitializedGithubRepo, InitializedGo, InitializedMaven, InitializedRepo, ProjectOutputType,
         RepoCreateParams, SourceInitializeParams,
@@ -557,7 +558,6 @@ mod tests {
             params: FacetCreateParams,
         ) -> Result<InitializedFacet, SkootError> {
             match params {
-                FacetCreateParams::SourceFile(_) => Err("Error".into()),
                 FacetCreateParams::SourceBundle(s) => {
                     if s.common.project_name == "error" {
                         return Err("Error".into());
@@ -570,6 +570,7 @@ mod tests {
                         }]),
                         facet_type: SupportedFacetType::Readme,
                         source_files_content: None,
+                        labels: vec![Label::Custom("test".to_string())],
                     };
 
                     Ok(InitializedFacet::SourceBundle(source_bundle_facet))
@@ -585,6 +586,7 @@ mod tests {
                             response: "worked".to_string(),
                         }],
                         facet_type: SupportedFacetType::BranchProtection,
+                        labels: vec![Label::Custom("test".to_string())],
                     };
 
                     Ok(InitializedFacet::APIBundle(api_bundle_facet))
@@ -614,6 +616,7 @@ mod tests {
             Ok(vec![ProjectOutputReference {
                 name: "test".into(),
                 output_type: ProjectOutputType::SBOM,
+                labels: vec![Label::Custom("test".to_string())],
             }])
         }
 
@@ -625,6 +628,7 @@ mod tests {
                 reference: ProjectOutputReference {
                     name: "test".into(),
                     output_type: ProjectOutputType::SBOM,
+                    labels: vec![Label::Custom("test".to_string())],
                 },
                 output: "test".into(),
             })

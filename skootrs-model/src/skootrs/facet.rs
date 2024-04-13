@@ -27,7 +27,10 @@ use strum::VariantNames;
 #[cfg(feature = "openapi")]
 use utoipa::ToSchema;
 
-use super::{InitializedEcosystem, InitializedRepo, InitializedSource};
+use super::{
+    label::{Label, Labeled},
+    InitializedEcosystem, InitializedRepo, InitializedSource,
+};
 use strum::EnumString;
 
 /// Represents a facet that has been initialized. This is an enum of
@@ -36,8 +39,6 @@ use strum::EnumString;
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum InitializedFacet {
-    /// (DEPRECATED) A facet that is based on a single source file.
-    SourceFile(SourceFileFacet),
     /// A facet that is based on a bundle of source files.
     SourceBundle(SourceBundleFacet),
     /// A facet that is based on one or more API calls.
@@ -49,9 +50,17 @@ impl InitializedFacet {
     #[must_use]
     pub fn facet_type(&self) -> SupportedFacetType {
         match self {
-            Self::SourceFile(facet) => facet.facet_type.clone(),
             Self::SourceBundle(facet) => facet.facet_type.clone(),
             Self::APIBundle(facet) => facet.facet_type.clone(),
+        }
+    }
+
+    /// Helper function to get the labels of the inner facet.
+    #[must_use]
+    pub fn labels(&self) -> Vec<Label> {
+        match self {
+            Self::SourceBundle(s) => s.labels(),
+            Self::APIBundle(a) => a.labels(),
         }
     }
 }
@@ -61,8 +70,6 @@ impl InitializedFacet {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[cfg_attr(feature = "openapi", derive(ToSchema))]
 pub enum FacetCreateParams {
-    /// (DEPRECATED) Params for creating a `SourceFileFacet`.
-    SourceFile(SourceFileFacetParams),
     /// Params for creating a `SourceBundleFacet`.
     SourceBundle(SourceBundleFacetCreateParams),
     /// Params for creating a `APIBundleFacet`.
@@ -95,29 +102,6 @@ pub struct CommonFacetCreateParams {
     pub repo: InitializedRepo,
     /// The ecosystem of the project the facet is being created for.
     pub ecosystem: InitializedEcosystem,
-}
-
-/// (DEPRECATED) Represents a source file facet which is a facet that
-/// is based on a single source file.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct SourceFileFacet {
-    /// The name of the source file.
-    pub name: String,
-    /// The path of the source file.
-    pub path: String,
-    /// The type of facet this is.
-    pub facet_type: SupportedFacetType,
-}
-
-/// (DEPRECATED) Represents the parameters for creating a source file facet.
-#[derive(Serialize, Deserialize, Clone, Debug)]
-#[cfg_attr(feature = "openapi", derive(ToSchema))]
-pub struct SourceFileFacetParams {
-    /// The common parameters for the facet being created.
-    pub common: CommonFacetCreateParams,
-    /// The type of facet that is being created.
-    pub facet_type: SupportedFacetType,
 }
 
 /// Represents the content of a source file.
@@ -184,6 +168,8 @@ pub struct SourceBundleFacet {
     /// The content of the source files that make up the facet. This is a map of the source file to the content of the source file.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub source_files_content: Option<HashMap<SourceFile, String>>,
+    /// The labels for the facet.
+    pub labels: Vec<Label>,
 }
 
 /// Represents the parameters for creating a source bundle facet.
@@ -194,6 +180,8 @@ pub struct SourceBundleFacetCreateParams {
     pub common: CommonFacetCreateParams,
     /// The type of facet that is being created.
     pub facet_type: SupportedFacetType,
+    /// The labels for the facet.
+    pub labels: Vec<Label>,
 }
 
 /// Represents the content of an API call. This just includes the
@@ -227,6 +215,8 @@ pub struct APIBundleFacet {
     pub apis: Vec<APIContent>,
     /// The type of facet this is.
     pub facet_type: SupportedFacetType,
+    /// The labels for the facet.
+    pub labels: Vec<Label>,
 }
 
 /// Represents the parameters for creating an API bundle facet.
@@ -237,6 +227,18 @@ pub struct APIBundleFacetParams {
     pub common: CommonFacetCreateParams,
     /// The type of facet that is being created.
     pub facet_type: SupportedFacetType,
+}
+
+impl Labeled for SourceBundleFacet {
+    fn labels(&self) -> Vec<Label> {
+        self.labels.clone()
+    }
+}
+
+impl Labeled for APIBundleFacet {
+    fn labels(&self) -> Vec<Label> {
+        self.labels.clone()
+    }
 }
 
 /// Represents the supported facet types. This is an enum of the

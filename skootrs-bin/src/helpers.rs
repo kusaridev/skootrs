@@ -4,7 +4,7 @@ use serde::Serialize;
 use skootrs_lib::service::{project::ProjectService, source::LocalSourceService};
 use skootrs_model::skootrs::{
     facet::InitializedFacet, Config, EcosystemInitializeParams, FacetGetParams, FacetMapKey,
-    GithubRepoParams, GithubUser, GoParams, InitializedProject, MavenParams, ProjectArchiveParams,
+    GithubRepoParams, GithubUser, GoParams, InitializedProject, ProjectArchiveParams,
     ProjectCreateParams, ProjectGetParams, ProjectOutput, ProjectOutputGetParams,
     ProjectOutputReference, ProjectOutputType, ProjectOutputsListParams, ProjectReleaseParam,
     ProjectUpdateParams, RepoCreateParams, SkootError, SourceInitializeParams, SupportedEcosystems,
@@ -118,11 +118,12 @@ impl Project {
                 name: name.clone(),
                 host: format!("github.com/{organization}"),
             }),
+            // TODO: Re-add Maven support.
             // TODO: Unclear if this is the right way to handle Maven group and artifact.
-            SupportedEcosystems::Maven => EcosystemInitializeParams::Maven(MavenParams {
+            /*SupportedEcosystems::Maven => EcosystemInitializeParams::Maven(MavenParams {
                 group_id: format!("com.{organization}.{name}"),
                 artifact_id: name.clone(),
-            }),
+            }),*/
         };
 
         let repo_params = RepoCreateParams::Github(GithubRepoParams {
