@@ -16,7 +16,7 @@ askama = "0.12.1"
 schemars = { version = "0.8.16", features = ["chrono", "url"] }
 tracing = "0.1"
 futures = "0.3.30"
-skootrs-model = { path = "../skootrs-model" }
+skootrs-model = { version = "0.1.0", path = "../skootrs-model" }
 sha2 = "0.10.8"
 url = "2.5.0"
 base64 = "0.22.0"
