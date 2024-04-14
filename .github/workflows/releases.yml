@@ -62,6 +62,8 @@ jobs:
         id: run-cargo-release
         run: cargo build --verbose --release && cargo test --verbose
       - name: Upload Release Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: startsWith(github.ref, 'refs/tags/')
         run: gh release upload ${{github.event.release.tag_name}} target/release/skootrs
         # TODO: Don't make this hardcoded.
@@ -97,6 +99,8 @@ jobs:
           name: skootrs.spdx.json
           path: skootrs.spdx.json
       - name: Push SBOM to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: startsWith(github.ref, 'refs/tags/')
         run: gh release upload ${{github.event.release.tag_name}} skootrs.spdx.json
   provenance-bins:
