@@ -2,13 +2,19 @@
 
 A CLI tool for creating secure-by-design/default source repos.
 
-**Note**: This is a POC! Don't use this outside of testing.
+**Note**: Skootrs is still pre-beta. The API will change often, and you should still audit what Skootrs is doing to ensure projects created by Skootrs are implementing all the security practices that it claims it does.
 
 ## Pre-reqs
 
 **Note**: These pre-reqs will change often as the tool develops and matures
 - Rust nightly >=1.77 - [Read more](https://www.rust-lang.org/tools/install)
-- GitHub token with the following permissions: `admin:org, admin:repo_hook, admin:ssh_signing_key, audit_log, delete_repo, repo, workflow, write:packages`
+- GitHub token with the following permissions: `admin:org, admin:repo_hook, admin:ssh_signing_key, audit_log, delete_repo, repo, workflow, write:packages` in the `GITHUB_TOKEN` environment variable.
+
+## Installing
+
+For releases you can download the `skootrs` binary from releases.
+
+For dev you can clone this repo and run `cargo install --path skootrs-bin` from the root of the repo.
 
 ## Running Skootrs
 
@@ -35,11 +41,17 @@ Project:
 ```shell
 Usage: skootrs project <COMMAND>
 
+Project commands
+
+Usage: skootrs project <COMMAND>
+
 Commands:
-  create  Create a new project
-  get     Get the metadata for a particular project
-  list    List all the projects known to the local Skootrs
-  help    Print this message or the help of the given subcommand(s)
+  create   Create a new project
+  get      Get the metadata for a particular project
+  update   Update a project
+  archive  Archive a project
+  list     List all the projects known to the local Skootrs
+  help     Print this message or the help of the given subcommand(s)
 ```
 
 Facet:
