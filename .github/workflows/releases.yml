@@ -60,7 +60,6 @@ jobs:
       - name: Run Cargo Build for versioned Release
         if: startsWith(github.ref, 'refs/tags/')
         id: run-cargo-release
-        uses: dtolnay/rust-toolchain@nightly
         run: cargo build --verbose --release && cargo test --verbose
         # TODO: Don't make this hardcoded.
       - name: Generate hashes and extract image digest
@@ -80,10 +79,11 @@ jobs:
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
         with:
           fetch-depth: 0
-      - name: Install cargo-sbom
+      - name: Setup cargo
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
+      - name: Install cargo sbom
         run: cargo install cargo-sbom
       - name: Generate SBOM
         run: cargo sbom > skootrs.spdx.json
@@ -104,5 +104,5 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0 # must use semver here
     with:
-      base64-subjects: "${{ needs.goreleaser.outputs.hashes }}"
+      base64-subjects: "${{ needs.cargo.outputs.hashes }}"
       upload-assets: true
