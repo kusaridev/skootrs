@@ -2639,7 +2639,7 @@ dependencies = [
 name = "skootrs-bin"
 version = "0.1.0"
 dependencies = [
- "base64 0.21.7",
+ "base64 0.22.0",
  "clap",
  "clap_mangen",
  "clio",
@@ -2669,7 +2669,7 @@ name = "skootrs-lib"
 version = "0.1.0"
 dependencies = [
  "askama",
- "base64 0.21.7",
+ "base64 0.22.0",
  "chrono",
  "futures",
  "octocrab 0.33.3",
