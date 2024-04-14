@@ -65,7 +65,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: startsWith(github.ref, 'refs/tags/')
-        run: gh release upload ${{github.event.release.tag_name}} target/release/skootrs
+        run: gh release upload ${{ github.ref_name }} target/release/skootrs
         # TODO: Don't make this hardcoded.
       - name: Generate hashes
         id: hash
@@ -102,7 +102,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: startsWith(github.ref, 'refs/tags/')
-        run: gh release upload ${{github.event.release.tag_name}} skootrs.spdx.json
+        run: gh release upload ${{ github.ref_name }} skootrs.spdx.json
   provenance-bins:
     permissions:
       id-token: write
