@@ -2,6 +2,10 @@
 name = "skootrs-bin"
 version = "0.1.0"
 edition = "2021"
+description = "This module is for the Skootrs CLI tool binary and helper functions."
+license = "Apache-2.0"
+repository = "https://github.com/kusaridev/skootrs"
+
 
 [[bin]]
 name = "skootrs"

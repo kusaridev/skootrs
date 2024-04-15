@@ -2,6 +2,9 @@
 name = "skootrs-statestore"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "This module contains code for managing the state of Skootrs projects as well as the state across all known Skootrs project for a particular installation of Skootrs."
+repository = "https://github.com/kusaridev/skootrs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
