@@ -28,7 +28,7 @@ skootrs-model = { version = "0.1.0", path = "../skootrs-model" }
 opentelemetry-jaeger = { version = "0.20.0", features = ["rt-tokio-current-thread"] }
 tracing-opentelemetry = "0.22.0"
 tracing-bunyan-formatter = "0.3.9"
-opentelemetry = { version = "0.21.0" }
+opentelemetry = { version = "0.22.0" }
 opentelemetry_sdk = "0.21.2"
 serde_yaml = "0.9.32"
 reqwest = "0.11.24"
