@@ -4,6 +4,8 @@ A CLI tool for creating secure-by-design/default source repos.
 
 **Note**: Skootrs is still pre-beta. The API will change often, and you should still audit what Skootrs is doing to ensure projects created by Skootrs are implementing all the security practices that it claims it does.
 
+- [Discord](https://discord.gg/ea74aBray2)
+
 ## Pre-reqs
 
 **Note**: These pre-reqs will change often as the tool develops and matures
