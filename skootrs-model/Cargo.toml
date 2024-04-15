@@ -16,7 +16,7 @@ chrono = { version = "0.4.31", features = ["serde"] }
 schemars = { version = "0.8.16", features = ["chrono", "url"] }
 regress = "0.9.1"
 url = "2.5.0"
-strum = { version = "0.26.1", features = ["derive"] }
+strum = { version = "0.26.2", features = ["derive"] }
 
 [lints]
 workspace = true

@@ -35,7 +35,7 @@ reqwest = "0.11.24"
 base64 = "0.22.0"
 clio = { version = "0.3.5", features = ["clap", "clap-parse"] }
 serde = "1.0.197"
-strum = "0.26.1"
+strum = "0.26.2"
 
 [build-dependencies]
 clap_mangen = "0.2.20"
