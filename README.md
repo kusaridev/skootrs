@@ -12,13 +12,11 @@ A CLI tool for creating secure-by-design/default source repos.
 
 ## Installing
 
-For releases you can download the `skootrs` binary from releases.
+For releases you can download the `skootrs` binary from releases or run `cargo install skootrs-bin`
 
 For dev you can clone this repo and run `cargo install --path skootrs-bin` from the root of the repo.
 
 ## Running Skootrs
-
-Skootrs is currently pre-release so you will need to use cargo to compile and run Skootrs yourself.
 
 ```shell
 $ cargo run
@@ -110,6 +108,14 @@ $ cargo run project create | bunyan                                             
 [2024-02-08T05:34:11.676Z]  INFO: skootrs/16973 on Michaels-MBP-2.localdomain: Creating path "/tmp/skoot-test-bunyan/./" (file=skootrs-lib/src/service/source.rs,line=92,target=skootrs_lib::service::source)
 [2024-02-08T05:34:11.676Z]  INFO: skootrs/16973 on Michaels-MBP-2.localdomain: Writing file SECURITY.md to ./ (file=skootrs-lib/src/service/facet.rs,line=115,target=skootrs_lib::service::facet)
 ```
+
+## Library docs:
+
+- https://docs.rs/skootrs-statestore/latest/skootrs_statestore/
+- https://docs.rs/skootrs-model/latest/skootrs_model/
+- https://docs.rs/skootrs-rest/latest/skootrs_rest/
+- https://docs.rs/skootrs-lib/latest/skootrs_lib/
+
 
 The initial talk given on Skootrs appears to not have been recorded but here are the locations of slides that include the reason why Skootrs is being built along with some architecture:
 
