@@ -73,6 +73,17 @@ jobs:
         run: |
           hashes=$(sha256sum target/release/skootrs | base64 -w0)
           echo "hashes=$hashes" >> $GITHUB_OUTPUT
+      - name: Setup cargo release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: cargo install cargo-release
+      - name: Public to crates.io
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cargo release -p skootrs-model --execute
+          cargo release -p skootrs-lib --execute
+          cargo release -p skootrs-statestore --execute
+          cargo release -p skootrs-rest --execute
+          cargo release -p skootrs-bin --execute
            
   sbom:
     permissions:
