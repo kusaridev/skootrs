@@ -12,7 +12,7 @@ repository = "https://github.com/kusaridev/skootrs"
 serde_json = "1.0.112"
 serde = { version = "1.0.193", features = ["derive"] }
 utoipa = { version = "4.1.0" }
-chrono = { version = "0.4.31", features = ["serde"] }
+chrono = { version = "0.4.38", features = ["serde"] }
 schemars = { version = "0.8.16", features = ["chrono", "url"] }
 regress = "0.9.1"
 url = "2.5.0"
