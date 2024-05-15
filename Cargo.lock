@@ -1739,6 +1739,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "opentelemetry"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b69a91d4893e713e06f724597ad630f1fa76057a5e1026c0ca67054a9032a76"
+dependencies = [
+ "futures-core",
+ "futures-sink",
+ "js-sys",
+ "once_cell",
+ "pin-project-lite",
+ "thiserror",
+]
+
+[[package]]
 name = "opentelemetry-jaeger"
 version = "0.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1747,9 +1761,9 @@ dependencies = [
  "async-trait",
  "futures-core",
  "futures-util",
- "opentelemetry",
+ "opentelemetry 0.21.0",
  "opentelemetry-semantic-conventions",
- "opentelemetry_sdk",
+ "opentelemetry_sdk 0.21.2",
  "thrift",
  "tokio",
 ]
@@ -1760,7 +1774,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f5774f1ef1f982ef2a447f6ee04ec383981a3ab99c8e77a1a7b30182e65bbc84"
 dependencies = [
- "opentelemetry",
+ "opentelemetry 0.21.0",
 ]
 
 [[package]]
@@ -1776,13 +1790,32 @@ dependencies = [
  "futures-util",
  "glob",
  "once_cell",
- "opentelemetry",
+ "opentelemetry 0.21.0",
  "ordered-float 4.2.0",
  "percent-encoding",
  "rand 0.8.5",
  "thiserror",
  "tokio",
  "tokio-stream",
+]
+
+[[package]]
+name = "opentelemetry_sdk"
+version = "0.23.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae312d58eaa90a82d2e627fd86e075cf5230b3f11794e2ed74199ebbe572d4fd"
+dependencies = [
+ "async-trait",
+ "futures-channel",
+ "futures-executor",
+ "futures-util",
+ "lazy_static",
+ "once_cell",
+ "opentelemetry 0.23.0",
+ "ordered-float 4.2.0",
+ "percent-encoding",
+ "rand 0.8.5",
+ "thiserror",
 ]
 
 [[package]]
@@ -2605,9 +2638,9 @@ dependencies = [
  "clio",
  "inquire",
  "octocrab 0.32.0",
- "opentelemetry",
+ "opentelemetry 0.21.0",
  "opentelemetry-jaeger",
- "opentelemetry_sdk",
+ "opentelemetry_sdk 0.23.0",
  "reqwest 0.11.24",
  "serde",
  "serde_json",
@@ -3178,8 +3211,8 @@ checksum = "c67ac25c5407e7b961fafc6f7e9aa5958fd297aada2d20fa2ae1737357e55596"
 dependencies = [
  "js-sys",
  "once_cell",
- "opentelemetry",
- "opentelemetry_sdk",
+ "opentelemetry 0.21.0",
+ "opentelemetry_sdk 0.21.2",
  "smallvec",
  "tracing",
  "tracing-core",
