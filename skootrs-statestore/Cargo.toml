@@ -11,4 +11,4 @@ repository = "https://github.com/kusaridev/skootrs"
 [dependencies]
 skootrs-lib = { version = "0.1.0", path = "../skootrs-lib" }
 skootrs-model = { version = "0.1.0", path = "../skootrs-model" }
-serde_json = "1.0.114"
+serde_json = "1.0.118"
